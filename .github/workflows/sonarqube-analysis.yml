@@ -2,12 +2,13 @@ name: Administrative Application - SonarQube Analysis
 
 on:
   pull_request:
-    branches:
-      - develop
+    branches: [ 'main', 'develop' ]
     types:
       - opened
       - synchronize
       - reopened
+  push:
+    branches: [ 'develop' ]
 
 permissions:
   contents: read
@@ -16,7 +17,6 @@ permissions:
 jobs:
   sonarcloud:
     name: Static Code Analysis
-    if: startsWith(github.head_ref, 'feature/')
     runs-on: ubuntu-latest
 
     steps:
