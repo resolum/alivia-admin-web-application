@@ -2,8 +2,7 @@ name: Administrative App CI
 
 on:
   pull_request:
-    branches:
-      - develop
+    branches: [ 'main', 'develop' ]
     types:
       - opened
       - synchronize
@@ -18,7 +17,6 @@ permissions:
 jobs:
   build:
     name: Angular Production Build
-    if: startsWith(github.head_ref, 'feature/')
     runs-on: ubuntu-latest
 
     steps:
