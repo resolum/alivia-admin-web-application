@@ -7,9 +7,6 @@ on:
       - opened
       - synchronize
       - reopened
-  push:
-    branches:
-      - develop
 
 permissions:
   contents: read
