@@ -22,7 +22,9 @@ export class ContractForm implements OnInit {
     initialStatus: new FormControl<'PENDING'|'ACTIVE'>('PENDING', { nonNullable: true }),
     notes: new FormControl('', { nonNullable: true, validators: Validators.maxLength(300) }),
   });
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void { void this.initialize(); }
+
+  private async initialize(): Promise<void> {
     this.generateCode();
     await this.store.loadEmployees();
     const employeeId = Number(this.route.snapshot.paramMap.get('employeeId'));
