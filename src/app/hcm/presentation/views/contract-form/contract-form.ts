@@ -3,12 +3,14 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HcmStore } from '../../../application/hcm.store';
 import { CreateContract } from '../../../domain/contract.entity';
+import { HcmApiError } from '../../../infrastructure/hcm.api';
 import { CURRENT_BUSINESS_ID } from '../../../../shared/infrastructure/api.config';
 
 @Component({ selector: 'app-contract-form', imports: [ReactiveFormsModule, RouterLink], templateUrl: './contract-form.html', styleUrl: './contract-form.css' })
 export class ContractForm implements OnInit {
   protected readonly store = inject(HcmStore); private readonly router = inject(Router); private readonly route = inject(ActivatedRoute);
   protected readonly saving = signal(false); protected readonly message = signal(''); protected readonly editing = signal(false);
+  protected readonly conflict = signal(false);
   protected readonly form = new FormGroup({
     code: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^CTR-ALV-\d{4}-\d{4,8}$/)] }),
     employeeId: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(1)] }),
@@ -33,7 +35,7 @@ export class ContractForm implements OnInit {
   }
   protected async submit(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.saving.set(true); this.message.set('');
+    this.saving.set(true); this.message.set(''); this.conflict.set(false);
     try {
       const value = this.form.getRawValue();
       const input: CreateContract = { ...value, businessId: CURRENT_BUSINESS_ID };
@@ -43,7 +45,10 @@ export class ContractForm implements OnInit {
         await this.store.updateContract(employeeId, contractId, { position, modality, weeklyHours, startDate, endDate, notes });
       } else await this.store.saveContract(input);
       await this.router.navigate(['/hcm/contracts']);
-    } catch (error) { this.message.set(error instanceof Error ? error.message : 'No se pudo guardar el contrato.'); }
+    } catch (error) {
+      this.conflict.set(error instanceof HcmApiError && error.status === 409);
+      this.message.set(error instanceof Error ? error.message : 'No se pudo guardar el contrato.');
+    }
     finally { this.saving.set(false); }
   }
 

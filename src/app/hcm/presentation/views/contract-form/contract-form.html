@@ -15,7 +15,13 @@
       <fieldset><legend>Estado inicial del contrato</legend><label><input type="radio" formControlName="initialStatus" value="PENDING"/> Pendiente de activación <small>Recomendado</small></label><label><input type="radio" formControlName="initialStatus" value="ACTIVE"/> Vigente inmediatamente</label></fieldset>
       <label class="full">Observaciones o cláusulas particulares <small>{{ form.controls.notes.value.length }} / 300</small><textarea formControlName="notes" placeholder="Anotaciones adicionales o cláusulas especiales (opcional)..."></textarea></label>
     </div>
-    @if (message()) { <p class="form-error">{{ message() }}</p> }
+    @if (message()) {
+      <div class="form-error" [class.contract-conflict]="conflict()" role="alert">
+        <strong>{{ conflict() ? 'No se puede registrar este contrato' : 'No se pudo guardar el contrato' }}</strong>
+        <span>{{ message() }}</span>
+        @if (conflict()) { <small>Revisa la vigencia contractual y las asignaciones futuras antes de volver a intentarlo.</small> }
+      </div>
+    }
     <footer><a routerLink="/hcm/contracts">Cancelar</a><button class="button primary submit" [disabled]="saving() || (!editing() && store.employees().length === 0)">{{ saving() ? 'Guardando…' : (editing() ? 'Guardar cambios' : 'Registrar contrato') }}</button></footer>
   </form>
 </section>
