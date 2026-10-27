@@ -29,7 +29,13 @@ export class ContractForm implements OnInit {
     await this.store.loadEmployees();
     const employeeId = Number(this.route.snapshot.paramMap.get('employeeId'));
     const contractId = Number(this.route.snapshot.paramMap.get('contractId'));
-    if (!employeeId || !contractId) { if (this.store.employees()[0]) this.form.controls.employeeId.setValue(this.store.employees()[0]!.id); return; }
+    if (!employeeId || !contractId) {
+      // Coming from a just registered employee, the contract starts with that employee selected.
+      const requested = Number(this.route.snapshot.queryParamMap?.get('employeeId'));
+      const employee = this.store.employees().find(item => item.id === requested) ?? this.store.employees()[0];
+      if (employee) this.form.controls.employeeId.setValue(employee.id);
+      return;
+    }
     this.editing.set(true);
     await this.store.selectContract(employeeId, contractId);
     const contract = this.store.selected();

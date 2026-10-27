@@ -1,0 +1,67 @@
+<section class="page form-page">
+  <div class="breadcrumb">Capital humano <b>›</b> Empleados <b>›</b> Registrar empleado</div>
+  <a class="back" routerLink="/hcm/employees">← Volver a empleados</a>
+  <div class="page-heading"><div><h1>Registrar empleado</h1><p>Registra la información del nuevo colaborador y prepara su acceso a Alivia.</p></div></div>
+  @if (registered(); as employee) {
+    <article class="card done">
+      <div class="done-icon">✓</div>
+      <h2>{{ employee.firstName }} {{ employee.lastName }} ya es parte de Alivia</h2>
+      <p>Se creó su cuenta corporativa {{ employee.corporateEmail }} con el código {{ employeeCode(employee) }}. El siguiente paso es registrar su contrato; dentro de él configurarás su horario laboral.</p>
+      <div class="actions"><a class="button secondary" routerLink="/hcm/employees">Volver a empleados</a><a class="button primary" routerLink="/hcm/contracts/new" [queryParams]="{ employeeId: employee.id }">Registrar contrato →</a></div>
+    </article>
+  } @else {
+    <ol class="stepper card">
+      @for (item of steps; track item.step) {
+        <li [class.current]="step() === item.step" [class.done]="step() > item.step"><button type="button" (click)="goTo(item.step)" [disabled]="item.step >= step()"><span>{{ step() > item.step ? '✓' : item.step }}</span><b>{{ item.title }}</b><small>{{ item.hint }}</small></button></li>
+      }
+    </ol>
+    <article class="card">
+      @switch (step()) {
+        @case (1) {
+          <div class="card-title"><div><h2>Información personal</h2><p>Ingresa los datos de identificación y contacto del nuevo colaborador</p></div><span>Paso 1 de 4</span></div>
+          <form class="form-grid" [formGroup]="personal">
+            <label>Tipo de documento<input value="DNI - Documento Nacional de Identidad" readonly tabindex="-1" aria-readonly="true" /></label>
+            <label>Número de documento *<input formControlName="dni" inputmode="numeric" maxlength="8" placeholder="8 dígitos" (input)="digitsOnly(personal.controls.dni, $event)" />@if (invalid(personal.controls.dni)) { <small class="error">El DNI tiene 8 dígitos.</small> }</label>
+            <label class="full">Nombres completos *<input formControlName="firstName" />@if (invalid(personal.controls.firstName)) { <small class="error">Ingresa los nombres.</small> }</label>
+            <label>Apellido paterno *<input formControlName="paternalSurname" />@if (invalid(personal.controls.paternalSurname)) { <small class="error">Ingresa el apellido paterno.</small> }</label>
+            <label>Apellido materno *<input formControlName="maternalSurname" />@if (invalid(personal.controls.maternalSurname)) { <small class="error">Ingresa el apellido materno.</small> }</label>
+            <label>Fecha de nacimiento *<app-date-select formControlName="birthDate" label="Fecha de nacimiento" />@if (invalid(personal.controls.birthDate)) { <small class="error">{{ personal.controls.birthDate.hasError('notPast') ? 'La fecha debe ser anterior a hoy.' : 'Elige día, mes y año.' }}</small> }</label>
+            <label>Teléfono celular *<div class="unit prefix"><span>+51</span><input formControlName="mobile" type="tel" inputmode="numeric" maxlength="9" placeholder="9XX XXX XXX" (input)="digitsOnly(personal.controls.mobile, $event)" /></div>@if (invalid(personal.controls.mobile)) { <small class="error">{{ mobileError() }}</small> }</label>
+          </form>
+        }
+        @case (2) {
+          <div class="card-title"><div><h2>Información laboral</h2><p>Define el rol operativo del colaborador en Alivia</p></div><span>Paso 2 de 4</span></div>
+          <form class="role-options" [formGroup]="work">
+            <label [class.on]="work.controls.role.value === 'TECH'"><input type="radio" formControlName="role" value="TECH" /><b>Soporte técnico</b><em>Operativo</em><small>Instala dispositivos y atiende las visitas de soporte en los hogares.</small></label>
+            <label [class.on]="work.controls.role.value === 'SUBSCRIPTION_MANAGER'"><input type="radio" formControlName="role" value="SUBSCRIPTION_MANAGER" /><b>Gestor de suscripciones</b><em>Comercial</em><small>Gestiona planes, contrataciones y suscripciones.</small></label>
+          </form>
+        }
+        @case (3) {
+          <div class="card-title"><div><h2>Acceso a la plataforma</h2><p>Configura la cuenta institucional del colaborador</p></div><span>Paso 3 de 4</span></div>
+          <form class="form-grid" [formGroup]="access">
+            <label>Correo electrónico institucional *<input type="email" formControlName="corporateEmail" autocomplete="off" />@if (invalid(access.controls.corporateEmail)) { <small class="error">Ingresa un correo válido.</small> }</label>
+            <label>Confirmar correo institucional *<input type="email" formControlName="confirmEmail" autocomplete="off" />@if (access.hasError('emailMismatch') && access.controls.confirmEmail.touched) { <small class="error">Los correos no coinciden.</small> }</label>
+          </form>
+          <p class="notice">El correo será su usuario de inicio de sesión. Al registrarlo, le llegará un correo de Alivia para verificar su cuenta.</p>
+        }
+        @case (4) {
+          <div class="card-title"><div><h2>Resumen y confirmación de registro</h2><p>Verifica los datos antes de registrar</p></div><span>Paso 4 de 4</span></div>
+          <section class="review"><header><b>1. Información personal</b><button type="button" (click)="goTo(1)">Editar paso 1</button></header>
+            <dl><div><dt>Nombre completo</dt><dd>{{ fullName() }}</dd></div><div><dt>Documento</dt><dd>DNI {{ personal.controls.dni.value }}</dd></div><div><dt>Fecha de nacimiento</dt><dd>{{ formatDate(personal.controls.birthDate.value) }}</dd></div><div><dt>Celular</dt><dd>+51 {{ personal.controls.mobile.value }}</dd></div></dl></section>
+          <section class="review"><header><b>2. Información laboral</b><button type="button" (click)="goTo(2)">Editar paso 2</button></header>
+            <dl><div><dt>Rol asignado</dt><dd>{{ roleLabel[work.controls.role.value] }}</dd></div><div><dt>Contrato y horario</dt><dd>Se asignan después del registro</dd></div></dl></section>
+          <section class="review"><header><b>3. Acceso a la plataforma</b><button type="button" (click)="goTo(3)">Editar paso 3</button></header>
+            <dl><div><dt>Correo corporativo</dt><dd>{{ access.controls.corporateEmail.value }}</dd></div></dl></section>
+          <label class="confirm"><input type="checkbox" [formControl]="confirmed" /> Confirmo que la información registrada fue verificada y cumple con las políticas de seguridad y privacidad de datos de Alivia.</label>
+          @if (message()) { <p class="form-error" role="alert">{{ message() }}</p> }
+        }
+      }
+      <footer class="wizard-footer">
+        <a routerLink="/hcm/employees">Cancelar</a>
+        @if (step() > 1) { <button type="button" class="button secondary" (click)="back()">← Anterior</button> }
+        @if (step() < 4) { <button type="button" class="button primary" (click)="next()">Continuar →</button> }
+        @else { <button type="button" class="button primary" [disabled]="!confirmed.value || saving()" (click)="submit()">{{ saving() ? 'Registrando…' : 'Registrar empleado ✓' }}</button> }
+      </footer>
+    </article>
+  }
+</section>
