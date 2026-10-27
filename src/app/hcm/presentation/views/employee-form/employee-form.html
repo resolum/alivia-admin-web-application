@@ -6,7 +6,7 @@
     <article class="card done">
       <div class="done-icon">✓</div>
       <h2>{{ employee.firstName }} {{ employee.lastName }} ya es parte de Alivia</h2>
-      <p>Se creó su cuenta corporativa {{ employee.corporateEmail }} con el código {{ employeeCode(employee) }}. El siguiente paso es registrar su contrato; dentro de él configurarás su horario laboral.</p>
+      <p>Le enviamos la invitación a {{ employee.corporateEmail }} para que active su cuenta y cree su contraseña (código {{ employeeCode(employee) }}). El siguiente paso es registrar su contrato; dentro de él configurarás su horario laboral.</p>
       <div class="actions"><a class="button secondary" routerLink="/hcm/employees">Volver a empleados</a><a class="button primary" routerLink="/hcm/contracts/new" [queryParams]="{ employeeId: employee.id }">Registrar contrato →</a></div>
     </article>
   } @else {
@@ -42,7 +42,8 @@
             <label>Correo electrónico institucional *<input type="email" formControlName="corporateEmail" autocomplete="off" />@if (invalid(access.controls.corporateEmail)) { <small class="error">Ingresa un correo válido.</small> }</label>
             <label>Confirmar correo institucional *<input type="email" formControlName="confirmEmail" autocomplete="off" />@if (access.hasError('emailMismatch') && access.controls.confirmEmail.touched) { <small class="error">Los correos no coinciden.</small> }</label>
           </form>
-          <p class="notice">El correo será su usuario de inicio de sesión. Al registrarlo, le llegará un correo de Alivia para verificar su cuenta.</p>
+          <p class="notice">El correo será su usuario de inicio de sesión. Al registrarlo le llega una invitación para activar su cuenta y crear su contraseña; Alivia nunca la envía por correo.</p>
+          <app-invitation-preview [fullName]="fullName()" [roleLabel]="roleLabel[work.controls.role.value]" [email]="access.controls.corporateEmail.value" />
         }
         @case (4) {
           <div class="card-title"><div><h2>Resumen y confirmación de registro</h2><p>Verifica los datos antes de registrar</p></div><span>Paso 4 de 4</span></div>

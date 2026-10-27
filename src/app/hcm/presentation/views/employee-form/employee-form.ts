@@ -7,6 +7,7 @@ import { DNI_PATTERN, Employee, employeeCode, MOBILE_PATTERN, toPhoneNumber } fr
 import { EmployeeRole, employeeRoleLabel, formatDate } from '../../../domain/work-schedule.entity';
 import { HcmApiError } from '../../../infrastructure/hcm.api';
 import { DateSelect } from '../../components/date-select/date-select';
+import { InvitationPreview } from '../../components/invitation-preview/invitation-preview';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -24,7 +25,7 @@ function sameEmail(group: AbstractControl): ValidationErrors | null {
   return corporateEmail && confirmEmail && corporateEmail.trim().toLowerCase() !== confirmEmail.trim().toLowerCase() ? { emailMismatch: true } : null;
 }
 
-@Component({ selector: 'app-employee-form', imports: [ReactiveFormsModule, RouterLink, DateSelect], templateUrl: './employee-form.html', styleUrl: './employee-form.css' })
+@Component({ selector: 'app-employee-form', imports: [ReactiveFormsModule, RouterLink, DateSelect, InvitationPreview], templateUrl: './employee-form.html', styleUrl: './employee-form.css' })
 export class EmployeeForm {
   private readonly store = inject(EmployeesStore);
   protected readonly roleLabel = employeeRoleLabel; protected readonly formatDate = formatDate; protected readonly employeeCode = employeeCode;
