@@ -8,13 +8,15 @@ import { AccountActivation, meetsPasswordPolicy, PASSWORD_RULES } from '../../..
 type State = 'loading' | 'invalid' | 'ready' | 'done';
 
 /** Page opened from the invitation email: the new employee chooses their password. */
-@Component({ selector: 'app-activate-account', imports: [ReactiveFormsModule, RouterLink], templateUrl: './activate-account.html', styleUrl: '../sign-in/sign-in.css' })
+@Component({ selector: 'app-activate-account', imports: [ReactiveFormsModule, RouterLink], templateUrl: './activate-account.html', styleUrl: './activate-account.css' })
 export class ActivateAccount implements OnInit {
   private readonly iam = inject(IamStore); private readonly route = inject(ActivatedRoute);
   protected readonly rules = PASSWORD_RULES;
   protected readonly state = signal<State>('loading');
   protected readonly account = signal<AccountActivation | null>(null);
   protected readonly error = signal(''); protected readonly saving = signal(false);
+  protected readonly submitted = signal(false);
+  protected readonly showPassword = signal(false); protected readonly showConfirmation = signal(false);
   protected readonly form = new FormGroup({
     password: new FormControl('', { nonNullable: true, validators: Validators.required }),
     confirmation: new FormControl('', { nonNullable: true, validators: Validators.required }),
@@ -22,7 +24,8 @@ export class ActivateAccount implements OnInit {
   private readonly value = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
   protected readonly password = computed(() => this.value().password ?? '');
   protected readonly matches = computed(() => this.password() !== '' && this.password() === this.value().confirmation);
-  protected readonly valid = computed(() => meetsPasswordPolicy(this.password()) && this.matches());
+  protected readonly meetsPolicy = computed(() => meetsPasswordPolicy(this.password()));
+  protected readonly valid = computed(() => this.meetsPolicy() && this.matches());
   private token = '';
 
   ngOnInit(): void { void this.load(); }
@@ -35,6 +38,7 @@ export class ActivateAccount implements OnInit {
   }
 
   protected async submit(): Promise<void> {
+    this.submitted.set(true);
     if (!this.valid()) { this.form.markAllAsTouched(); return; }
     this.saving.set(true); this.error.set('');
     try { await this.iam.activate(this.token, this.password()); this.state.set('done'); }
