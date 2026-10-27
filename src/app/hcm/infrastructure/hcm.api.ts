@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ACCESS_TOKEN_KEY, API_BASE_URL, API_PATHS, currentBusinessId } from '../../shared/infrastructure/api.config';
 import { Contract, ContractFilters, ContractPage, CreateContract, EmployeeOption, UpdateContract } from '../domain/contract.entity';
+import { CreateEmployee, Employee } from '../domain/employee.entity';
 import { SaveWorkSchedule, WorkSchedule, WorkScheduleFilters, WorkSchedulePage, WorkScheduleSummary } from '../domain/work-schedule.entity';
 
 interface EmployeePageResponse { content: EmployeeOption[]; }
@@ -14,7 +15,7 @@ export class HcmApiError extends Error {
 @Injectable({ providedIn: 'root' })
 export class HcmApi {
   async listContracts(filters: ContractFilters): Promise<ContractPage> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()), page: String(filters.page), size: String(filters.size), sort: 'id,desc' });
+    const params = this.params({ page: String(filters.page), size: String(filters.size), sort: 'id,desc' });
     if (filters.search.trim()) params.set('search', filters.search.trim());
     if (filters.status !== 'ALL') params.set('status', filters.status);
     if (filters.modality !== 'ALL') params.set('modality', filters.modality);
@@ -28,13 +29,25 @@ export class HcmApi {
 
   async listEmployees(): Promise<EmployeeOption[]> {
     // Names live in the staff profile, not in the employees table, so the backend can only sort by id.
-    const params = new URLSearchParams({ businessId: String(this.businessId()), status: 'ACTIVE', page: '0', size: '100', sort: 'id,asc' });
+    const params = this.params({ status: 'ACTIVE', page: '0', size: '100', sort: 'id,asc' });
     const employees = (await this.request<EmployeePageResponse>(`${API_BASE_URL}${API_PATHS.employees}?${params}`)).content;
     return [...employees].sort((a, b) => `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`, 'es'));
   }
 
+  /** Every employee of the business, whatever their status, for the employees list. */
+  async listAllEmployees(): Promise<Employee[]> {
+    const params = this.params({ page: '0', size: '200', sort: 'id,desc' });
+    return (await this.request<{ content: Employee[] }>(`${API_BASE_URL}${API_PATHS.employees}?${params}`)).content;
+  }
+
+  async createEmployee(input: CreateEmployee): Promise<Employee> {
+    return this.request<Employee>(`${API_BASE_URL}${API_PATHS.employees}`, {
+      method: 'POST', body: JSON.stringify({ ...input, businessId: currentBusinessId() ?? undefined }),
+    });
+  }
+
   async getContract(employeeId: number, contractId: number): Promise<Contract> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const params = this.params();
     const [contract, employees] = await Promise.all([
       this.request<ContractResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.contracts}/${contractId}?${params}`),
       this.listEmployees(),
@@ -45,7 +58,7 @@ export class HcmApi {
 
   async createContract(input: CreateContract): Promise<Contract> {
     const { employeeId, ...rest } = input;
-    const body = { ...rest, businessId: this.businessId() };
+    const body = { ...rest, businessId: currentBusinessId() ?? undefined };
     const contract = await this.request<ContractResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.contracts}`, {
       method: 'POST', body: JSON.stringify(body),
     });
@@ -53,7 +66,7 @@ export class HcmApi {
   }
 
   async updateContract(employeeId: number, contractId: number, input: UpdateContract): Promise<Contract> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const params = this.params();
     const contract = await this.request<ContractResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.contracts}/${contractId}?${params}`, {
       method: 'PATCH', body: JSON.stringify(input),
     });
@@ -61,7 +74,7 @@ export class HcmApi {
   }
 
   async listWorkSchedules(filters: WorkScheduleFilters): Promise<WorkSchedulePage> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()), page: String(filters.page), size: String(filters.size), sort: 'id,desc' });
+    const params = this.params({ page: String(filters.page), size: String(filters.size), sort: 'id,desc' });
     if (filters.search.trim()) params.set('search', filters.search.trim());
     if (filters.role !== 'ALL') params.set('role', filters.role);
     if (filters.status !== 'ALL') params.set('status', filters.status);
@@ -73,12 +86,12 @@ export class HcmApi {
   }
 
   async getWorkScheduleSummary(): Promise<WorkScheduleSummary> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const params = this.params();
     return this.request<WorkScheduleSummary>(`${API_BASE_URL}${API_PATHS.workSchedules}/summary?${params}`);
   }
 
   async getWorkSchedule(employeeId: number, workScheduleId: number): Promise<WorkSchedule> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const params = this.params();
     const [schedule, employees] = await Promise.all([
       this.request<WorkScheduleResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.workSchedules}/${workScheduleId}?${params}`),
       this.listEmployees(),
@@ -87,7 +100,7 @@ export class HcmApi {
   }
 
   async listContractWorkSchedules(contractId: number): Promise<WorkSchedule[]> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()), contractId: String(contractId), page: '0', size: '20', sort: 'startDate,desc' });
+    const params = this.params({ contractId: String(contractId), page: '0', size: '20', sort: 'startDate,desc' });
     const page = await this.request<{ content: WorkScheduleResponse[] }>(`${API_BASE_URL}${API_PATHS.workSchedules}?${params}`);
     return page.content.map(schedule => this.withEmployee(schedule, []));
   }
@@ -95,13 +108,13 @@ export class HcmApi {
   /** A schedule is always configured inside one of the employee's contracts. */
   async createWorkSchedule(employeeId: number, contractId: number, input: SaveWorkSchedule): Promise<WorkSchedule> {
     const schedule = await this.request<WorkScheduleResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.contracts}/${contractId}${API_PATHS.workSchedules}`, {
-      method: 'POST', body: JSON.stringify({ ...input, businessId: this.businessId() }),
+      method: 'POST', body: JSON.stringify({ ...input, businessId: currentBusinessId() ?? undefined }),
     });
     return this.withEmployee(schedule, []);
   }
 
   async updateWorkSchedule(employeeId: number, workScheduleId: number, input: SaveWorkSchedule): Promise<WorkSchedule> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const params = this.params();
     const schedule = await this.request<WorkScheduleResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.workSchedules}/${workScheduleId}?${params}`, {
       method: 'PATCH', body: JSON.stringify(input),
     });
@@ -109,7 +122,7 @@ export class HcmApi {
   }
 
   async deactivateWorkSchedule(employeeId: number, workScheduleId: number): Promise<WorkSchedule> {
-    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const params = this.params();
     const schedule = await this.request<WorkScheduleResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.workSchedules}/${workScheduleId}/deactivation?${params}`, { method: 'POST' });
     return this.withEmployee(schedule, []);
   }
@@ -123,11 +136,15 @@ export class HcmApi {
     };
   }
 
-  /** Every hcm endpoint is scoped to the business of the signed-in user. */
-  private businessId(): number {
+  /**
+   * Query parameters scoped to the signed-in user's business. When the session carries no business,
+   * the parameter is left out and the backend uses its default business.
+   */
+  private params(values: Record<string, string> = {}): URLSearchParams {
+    const params = new URLSearchParams(values);
     const businessId = currentBusinessId();
-    if (businessId === null) throw new HcmApiError('Tu sesión no tiene un negocio asignado. Inicia sesión con una cuenta de un negocio.', 403);
-    return businessId;
+    if (businessId !== null) params.set('businessId', String(businessId));
+    return params;
   }
 
   private async request<T>(url: string, init: RequestInit = {}): Promise<T> {

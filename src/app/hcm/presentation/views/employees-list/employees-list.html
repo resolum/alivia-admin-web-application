@@ -1,0 +1,56 @@
+<section class="page">
+  <div class="breadcrumb">Capital humano <b>›</b> Empleados</div>
+  <div class="page-heading"><div><h1>Empleados</h1><p>Administra y supervisa al personal técnico y comercial de Alivia</p></div><div class="actions"><a class="button primary" routerLink="new">＋ Registrar empleado</a></div></div>
+  <div class="stats">
+    <article><span>Total empleados</span><strong>{{ store.summary().total }}</strong><i>♙</i></article>
+    <article><span>Soporte técnico activo</span><strong>{{ store.summary().technicians }}</strong><em class="plain">{{ store.summary().available }} disponibles ahora</em><i class="green">⚒</i></article>
+    <article><span>Gestores activos</span><strong>{{ store.summary().managers }}</strong><i>▤</i></article>
+    <article><span>Configuración pendiente</span><strong>{{ store.summary().pending }}</strong><em class="plain danger">{{ store.summary().withoutContract }} sin contrato · {{ store.summary().withoutSchedule }} sin horario</em><i class="red">◷</i></article>
+  </div>
+  @if (store.error()) { <div class="notice error-notice"><span>⚠ {{ store.error() }}</span><button (click)="store.load()">Reintentar</button></div> }
+  @if (store.loading() && store.rows().length === 0) { <div class="loading card">Cargando empleados…</div> }
+  @else if (!store.error() && store.rows().length === 0) {
+    <section class="contracts-empty-state">
+      <div class="empty-state-icon">♙<span>＋</span></div>
+      <h2>No tienes empleados todavía</h2>
+      <p>Registra a tu primer colaborador. Después podrás asignarle su contrato y, dentro de él, su horario laboral.</p>
+      <a class="button primary" routerLink="new">＋ Registrar mi primer empleado</a>
+    </section>
+  } @else if (!store.error()) {
+    <div class="filters employee-filters">
+      <label for="employee-search">⌕<input id="employee-search" placeholder="Buscar empleado por nombre, código o documento" [value]="store.filters().search" (input)="search($event)" /></label>
+      <div class="role-tabs" role="tablist">
+        <button type="button" role="tab" [class.on]="store.filters().role === 'ALL'" (click)="role('ALL')">Todos ({{ store.roleCounts().ALL }})</button>
+        <button type="button" role="tab" [class.on]="store.filters().role === 'TECH'" (click)="role('TECH')">Soporte técnico ({{ store.roleCounts().TECH }})</button>
+        <button type="button" role="tab" [class.on]="store.filters().role === 'SUBSCRIPTION_MANAGER'" (click)="role('SUBSCRIPTION_MANAGER')">Gestores ({{ store.roleCounts().SUBSCRIPTION_MANAGER }})</button>
+      </div>
+    </div>
+    @if (store.filtered().length === 0) {
+      <section class="contracts-empty-state compact"><div class="empty-state-icon">⌕</div><h2>No encontramos empleados</h2><p>Prueba con otro nombre, código o documento.</p></section>
+    } @else {
+      <div class="table-card">
+        <table><thead><tr><th>EMPLEADO</th><th>ROL</th><th>CONTRATO</th><th>HORARIO</th><th>DISPONIBILIDAD</th><th>ACCIONES</th></tr></thead><tbody>
+          @for (row of store.page(); track row.employee.id) {
+            <tr [class.muted-row]="row.employee.status === 'TERMINATED'">
+              <td><div class="employee-cell"><span class="avatar">{{ initials(row.employee.firstName + ' ' + row.employee.lastName) }}<i [class]="'dot ' + row.availability.toLowerCase()"></i></span><div><strong>{{ row.employee.firstName }} {{ row.employee.lastName }}</strong><small class="code">#{{ row.code }}</small></div></div></td>
+              <td><span class="pill role">{{ roleLabel[row.employee.role] }}</span></td>
+              <td><span [class]="'pill contract ' + row.contractState.toLowerCase()">{{ contractLabel[row.contractState] }}</span></td>
+              <td>@if (row.scheduleDays) { <strong>{{ row.scheduleDays }}</strong><small class="code">{{ row.scheduleHours }}</small> } @else { <em class="muted">Sin configurar</em> }</td>
+              <td><span [class]="'pill availability ' + row.availability.toLowerCase()">● {{ availabilityLabel[row.availability] }}</span></td>
+              <td class="row-actions"><button type="button" class="menu-trigger" [attr.aria-label]="'Acciones de ' + row.employee.firstName" (click)="toggleMenu(row.employee.id)">⋮</button>
+                @if (openMenu() === row.employee.id) {
+                  <div class="row-menu">
+                    @if (row.contract) { <a [routerLink]="['/hcm/contracts', row.employee.id, row.contract.id]">Ver contrato</a> }
+                    <a routerLink="/hcm/contracts/new" [queryParams]="{ employeeId: row.employee.id }">Registrar contrato</a>
+                    @if (canConfigureSchedule(row)) { <a routerLink="/hcm/work-schedules/new" [queryParams]="{ contractId: row.contract!.id }">Configurar horario</a> }
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody></table>
+        <footer><span>Mostrando <b>{{ store.page().length }}</b> de <b>{{ store.filtered().length }}</b> empleados</span><span>Página {{ store.filters().page + 1 }} de {{ store.totalPages() }}</span><div><button [disabled]="store.filters().page === 0" (click)="store.goToPage(store.filters().page - 1)">‹</button><button class="current">{{ store.filters().page + 1 }}</button><button [disabled]="store.filters().page + 1 >= store.totalPages()" (click)="store.goToPage(store.filters().page + 1)">›</button></div></footer>
+      </div>
+    }
+  }
+</section>

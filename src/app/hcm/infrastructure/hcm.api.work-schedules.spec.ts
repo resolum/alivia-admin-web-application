@@ -65,4 +65,14 @@ describe('HcmApi work schedules', () => {
     expect(JSON.parse(fetchMock.mock.calls[0]![1].body)).toMatchObject({ name: 'Turno A', businessId: 1 });
     expect(fetchMock.mock.calls.map(call => call[1].method)).toEqual(['POST', 'PATCH', 'POST']);
   });
+
+  it('lists every employee and registers a new one in the business', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(json({ content: [{ id: 3 }], id: 52 })));
+    expect(await api.listAllEmployees()).toEqual([{ id: 3 }]);
+    await api.createEmployee({ corporateEmail: 'a@alivia.pe', phoneNumber: '51987654321', firstName: 'Ana', lastName: 'Pérez Ruiz', dni: '12345678', birthDate: '1990-01-01', role: 'TECH' });
+
+    expect(urls()[0]).toContain('businessId=1');
+    expect(urls()[1]).toBe('/api/v1/employees');
+    expect(JSON.parse(fetchMock.mock.calls[1]![1].body)).toMatchObject({ dni: '12345678', businessId: 1 });
+  });
 });

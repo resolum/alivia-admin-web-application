@@ -27,13 +27,13 @@ describe('HcmApi', () => {
     sessionStorage.setItem(BUSINESS_ID_KEY, '1');
   });
 
-  it('refuses to call the backend when the session has no business', async () => {
+  it('lets the backend use its default business when the session has none', async () => {
     sessionStorage.removeItem(BUSINESS_ID_KEY);
-    const fetchMock = vi.fn();
+    const fetchMock = vi.fn().mockResolvedValue(json({ content: [] }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(api.listEmployees()).rejects.toMatchObject({ status: 403 });
-    expect(fetchMock).not.toHaveBeenCalled();
+    await api.listEmployees();
+    expect(String(fetchMock.mock.calls[0]![0])).not.toContain('businessId');
   });
 
   afterEach(() => vi.unstubAllGlobals());

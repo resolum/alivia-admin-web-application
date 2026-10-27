@@ -1,0 +1,26 @@
+.stats em.plain { position: static; display: block; margin-top: 4px; padding: 0; background: none; color: #138575; font-weight: 700; }
+.stats em.plain.danger { color: #c52828; }
+.employee-filters { align-items: center; }
+.role-tabs { display: flex; gap: 4px; padding: 4px; border-radius: 8px; background: #f2f4fd; }
+.role-tabs button { padding: 8px 12px; border: 0; border-radius: 6px; background: none; color: #5d687a; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.role-tabs button.on { background: #fff; color: #0c307a; box-shadow: 0 1px 3px rgba(9, 22, 49, .1); }
+.employee-cell { display: flex; align-items: center; gap: 10px; }
+.employee-cell .avatar { position: relative; display: grid; flex: 0 0 auto; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #0c307a; color: #fff; font-size: 11px; font-weight: 800; }
+.employee-cell strong { color: #173b77 !important; font-size: 13px; }
+.dot { position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border: 2px solid #fff; border-radius: 50%; background: #9aa3b5; }
+.dot.available { background: #168978; }
+.dot.unavailable { background: #c52828; }
+.code { font-family: ui-monospace, monospace; }
+.muted { color: #8a93a5; }
+.pill { display: inline-flex; width: max-content; padding: 5px 11px; border-radius: 14px; background: #e3e9f7; color: #264a94; font-size: 10px; font-weight: 800; }
+.pill.contract.active, .pill.availability.available { background: #d9faf2; color: #168978; }
+.pill.contract.expiring, .pill.contract.pending { background: #fff4dc; color: #a15c00; }
+.pill.contract.expired, .pill.availability.unavailable { background: #ffe0e0; color: #c52828; }
+.pill.contract.terminated, .pill.contract.none, .pill.availability.off_shift { background: #e8ebf2; color: #626b7b; }
+.muted-row td { opacity: .55; }
+.row-actions { position: relative; }
+.menu-trigger { width: 30px; height: 30px; border: 0; border-radius: 7px; background: #f0f3ff; color: #22478d; font-weight: 900; }
+.row-menu { position: absolute; top: 46px; right: 15px; z-index: 5; display: flex; flex-direction: column; min-width: 170px; padding: 6px; border: 1px solid #e4e8f2; border-radius: 8px; background: #fff; box-shadow: 0 8px 20px rgba(9, 22, 49, .12); }
+.row-menu a { padding: 8px 10px; border-radius: 6px; color: #28364b; font-size: 12px; text-decoration: none; }
+.row-menu a:hover { background: #f0f3ff; }
+@media (max-width: 950px) { .employee-filters { flex-wrap: wrap; } }
