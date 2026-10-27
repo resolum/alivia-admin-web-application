@@ -1,4 +1,5 @@
 import { ContractFilters, CreateContract, UpdateContract } from '../domain/contract.entity';
+import { BUSINESS_ID_KEY } from '../../shared/infrastructure/api.config';
 import { HcmApi, HcmApiError } from './hcm.api';
 
 const filters: ContractFilters = {
@@ -23,6 +24,16 @@ describe('HcmApi', () => {
     api = new HcmApi();
     localStorage.clear();
     sessionStorage.clear();
+    sessionStorage.setItem(BUSINESS_ID_KEY, '1');
+  });
+
+  it('refuses to call the backend when the session has no business', async () => {
+    sessionStorage.removeItem(BUSINESS_ID_KEY);
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(api.listEmployees()).rejects.toMatchObject({ status: 403 });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   afterEach(() => vi.unstubAllGlobals());
@@ -75,7 +86,7 @@ describe('HcmApi', () => {
     vi.stubGlobal('fetch', fetchMock);
     const request = (api as unknown as { request<T>(url: string): Promise<T> }).request.bind(api);
 
-    await expect(request('/one')).rejects.toMatchObject({ status: 401, message: 'Debes iniciar sesión para consultar los contratos.' });
+    await expect(request('/one')).rejects.toMatchObject({ status: 401, message: 'Debes iniciar sesión para consultar capital humano.' });
     await expect(request('/two')).rejects.toMatchObject({ status: 403 });
     await expect(request('/three')).rejects.toMatchObject({ status: 404 });
     await expect(request('/four')).rejects.toThrow('Contrato incompatible');

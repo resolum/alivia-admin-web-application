@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HcmStore } from '../../../application/hcm.store';
 import { CreateContract } from '../../../domain/contract.entity';
 import { HcmApiError } from '../../../infrastructure/hcm.api';
-import { CURRENT_BUSINESS_ID } from '../../../../shared/infrastructure/api.config';
+import { currentBusinessId } from '../../../../shared/infrastructure/api.config';
 
 @Component({ selector: 'app-contract-form', imports: [ReactiveFormsModule, RouterLink], templateUrl: './contract-form.html', styleUrl: './contract-form.css' })
 export class ContractForm implements OnInit {
@@ -40,7 +40,7 @@ export class ContractForm implements OnInit {
     this.saving.set(true); this.message.set(''); this.conflict.set(false);
     try {
       const value = this.form.getRawValue();
-      const input: CreateContract = { ...value, businessId: CURRENT_BUSINESS_ID };
+      const input: CreateContract = { ...value, businessId: currentBusinessId() ?? 0 };
       const employeeId = Number(this.route.snapshot.paramMap.get('employeeId')); const contractId = Number(this.route.snapshot.paramMap.get('contractId'));
       if (this.editing() && employeeId && contractId) {
         const { position, modality, weeklyHours, startDate, endDate, notes } = input;

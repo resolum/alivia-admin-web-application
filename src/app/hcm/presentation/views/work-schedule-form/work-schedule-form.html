@@ -1,0 +1,82 @@
+<section class="page form-page">
+  <div class="breadcrumb">Capital humano <b>›</b> Horarios laborales <b>›</b> {{ editing() ? 'Editar horario' : 'Registrar horario' }}</div>
+  <a class="back" routerLink="/hcm/work-schedules">← Volver a horarios laborales</a>
+  <div class="page-heading">
+    <div><h1>{{ editing() ? 'Editar horario laboral' : 'Registrar horario laboral' }}</h1><p>{{ editing() ? 'Modifica los parámetros de vigencia y la distribución de jornada semanal para este horario.' : 'Configura la jornada semanal del colaborador según las condiciones de su contrato laboral vigente.' }}</p></div>
+    @if (editing(); as schedule) { <span class="draft-badge">Código: {{ schedule.code }}</span> } @else { <span class="draft-badge">NUEVO HORARIO</span> }
+  </div>
+  <div class="schedule-layout">
+    <form [formGroup]="form" class="schedule-sections" (ngSubmit)="save(false)">
+      <article class="card">
+        <div class="card-title"><div class="step-title"><span>1</span><div><h2>Contrato</h2><p>El horario se configura dentro de un contrato pendiente o vigente, que fija al empleado, las horas pactadas y la vigencia</p></div></div></div>
+        <div class="form-grid">
+          <label class="full">Contrato *<select formControlName="contractId" (change)="changeContract()">
+            @if (contractLocked() && bindingContract(); as contract) { <option [ngValue]="contract.id">{{ contract.code }} · {{ contract.employeeName }}</option> }
+            @else { @for (contract of store.openContracts(); track contract.id) { <option [ngValue]="contract.id">{{ contract.code }} · {{ contract.employeeName }} · {{ contractStatusLabel[contract.status] }}</option> } @empty { <option [ngValue]="0">No hay contratos pendientes o vigentes</option> } }
+          </select></label>
+          @if (bindingContract(); as contract) {
+            <div class="full contract-card"><div><small>EMPLEADO</small><strong>{{ contract.employeeName }}</strong></div><div><small>VIGENCIA</small><strong>{{ formatDate(contract.startDate) }} – {{ formatDate(contract.endDate) }}</strong></div><div><small>HORAS PACTADAS</small><strong>{{ contract.weeklyHours ?? '—' }} h / semana</strong></div><div><small>MODALIDAD</small><strong>{{ modalityLabel[contract.modality] }}</strong></div></div>
+          } @else if (!editing()) {
+            <div class="full notice">No hay contratos pendientes o vigentes. Primero registra el contrato del empleado.<a class="button secondary small" routerLink="/hcm/contracts/new">Registrar contrato</a></div>
+          }
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-title"><div class="step-title"><span>2</span><div><h2>Vigencia y parámetros temporales</h2><p>Define el periodo de efectividad en el que este horario será aplicable, dentro del contrato</p></div></div></div>
+        <div class="form-grid">
+          <label class="full">Nombre del horario *<input formControlName="name" maxlength="100" placeholder="Jornada Ordinaria Diurna (40h)" /><small class="hint">Identificador interno visible para asignación a cuadrillas y colaboradores</small></label>
+          <label>Fecha de inicio de vigencia *<input type="date" formControlName="startDate" [min]="bindingContract()?.startDate ?? ''" [max]="bindingContract()?.endDate ?? ''" /><small class="hint">Inicio del ciclo operativo</small></label>
+          <label><span class="label-row">Fecha de término (opcional)<span class="check"><input type="checkbox" style="width:auto" [checked]="form.controls.indefinite.value" (change)="setIndefinite($event)" /> Indefinido</span></span><input type="date" formControlName="endDate" [readOnly]="form.controls.indefinite.value" [min]="form.controls.startDate.value" [max]="bindingContract()?.endDate ?? ''" /><small class="hint">{{ form.controls.indefinite.value ? 'Rige hasta el fin del contrato asociado' : 'No puede pasar del fin del contrato' }}</small></label>
+          <label class="full">Estado de aplicación<input readonly [value]="applicationStatus() === 'SCHEDULED' ? 'Programado (activación automática)' : applicationStatus() === 'DRAFT' ? 'Borrador (sin efecto hasta publicarlo)' : 'Activo (en ejecución)'" /><small class="hint">Se calcula con la fecha de inicio; visibilidad para asignaciones de campo</small></label>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-title"><div class="step-title"><span>3</span><div><h2>Jornada semanal detallada</h2><p>Configuración de bloques diarios y jornadas partidas (Lunes a Domingo)</p></div></div><button type="button" class="button secondary small" (click)="copyMondayToWeekdays()">⧉ Copiar Lunes a Viernes</button></div>
+        <p class="notice tip">Puedes añadir varios bloques de trabajo en un mismo día para contemplar pausas obligatorias, refrigerio o turnos divididos. Ningún bloque puede cruzar la medianoche.</p>
+        @for (plan of days(); track plan.day) {
+          <section class="day-plan" [class.off]="!plan.enabled">
+            <header>
+              <button type="button" class="switch" role="switch" [attr.aria-checked]="plan.enabled" [attr.aria-label]="'Jornada del ' + dayLabel[plan.day]" (click)="toggleDay(plan.day)"><span></span></button>
+              <strong>{{ dayLabel[plan.day] }}</strong><em>{{ plan.enabled ? 'Laborable' : 'Descanso' }}</em>
+              @if (plan.enabled) {
+                <span class="subtotal">Subtotal día: <b>{{ formatHours(totalHours(plan.blocks)) }} hrs</b></span>
+                <button type="button" class="link" (click)="addBlock(plan.day)">⊕ Agregar bloque</button>
+              } @else { <button type="button" class="link" (click)="toggleDay(plan.day)">Habilitar jornada</button> }
+            </header>
+            @if (plan.enabled) {
+              @for (block of plan.blocks; track $index; let index = $index) {
+                <div class="block-row">
+                  <span>Bloque {{ index + 1 }}:</span>
+                  <input type="time" [value]="block.startTime" [attr.aria-label]="dayLabel[plan.day] + ' bloque ' + (index + 1) + ' inicio'" (change)="setTime(plan.day, index, 'startTime', $event)" />
+                  <i>a</i>
+                  <input type="time" [value]="block.endTime" [attr.aria-label]="dayLabel[plan.day] + ' bloque ' + (index + 1) + ' fin'" (change)="setTime(plan.day, index, 'endTime', $event)" />
+                  <small>{{ formatHours(totalHours([block])) }} hrs</small>
+                  <button type="button" class="remove" [attr.aria-label]="'Quitar bloque ' + (index + 1)" (click)="removeBlock(plan.day, index)">✕</button>
+                </div>
+              }
+              @if (dayBlocksError(plan.blocks); as error) { <p class="day-error">{{ error }}</p> }
+              @if (plan.blocks.length === 0) { <p class="day-error">Agrega un bloque o marca el día como descanso.</p> }
+            }
+          </section>
+        }
+      </article>
+      @if (message()) {
+        <div class="form-error" role="alert"><strong>{{ conflict() ? 'No se puede guardar este horario' : 'Revisa el horario' }}</strong><span>{{ message() }}</span>@if (conflict()) { <small>El horario debe caber dentro de un contrato pendiente o vigente del empleado y no cruzarse con otro horario activo.</small> }</div>
+      }
+      <footer class="schedule-footer card">
+        @if (editing(); as schedule) {
+          @if (schedule.status === 'DRAFT') { <button type="button" class="button secondary" [disabled]="saving()" (click)="save(true)">Guardar como borrador</button> }
+          <a routerLink="/hcm/work-schedules">Descartar cambios</a>
+          <button type="button" class="danger-link" [disabled]="saving()" (click)="deactivate()">Dar de baja horario</button>
+          <button class="button primary submit" [disabled]="saving()">{{ saving() ? 'Guardando…' : (schedule.status === 'DRAFT' ? 'Publicar horario' : 'Guardar cambios') }}</button>
+        } @else {
+          <button type="button" class="button secondary" [disabled]="saving() || !bindingContract()" (click)="save(true)">Guardar borrador</button>
+          <a routerLink="/hcm/work-schedules">Cancelar</a>
+          <button class="button primary submit" [disabled]="saving() || !bindingContract()">{{ saving() ? 'Guardando…' : 'Registrar horario laboral' }}</button>
+        }
+      </footer>
+    </form>
+    <app-work-schedule-summary class="schedule-summary" [contract]="bindingContract()" [configuredHours]="configuredHours()" [workingDays]="workingDaysList()"
+      [startDate]="form.controls.startDate.value" [endDate]="form.controls.indefinite.value ? null : form.controls.endDate.value || null" [lastModified]="editing()?.updatedAt ?? null" />
+  </div>
+</section>

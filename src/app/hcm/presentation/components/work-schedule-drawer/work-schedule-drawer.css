@@ -1,0 +1,49 @@
+.drawer-backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(9, 22, 49, .35); }
+.schedule-drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 41; display: flex; flex-direction: column; width: min(500px, 100%); background: #fff; box-shadow: -12px 0 32px rgba(9, 22, 49, .18); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
+.drawer-employee { display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 14px; background: #eef1ff; }
+.drawer-employee .avatar { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: #0c307a; color: #fff; font-weight: 800; }
+.drawer-employee div { display: flex; flex-direction: column; gap: 3px; }
+.drawer-employee strong { color: #0a2c69; font-size: 14px; }
+.drawer-employee small { color: #3f4b60; font-size: 12px; }
+.drawer-employee b { color: #168978; font-size: 11px; }
+.drawer-employee b.draft, .drawer-employee b.scheduled { color: #264a94; }
+.drawer-employee b.finished, .drawer-employee b.inactive { color: #6c7482; }
+.drawer-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+.drawer-stats article { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 12px; background: #f5f6ff; }
+.drawer-stats span { color: #4f5b70; font-size: 11px; font-weight: 700; }
+.drawer-stats strong { color: #0a2c69; font-size: 22px; }
+.drawer-stats strong small { color: #6a7487; font-size: 13px; font-weight: 500; }
+.drawer-stats em { color: #168978; font-size: 11px; font-style: normal; }
+.drawer-stats em.muted { color: #5b6578; font-weight: 700; }
+.schedule-drawer h3 { margin: 0 0 10px; color: #0a2c69; font-size: 14px; }
+.drawer-days { display: flex; flex-direction: column; gap: 8px; margin: 0 0 20px; padding: 10px; list-style: none; border-radius: 12px; background: #eef1ff; }
+.drawer-days li { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; background: #fff; font-size: 12px; }
+.drawer-days li.rest { background: transparent; color: #8a93a5; }
+.day-chip { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; background: #0c307a; color: #fff; font-size: 10px; font-weight: 800; }
+.drawer-days li.rest .day-chip { background: #e3e7f6; color: #8a93a5; }
+.drawer-days strong { color: #28364b; }
+.drawer-days li.rest strong { color: #8a93a5; font-weight: 500; }
+.blocks { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-left: auto; color: #28364b; }
+.blocks small { color: #8a93a5; }
+.rest-label { color: #8a93a5; font-size: 10px; font-weight: 800; letter-spacing: .5px; }
+.drawer-contract { padding: 16px; border-radius: 12px; background: #eef1ff; font-size: 12px; color: #344056; }
+.drawer-contract header { display: flex; justify-content: space-between; align-items: center; }
+.drawer-contract header strong { color: #0a2c69; }
+.drawer-contract p { margin: 10px 0 0; line-height: 1.5; }
+.drawer-contract dl { display: flex; justify-content: space-between; margin: 12px 0 0; }
+.drawer-contract dt { color: #5b6578; }
+.drawer-contract dd { margin: 0; color: #0a2c69; font-weight: 800; }
+.contract-link { display: inline-block; margin-top: 10px; color: #173b77; font-weight: 800; text-decoration: none; }
+.compliance-badge { font-size: 11px; font-weight: 800; color: #168978; }
+.compliance-badge.over { color: #c52828; }
+.compliance-badge.under { color: #b26a00; }
+.compliance-badge.no_reference { color: #6c7482; }
+.legal-warning { color: #c52828; font-weight: 700; }
+.drawer-footer { position: relative; padding: 22px 24px; background: #eef1ff; }
+.drawer-footer small { color: #168978; font-size: 10px; font-weight: 900; letter-spacing: .5px; }
+.drawer-footer h2 { margin: 6px 0; color: #0a2c69; font-size: 20px; }
+.drawer-footer span { color: #5b6578; font-size: 12px; }
+.drawer-close { position: absolute; top: 18px; right: 20px; width: 34px; height: 34px; border: 0; border-radius: 8px; background: #fff; color: #4f5b70; }
+.drawer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+@media (max-width: 600px) { .drawer-stats { grid-template-columns: 1fr; } }

@@ -30,6 +30,7 @@ export interface EmployeeOption {
   firstName: string;
   lastName: string;
   corporateEmail: string;
+  role?: 'TECH' | 'SUBSCRIPTION_MANAGER' | 'CLEANING';
   status: 'ACTIVE' | 'INACTIVE';
 }
 

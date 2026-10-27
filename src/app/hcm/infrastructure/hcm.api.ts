@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ACCESS_TOKEN_KEY, API_BASE_URL, CURRENT_BUSINESS_ID } from '../../shared/infrastructure/api.config';
+import { ACCESS_TOKEN_KEY, API_BASE_URL, API_PATHS, currentBusinessId } from '../../shared/infrastructure/api.config';
 import { Contract, ContractFilters, ContractPage, CreateContract, EmployeeOption, UpdateContract } from '../domain/contract.entity';
+import { SaveWorkSchedule, WorkSchedule, WorkScheduleFilters, WorkSchedulePage, WorkScheduleSummary } from '../domain/work-schedule.entity';
 
 interface EmployeePageResponse { content: EmployeeOption[]; }
 interface ContractResponse extends Omit<Contract, 'employeeName'> {}
+type WorkScheduleResponse = Omit<WorkSchedule, 'employeeName' | 'employeeRole'>;
 
 export class HcmApiError extends Error {
   constructor(message: string, readonly status: number) { super(message); this.name = 'HcmApiError'; }
@@ -12,12 +14,12 @@ export class HcmApiError extends Error {
 @Injectable({ providedIn: 'root' })
 export class HcmApi {
   async listContracts(filters: ContractFilters): Promise<ContractPage> {
-    const params = new URLSearchParams({ businessId: String(CURRENT_BUSINESS_ID), page: String(filters.page), size: String(filters.size), sort: 'id,desc' });
+    const params = new URLSearchParams({ businessId: String(this.businessId()), page: String(filters.page), size: String(filters.size), sort: 'id,desc' });
     if (filters.search.trim()) params.set('search', filters.search.trim());
     if (filters.status !== 'ALL') params.set('status', filters.status);
     if (filters.modality !== 'ALL') params.set('modality', filters.modality);
     const [page, employees] = await Promise.all([
-      this.request<Omit<ContractPage, 'content'> & { content: ContractResponse[] }>(`${API_BASE_URL}/contracts?${params}`),
+      this.request<Omit<ContractPage, 'content'> & { content: ContractResponse[] }>(`${API_BASE_URL}${API_PATHS.contracts}?${params}`),
       this.listEmployees(),
     ]);
     const employeeNames = new Map(employees.map(employee => [employee.id, `${employee.firstName} ${employee.lastName}`]));
@@ -25,14 +27,16 @@ export class HcmApi {
   }
 
   async listEmployees(): Promise<EmployeeOption[]> {
-    const params = new URLSearchParams({ businessId: String(CURRENT_BUSINESS_ID), status: 'ACTIVE', page: '0', size: '100', sort: 'lastName,asc' });
-    return (await this.request<EmployeePageResponse>(`${API_BASE_URL}/employees?${params}`)).content;
+    // Names live in the staff profile, not in the employees table, so the backend can only sort by id.
+    const params = new URLSearchParams({ businessId: String(this.businessId()), status: 'ACTIVE', page: '0', size: '100', sort: 'id,asc' });
+    const employees = (await this.request<EmployeePageResponse>(`${API_BASE_URL}${API_PATHS.employees}?${params}`)).content;
+    return [...employees].sort((a, b) => `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`, 'es'));
   }
 
   async getContract(employeeId: number, contractId: number): Promise<Contract> {
-    const params = new URLSearchParams({ businessId: String(CURRENT_BUSINESS_ID) });
+    const params = new URLSearchParams({ businessId: String(this.businessId()) });
     const [contract, employees] = await Promise.all([
-      this.request<ContractResponse>(`${API_BASE_URL}/employees/${employeeId}/contracts/${contractId}?${params}`),
+      this.request<ContractResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.contracts}/${contractId}?${params}`),
       this.listEmployees(),
     ]);
     const employee = employees.find(item => item.id === contract.employeeId);
@@ -40,19 +44,90 @@ export class HcmApi {
   }
 
   async createContract(input: CreateContract): Promise<Contract> {
-    const { employeeId, ...body } = input;
-    const contract = await this.request<ContractResponse>(`${API_BASE_URL}/employees/${employeeId}/contracts`, {
+    const { employeeId, ...rest } = input;
+    const body = { ...rest, businessId: this.businessId() };
+    const contract = await this.request<ContractResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.contracts}`, {
       method: 'POST', body: JSON.stringify(body),
     });
     return { ...contract, employeeName: `Empleado #${contract.employeeId}` };
   }
 
   async updateContract(employeeId: number, contractId: number, input: UpdateContract): Promise<Contract> {
-    const params = new URLSearchParams({ businessId: String(CURRENT_BUSINESS_ID) });
-    const contract = await this.request<ContractResponse>(`${API_BASE_URL}/employees/${employeeId}/contracts/${contractId}?${params}`, {
+    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const contract = await this.request<ContractResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.contracts}/${contractId}?${params}`, {
       method: 'PATCH', body: JSON.stringify(input),
     });
     return { ...contract, employeeName: `Empleado #${contract.employeeId}` };
+  }
+
+  async listWorkSchedules(filters: WorkScheduleFilters): Promise<WorkSchedulePage> {
+    const params = new URLSearchParams({ businessId: String(this.businessId()), page: String(filters.page), size: String(filters.size), sort: 'id,desc' });
+    if (filters.search.trim()) params.set('search', filters.search.trim());
+    if (filters.role !== 'ALL') params.set('role', filters.role);
+    if (filters.status !== 'ALL') params.set('status', filters.status);
+    const [page, employees] = await Promise.all([
+      this.request<Omit<WorkSchedulePage, 'content'> & { content: WorkScheduleResponse[] }>(`${API_BASE_URL}${API_PATHS.workSchedules}?${params}`),
+      this.listEmployees(),
+    ]);
+    return { ...page, content: page.content.map(schedule => this.withEmployee(schedule, employees)) };
+  }
+
+  async getWorkScheduleSummary(): Promise<WorkScheduleSummary> {
+    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    return this.request<WorkScheduleSummary>(`${API_BASE_URL}${API_PATHS.workSchedules}/summary?${params}`);
+  }
+
+  async getWorkSchedule(employeeId: number, workScheduleId: number): Promise<WorkSchedule> {
+    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const [schedule, employees] = await Promise.all([
+      this.request<WorkScheduleResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.workSchedules}/${workScheduleId}?${params}`),
+      this.listEmployees(),
+    ]);
+    return this.withEmployee(schedule, employees);
+  }
+
+  async listContractWorkSchedules(contractId: number): Promise<WorkSchedule[]> {
+    const params = new URLSearchParams({ businessId: String(this.businessId()), contractId: String(contractId), page: '0', size: '20', sort: 'startDate,desc' });
+    const page = await this.request<{ content: WorkScheduleResponse[] }>(`${API_BASE_URL}${API_PATHS.workSchedules}?${params}`);
+    return page.content.map(schedule => this.withEmployee(schedule, []));
+  }
+
+  /** A schedule is always configured inside one of the employee's contracts. */
+  async createWorkSchedule(employeeId: number, contractId: number, input: SaveWorkSchedule): Promise<WorkSchedule> {
+    const schedule = await this.request<WorkScheduleResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.contracts}/${contractId}${API_PATHS.workSchedules}`, {
+      method: 'POST', body: JSON.stringify({ ...input, businessId: this.businessId() }),
+    });
+    return this.withEmployee(schedule, []);
+  }
+
+  async updateWorkSchedule(employeeId: number, workScheduleId: number, input: SaveWorkSchedule): Promise<WorkSchedule> {
+    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const schedule = await this.request<WorkScheduleResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.workSchedules}/${workScheduleId}?${params}`, {
+      method: 'PATCH', body: JSON.stringify(input),
+    });
+    return this.withEmployee(schedule, []);
+  }
+
+  async deactivateWorkSchedule(employeeId: number, workScheduleId: number): Promise<WorkSchedule> {
+    const params = new URLSearchParams({ businessId: String(this.businessId()) });
+    const schedule = await this.request<WorkScheduleResponse>(`${API_BASE_URL}${API_PATHS.employees}/${employeeId}${API_PATHS.workSchedules}/${workScheduleId}/deactivation?${params}`, { method: 'POST' });
+    return this.withEmployee(schedule, []);
+  }
+
+  private withEmployee(schedule: WorkScheduleResponse, employees: EmployeeOption[]): WorkSchedule {
+    const employee = employees.find(item => item.id === schedule.employeeId);
+    return {
+      ...schedule,
+      employeeName: employee ? `${employee.firstName} ${employee.lastName}` : `Empleado #${schedule.employeeId}`,
+      employeeRole: employee?.role ?? null,
+    };
+  }
+
+  /** Every hcm endpoint is scoped to the business of the signed-in user. */
+  private businessId(): number {
+    const businessId = currentBusinessId();
+    if (businessId === null) throw new HcmApiError('Tu sesión no tiene un negocio asignado. Inicia sesión con una cuenta de un negocio.', 403);
+    return businessId;
   }
 
   private async request<T>(url: string, init: RequestInit = {}): Promise<T> {
@@ -74,9 +149,9 @@ export class HcmApi {
   }
 
   private async errorMessage(response: Response): Promise<string> {
-    if (response.status === 401) return 'Debes iniciar sesión para consultar los contratos.';
-    if (response.status === 403) return 'Tu usuario no tiene permiso para gestionar contratos.';
-    if (response.status === 404) return 'El servicio de contratos no está disponible en el backend actual.';
+    if (response.status === 401) return 'Debes iniciar sesión para consultar capital humano.';
+    if (response.status === 403) return 'Tu usuario no tiene permiso para gestionar capital humano.';
+    if (response.status === 404) return 'El servicio de capital humano no está disponible en el backend actual.';
     const contentType = response.headers.get('content-type') ?? '';
     if (contentType.includes('json')) {
       const problem = await response.json() as { detail?: string; message?: string; title?: string };
