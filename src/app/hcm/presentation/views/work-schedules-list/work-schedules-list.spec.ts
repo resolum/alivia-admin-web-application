@@ -45,7 +45,7 @@ describe('WorkSchedulesList', () => {
     expect(view.roleFilterLabel()).toBe('');
     filters.role = 'TECH'; filters.status = 'SCHEDULED';
     const fresh = TestBed.runInInjectionContext(() => new WorkSchedulesList()) as unknown as ListInternals;
-    expect(fresh.roleFilterLabel()).toBe('Técnico');
+    expect(fresh.roleFilterLabel()).toBe('Soporte técnico');
     expect(fresh.statusFilterLabel()).toBe('Programado');
     filters.role = 'ALL'; filters.status = 'ALL';
   });

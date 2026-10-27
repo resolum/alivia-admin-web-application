@@ -75,7 +75,7 @@ export const workScheduleStatusLabel: Record<WorkScheduleStatus, string> = {
 };
 
 export const employeeRoleLabel: Record<EmployeeRole, string> = {
-  TECH: 'Técnico', SUBSCRIPTION_MANAGER: 'Gestor de suscripciones', CLEANING: 'Limpieza',
+  TECH: 'Soporte técnico', SUBSCRIPTION_MANAGER: 'Gestor de suscripciones', CLEANING: 'Limpieza',
 };
 
 /** Minutes between two "HH:mm" times; negative or zero when the block is not valid. */
