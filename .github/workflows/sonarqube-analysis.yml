@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
       - name: SonarCloud analysis
         uses: SonarSource/sonarqube-scan-action@v6
         env:
@@ -39,3 +42,4 @@ jobs:
         with:
           args: >
             -Dsonar.qualitygate.wait=true
+            -Dsonar.javascript.lcov.reportPaths=coverage/alivia-admin-web-application/lcov.info

@@ -1,0 +1,11 @@
+.form-page .page-heading p { max-width: none; }
+.form-grid > label:first-child { position: relative; }
+.form-grid > label:first-child > small { position: absolute; top: 2px; right: 0; }
+.code-input { display: flex; width: 100%; min-height: 44px; gap: 8px; }
+.code-input input { min-width: 0; min-height: 44px; flex: 1 1 auto; }
+.code-input button { min-height: 44px; flex: 0 0 auto; padding: 0 14px; border: 1px solid #cbd5e9; border-radius: 8px; background: #fff; color: #173b77; font-size: 11px; font-weight: 800; }
+.code-input button:disabled { cursor: not-allowed; opacity: .45; }
+.form-error { display: flex; flex-direction: column; gap: 4px; margin: 18px 0 0; padding: 12px 14px; border-radius: 8px; background: #fff1f1; }
+.form-error strong { color: #9e2929; font-size: 12px; }
+.form-error span, .form-error small { color: #754040; font-size: 11px; }
+.form-error.contract-conflict { border: 1px solid #efc5c5; }
