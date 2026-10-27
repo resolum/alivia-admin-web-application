@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ACCESS_TOKEN_KEY, API_BASE_URL, API_PATHS, BUSINESS_ID_KEY } from '../../shared/infrastructure/api.config';
-import { businessIdOf, SignInCommand } from '../domain/sign-in.command';
+import { AccountActivation, businessIdOf, SignInCommand } from '../domain/sign-in.command';
 
 @Injectable({ providedIn: 'root' })
 export class IamApi {
@@ -27,6 +27,26 @@ export class IamApi {
     else window.sessionStorage.removeItem(BUSINESS_ID_KEY);
   }
 
+  /** Who an invitation link belongs to; fails when the link is unknown, used or expired. */
+  async getActivation(token: string): Promise<AccountActivation> {
+    const response = await this.send(`${API_BASE_URL}${API_PATHS.activation}?${new URLSearchParams({ token })}`, { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error(await activationError(response));
+    return await response.json() as AccountActivation;
+  }
+
+  /** Sets the password chosen by an invited employee and activates the account. */
+  async activate(token: string, password: string): Promise<void> {
+    const response = await this.send(`${API_BASE_URL}${API_PATHS.activate}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, password }),
+    });
+    if (!response.ok) throw new Error(await activationError(response));
+  }
+
+  private async send(url: string, init: RequestInit): Promise<Response> {
+    try { return await fetch(url, init); }
+    catch { throw new Error('No se pudo conectar con el servicio de autenticación.'); }
+  }
+
   signOut(): void {
     for (const key of [ACCESS_TOKEN_KEY, BUSINESS_ID_KEY]) {
       window.sessionStorage.removeItem(key);
@@ -38,4 +58,14 @@ export class IamApi {
     if (typeof window === 'undefined') return null;
     return window.sessionStorage.getItem(ACCESS_TOKEN_KEY) ?? window.localStorage.getItem(ACCESS_TOKEN_KEY);
   }
+}
+
+async function activationError(response: Response): Promise<string> {
+  const problem = (response.headers.get('content-type') ?? '').includes('json')
+    ? await response.json() as { code?: string; errors?: { code?: string }[] } : {};
+  const codes = [problem.code, ...(problem.errors ?? []).map(error => error.code)];
+  if (codes.includes('verification_token_expired')) return 'El enlace de activación venció. Pide al administrador que te registre de nuevo.';
+  if (codes.includes('password_weak') || codes.includes('too_long')) return 'La contraseña no cumple los requisitos de seguridad.';
+  if (response.status === 400 || response.status === 404) return 'El enlace de activación no es válido o ya fue usado.';
+  return `No se pudo activar la cuenta (${response.status}).`;
 }

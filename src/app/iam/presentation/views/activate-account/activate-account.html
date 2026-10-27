@@ -1,0 +1,29 @@
+<main class="sign-in">
+  <section class="card">
+    <div class="brand"><span class="brand-mark">A</span><div><strong>Alivia</strong><small>ADMINISTRACIÓN GENERAL</small></div></div>
+    @switch (state()) {
+      @case ('loading') { <p class="hint">Revisando tu enlace de activación…</p> }
+      @case ('invalid') {
+        <h1>No pudimos activar tu cuenta</h1>
+        <p class="error" role="alert">{{ error() }}</p>
+        <a class="button secondary" routerLink="/sign-in">Ir a iniciar sesión</a>
+      }
+      @case ('done') {
+        <h1>Tu cuenta está activa</h1>
+        <p class="hint">Ya puedes iniciar sesión con {{ account()?.email }} y la contraseña que acabas de crear.</p>
+        <a class="button primary" routerLink="/sign-in">Iniciar sesión</a>
+      }
+      @default {
+        <h1>Activa tu cuenta</h1>
+        <p class="hint">Hola {{ account()?.fullName }}, crea la contraseña para {{ account()?.email }}.</p>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <label>Contraseña<input type="password" formControlName="password" autocomplete="new-password" /></label>
+          <ul class="rules">@for (rule of rules; track rule.label) { <li [class.ok]="rule.test(password())">{{ rule.test(password()) ? '✓' : '○' }} {{ rule.label }}</li> }</ul>
+          <label>Confirmar contraseña<input type="password" formControlName="confirmation" autocomplete="new-password" />@if (form.controls.confirmation.touched && !matches()) { <small class="error">Las contraseñas no coinciden.</small> }</label>
+          @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+          <button class="button primary" [disabled]="!valid() || saving()">{{ saving() ? 'Activando…' : 'Activar mi cuenta' }}</button>
+        </form>
+      }
+    }
+  </section>
+</main>

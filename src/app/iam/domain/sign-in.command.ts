@@ -1,5 +1,19 @@
 export interface SignInCommand { email: string; password: string; }
 
+/** Who an invitation link belongs to, before its owner chooses a password. */
+export interface AccountActivation { email: string; fullName: string; expiresAt: string; }
+
+/** Same rules as IAM's PasswordPolicy: 8+ characters with upper and lower case, a digit and one of @$!%*?&#. */
+export const PASSWORD_RULES = [
+  { label: 'Al menos 8 caracteres', test: (value: string) => [...value].length >= 8 },
+  { label: 'Una letra mayúscula', test: (value: string) => /[A-ZÁÉÍÓÚÑ]/.test(value) },
+  { label: 'Una letra minúscula', test: (value: string) => /[a-záéíóúñ]/.test(value) },
+  { label: 'Un número', test: (value: string) => /\d/.test(value) },
+  { label: 'Un símbolo: @ $ ! % * ? & #', test: (value: string) => /[@$!%*?&#]/.test(value) },
+] as const;
+
+export function meetsPasswordPolicy(value: string): boolean { return PASSWORD_RULES.every(rule => rule.test(value)); }
+
 interface TokenClaims { exp?: number; businessId?: number | string; }
 
 function claimsOf(token: string): TokenClaims | null {
