@@ -1,0 +1,11 @@
+.sign-in { display: grid; min-height: 100vh; place-items: center; padding: 16px; }
+form { display: flex; flex-direction: column; gap: 14px; width: min(380px, 100%); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 2px solid #20aa91; border-radius: 8px; color: #0c307a; font-weight: 800; }
+.brand strong { display: block; color: #0c307a; }
+.brand small { color: #5d687a; font-size: 9px; }
+h1 { margin: 6px 0; color: #092765; font-size: 24px; }
+label { display: flex; flex-direction: column; gap: 6px; color: #193763; font-size: 12px; font-weight: 800; }
+input { padding: 12px 14px; border: 1px solid transparent; border-radius: 8px; outline: 0; background: #f1f3fd; color: #263a58; }
+input:focus { border-color: #6b8ac4; }
+.error { margin: 0; color: #c62f2f; font-size: 12px; }

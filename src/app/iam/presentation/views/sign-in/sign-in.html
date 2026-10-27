@@ -1,0 +1,10 @@
+<main class="sign-in">
+  <form class="card" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="brand"><span class="brand-mark">A</span><div><strong>Alivia</strong><small>ADMINISTRACIÓN GENERAL</small></div></div>
+    <h1>Iniciar sesión</h1>
+    <label>Correo<input type="email" formControlName="email" autocomplete="username" /></label>
+    <label>Contraseña<input type="password" formControlName="password" autocomplete="current-password" /></label>
+    @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+    <button class="button primary" [disabled]="loading()">{{ loading() ? 'Ingresando…' : 'Ingresar' }}</button>
+  </form>
+</main>

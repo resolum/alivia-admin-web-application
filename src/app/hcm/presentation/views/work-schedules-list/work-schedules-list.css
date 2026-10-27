@@ -1,0 +1,23 @@
+.schedule-stats { grid-template-columns: repeat(3, 1fr); }
+.schedule-stats em.plain { position: static; display: block; margin-top: 4px; padding: 0; background: none; color: #566176; font-weight: 700; }
+.schedule-stats article:nth-child(4) strong { color: inherit; }
+.applied-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: -4px 0 16px; color: #566176; font-size: 11px; font-weight: 700; }
+.applied-filters button { padding: 5px 10px; border: 0; border-radius: 12px; background: #e3e9f7; color: #173b77; font-size: 11px; font-weight: 800; }
+.applied-filters a { color: #173b77; text-decoration: underline; }
+.employee-cell { display: flex; align-items: center; gap: 10px; }
+.employee-cell .avatar { display: grid; flex: 0 0 auto; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #0c307a; color: #fff; font-size: 11px; font-weight: 800; }
+.employee-cell strong { color: #173b77 !important; }
+.day-chips { display: flex; gap: 4px; }
+.day-chips span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 5px; background: #eef0f6; color: #9aa3b5; font-size: 9px; font-weight: 800; }
+.day-chips span.on { background: #0c307a; color: #fff; }
+.hours { font-weight: 800; color: #28364b; }
+.hours.over { color: #c52828; }
+.hours b { margin-left: 4px; }
+.warning-row { background: #fffaf7; }
+.muted-row td { opacity: .55; }
+.row-actions { position: relative; }
+.menu-trigger { width: 30px; height: 30px; border: 0; border-radius: 7px; background: #f0f3ff; color: #22478d; font-weight: 900; }
+.row-menu { position: absolute; top: 46px; right: 15px; z-index: 5; display: flex; flex-direction: column; min-width: 150px; padding: 6px; border: 1px solid #e4e8f2; border-radius: 8px; background: #fff; box-shadow: 0 8px 20px rgba(9, 22, 49, .12); }
+.row-menu button { padding: 8px 10px; border: 0; border-radius: 6px; background: none; color: #28364b; font-size: 12px; text-align: left; }
+.row-menu button:hover { background: #f0f3ff; }
+@media (max-width: 950px) { .schedule-stats { grid-template-columns: 1fr; } }
