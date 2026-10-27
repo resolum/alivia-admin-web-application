@@ -7,6 +7,12 @@
       <footer><span>♙ Contrato creado: {{ contract.createdAt }}</span><span>◷ Última modificación: {{ contract.updatedAt }}</span></footer>
     </article>
     <article class="card employees"><div class="card-title"><div><h2>Empleado asignado</h2><p>Colaborador vinculado a este contrato laboral</p></div><span>1 colaborador</span></div><div class="employee-card"><span class="avatar">{{ contract.employeeName.slice(0,2).toUpperCase() }}</span><div><strong>{{ contract.employeeName }}</strong><small>Empleado #{{ contract.employeeId }}</small><span>{{ contract.position }}</span></div><b>● {{ contract.eligible ? 'Elegible' : 'No elegible' }}</b></div></article>
+    <article class="card contract-schedule"><div class="card-title"><div><h2>Horario laboral</h2><p>Jornada semanal configurada dentro de este contrato</p></div>
+      @if (contract.status === 'ACTIVE' || contract.status === 'PENDING') { <a class="button primary" routerLink="/hcm/work-schedules/new" [queryParams]="{ employeeId: contract.employeeId, contractId: contract.id }">◷ Configurar horario</a> }</div>
+      @for (schedule of schedules.contractSchedules(); track schedule.id) {
+        <div class="employee-card"><span class="avatar">◷</span><div><strong>{{ schedule.name }}</strong><small>{{ schedule.code }}</small><span>{{ formatDate(schedule.startDate) }} – {{ schedule.endDate ? formatDate(schedule.endDate) : 'fin del contrato' }} · {{ formatHours(schedule.weeklyHours) }} h de {{ contract.weeklyHours }} h pactadas</span></div><a class="view-link" [routerLink]="['/hcm/work-schedules', schedule.employeeId, schedule.id, 'edit']">{{ scheduleStatusLabel[schedule.status] }} · Editar</a></div>
+      } @empty { <p class="empty">Este contrato todavía no tiene horario. Configúralo para definir los días y bloques de trabajo.</p> }
+    </article>
   } @else if (store.error()) { <div class="loading card">{{ store.error() }}</div> }
   @else { <div class="loading card">Cargando detalle del contrato…</div> }
 </section>
