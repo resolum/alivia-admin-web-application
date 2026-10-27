@@ -1,0 +1,20 @@
+<div class="shell" [class.menu-open]="mobileMenuOpen()">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">A</span><strong>Alivia</strong><span>ADMINISTRACIÓN GENERAL</span></div>
+    <nav>
+      <small>PRINCIPAL</small><a routerLink="/home">⌂ <span>Inicio</span></a>
+      <small>CAPITAL HUMANO</small><a routerLink="/hcm/employees">♙ <span>Empleados</span></a><a routerLink="/hcm/contracts" routerLinkActive="active">▣ <span>Contratos</span></a><a routerLink="/hcm/work-schedules">◷ <span>Horarios laborales</span></a>
+      <small>OPERACIONES TÉCNICAS</small><a routerLink="/operations">⚒ <span>Órdenes técnicas</span></a>
+      <small>CLIENTES Y SERVICIO</small><a routerLink="/households">⌂ <span>Hogares</span></a><a routerLink="/devices">⌘ <span>Dispositivos</span></a>
+      <small>GESTIÓN COMERCIAL</small><a routerLink="/plans">▤ <span>Planes</span></a><a routerLink="/hiring">▱ <span>Contrataciones</span></a><a routerLink="/subscriptions">⟳ <span>Suscripciones</span></a>
+      <small>ANALÍTICA</small><a routerLink="/metrics">⌁ <span>Métricas</span></a>
+      <small>CONFIGURACIÓN</small><a routerLink="/business-profile">▦ <span>Perfil del negocio</span></a>
+    </nav>
+    <div class="account"><span class="avatar">MV</span><div><strong>Dra. Mariana Valdivia</strong><small>Administradora general</small></div><b>⋮</b></div>
+  </aside>
+  <section class="workspace">
+    <header class="topbar"><button class="menu-button" (click)="mobileMenuOpen.set(!mobileMenuOpen())">☰</button><span class="bell">♟<i></i></span><div class="top-user"><strong>Dra. Mariana Valdivia</strong><small>Administradora General</small></div></header>
+    <main><router-outlet /></main>
+  </section>
+  @if (mobileMenuOpen()) { <button class="backdrop" aria-label="Cerrar menú" (click)="mobileMenuOpen.set(false)"></button> }
+</div>
