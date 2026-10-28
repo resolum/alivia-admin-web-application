@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { EmployeesStore } from '../../../application/employees.store';
-import { HcmApiError } from '../../../infrastructure/hcm.api';
+import { HcmApiError } from '../../../infrastructure/hcm-http.client';
 import { EmployeeForm } from './employee-form';
 
 type FormGroupLike = { setValue(value: object): void; patchValue(value: object): void; invalid: boolean; controls: Record<string, { touched: boolean }> };

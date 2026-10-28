@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HcmStore } from '../../../application/hcm.store';
-import { HcmApiError } from '../../../infrastructure/hcm.api';
+import { HcmApiError } from '../../../infrastructure/hcm-http.client';
 import { ContractForm } from './contract-form';
 
 const contract = {

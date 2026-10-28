@@ -8,7 +8,7 @@ import {
   dayBlocksError, DayOfWeek, dayLabel, dayShortLabel, formatDate, formatHours, SaveWorkSchedule, toInputTime, totalHours,
   WEEK_DAYS, WorkSchedule, WorkScheduleStatus,
 } from '../../../domain/work-schedule.entity';
-import { HcmApiError } from '../../../infrastructure/hcm.api';
+import { HcmApiError } from '../../../infrastructure/hcm-http.client';
 import { WorkScheduleSummary } from '../../components/work-schedule-summary/work-schedule-summary';
 
 interface TimeBlock { startTime: string; endTime: string; }

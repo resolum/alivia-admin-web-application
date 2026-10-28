@@ -1,13 +1,17 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { CreateEmployee, Employee, EmployeeRow, toEmployeeRow } from '../domain/employee.entity';
 import { EmployeeRole } from '../domain/work-schedule.entity';
-import { HcmApi } from '../infrastructure/hcm.api';
+import { ContractsApi } from '../infrastructure/contracts.api';
+import { EmployeesApi } from '../infrastructure/employees.api';
+import { WorkSchedulesApi } from '../infrastructure/work-schedules.api';
 
 export interface EmployeeFilters { search: string; role: EmployeeRole | 'ALL'; page: number; size: number; }
 
 @Injectable({ providedIn: 'root' })
 export class EmployeesStore {
-  private readonly api = inject(HcmApi);
+  private readonly employeesApi = inject(EmployeesApi);
+  private readonly contractsApi = inject(ContractsApi);
+  private readonly workSchedulesApi = inject(WorkSchedulesApi);
   private readonly rowsState = signal<EmployeeRow[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -49,9 +53,9 @@ export class EmployeesStore {
     this.loading.set(true); this.error.set(null);
     try {
       const [employees, contracts, schedules] = await Promise.all([
-        this.api.listAllEmployees(),
-        this.api.listContracts({ search: '', status: 'ALL', modality: 'ALL', page: 0, size: 200 }),
-        this.api.listWorkSchedules({ search: '', role: 'ALL', status: 'ALL', page: 0, size: 200 }),
+        this.employeesApi.listAllEmployees(),
+        this.contractsApi.listContracts({ search: '', status: 'ALL', modality: 'ALL', page: 0, size: 200 }),
+        this.workSchedulesApi.listWorkSchedules({ search: '', role: 'ALL', status: 'ALL', page: 0, size: 200 }),
       ]);
       this.rowsState.set(employees.map(employee => toEmployeeRow(employee, contracts.content, schedules.content, now)));
     }
@@ -68,5 +72,5 @@ export class EmployeesStore {
     this.filters.update(current => ({ ...current, page }));
   }
 
-  create(input: CreateEmployee): Promise<Employee> { return this.api.createEmployee(input); }
+  create(input: CreateEmployee): Promise<Employee> { return this.employeesApi.createEmployee(input); }
 }

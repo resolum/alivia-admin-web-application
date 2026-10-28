@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HcmApi } from '../infrastructure/hcm.api';
+import { EmployeesApi } from '../infrastructure/employees.api';
+import { ContractsApi } from '../infrastructure/contracts.api';
+import { WorkSchedulesApi } from '../infrastructure/work-schedules.api';
 import { EmployeesStore } from './employees.store';
 
 const employee = (id: number, role: string, status = 'ACTIVE', firstName = 'Ana') =>
@@ -14,7 +16,7 @@ describe('EmployeesStore', () => {
     api.listAllEmployees.mockResolvedValue([employee(1, 'TECH'), employee(2, 'TECH', 'ACTIVE', 'Luis'), employee(3, 'SUBSCRIPTION_MANAGER'), employee(4, 'TECH', 'TERMINATED')]);
     api.listContracts.mockResolvedValue({ content: [{ id: 9, employeeId: 1, status: 'ACTIVE', startDate: '2026-01-01', endDate: '2027-12-31' }] });
     api.listWorkSchedules.mockResolvedValue({ content: [] });
-    TestBed.configureTestingModule({ providers: [{ provide: HcmApi, useValue: api }] });
+    TestBed.configureTestingModule({ providers: [{ provide: EmployeesApi, useValue: api }, { provide: ContractsApi, useValue: api }, { provide: WorkSchedulesApi, useValue: api }] });
     store = TestBed.inject(EmployeesStore);
   });
 

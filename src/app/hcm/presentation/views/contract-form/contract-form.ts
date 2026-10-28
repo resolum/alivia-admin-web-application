@@ -3,7 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HcmStore } from '../../../application/hcm.store';
 import { CreateContract } from '../../../domain/contract.entity';
-import { HcmApiError } from '../../../infrastructure/hcm.api';
+import { HcmApiError } from '../../../infrastructure/hcm-http.client';
 import { currentBusinessId } from '../../../../shared/infrastructure/api.config';
 
 @Component({ selector: 'app-contract-form', imports: [ReactiveFormsModule, RouterLink], templateUrl: './contract-form.html', styleUrl: './contract-form.css' })

@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HcmApi, HcmApiError } from '../infrastructure/hcm.api';
+import { ContractsApi } from '../infrastructure/contracts.api';
+import { EmployeesApi } from '../infrastructure/employees.api';
+import { HcmApiError } from '../infrastructure/hcm-http.client';
 import { HcmStore } from './hcm.store';
 
 const contract = {
@@ -18,7 +20,7 @@ describe('HcmStore', () => {
 
   beforeEach(() => {
     Object.values(api).forEach(mock => mock.mockReset());
-    TestBed.configureTestingModule({ providers: [HcmStore, { provide: HcmApi, useValue: api }] });
+    TestBed.configureTestingModule({ providers: [HcmStore, { provide: ContractsApi, useValue: api }, { provide: EmployeesApi, useValue: api }] });
     store = TestBed.inject(HcmStore);
   });
 

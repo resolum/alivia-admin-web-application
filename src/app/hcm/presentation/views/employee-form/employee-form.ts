@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { EmployeesStore } from '../../../application/employees.store';
 import { DNI_PATTERN, Employee, employeeCode, MOBILE_PATTERN, toPhoneNumber } from '../../../domain/employee.entity';
 import { EmployeeRole, employeeRoleLabel, formatDate } from '../../../domain/work-schedule.entity';
-import { HcmApiError } from '../../../infrastructure/hcm.api';
+import { HcmApiError } from '../../../infrastructure/hcm-http.client';
 import { DateSelect } from '../../components/date-select/date-select';
 import { InvitationPreview } from '../../components/invitation-preview/invitation-preview';
 

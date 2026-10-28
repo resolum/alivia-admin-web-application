@@ -1,13 +1,16 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Contract } from '../domain/contract.entity';
 import { SaveWorkSchedule, WorkSchedule, WorkScheduleFilters, WorkScheduleSummary } from '../domain/work-schedule.entity';
-import { HcmApi, HcmApiError } from '../infrastructure/hcm.api';
+import { ContractsApi } from '../infrastructure/contracts.api';
+import { HcmApiError } from '../infrastructure/hcm-http.client';
+import { WorkSchedulesApi } from '../infrastructure/work-schedules.api';
 
 const EMPTY_SUMMARY: WorkScheduleSummary = { totalSchedules: 0, employeesWithSchedule: 0, averageWeeklyHours: 0 };
 
 @Injectable({ providedIn: 'root' })
 export class WorkSchedulesStore {
-  private readonly api = inject(HcmApi);
+  private readonly api = inject(WorkSchedulesApi);
+  private readonly contractsApi = inject(ContractsApi);
   private readonly schedulesState = signal<WorkSchedule[]>([]);
   private readonly selectedState = signal<WorkSchedule | null>(null);
   private readonly openContractsState = signal<Contract[]>([]);
@@ -55,7 +58,7 @@ export class WorkSchedulesStore {
 
   async loadOpenContracts(): Promise<void> {
     try {
-      const page = await this.api.listContracts({ search: '', status: 'ALL', modality: 'ALL', page: 0, size: 100 });
+      const page = await this.contractsApi.listContracts({ search: '', status: 'ALL', modality: 'ALL', page: 0, size: 100 });
       this.openContractsState.set(page.content.filter(contract => contract.status === 'ACTIVE' || contract.status === 'PENDING'));
     }
     catch (error) { this.openContractsState.set([]); this.error.set(error instanceof Error ? error.message : 'No se pudieron consultar los contratos'); }

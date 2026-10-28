@@ -1,10 +1,13 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Contract, ContractFilters, CreateContract, EmployeeOption, UpdateContract } from '../domain/contract.entity';
-import { HcmApi, HcmApiError } from '../infrastructure/hcm.api';
+import { ContractsApi } from '../infrastructure/contracts.api';
+import { EmployeesApi } from '../infrastructure/employees.api';
+import { HcmApiError } from '../infrastructure/hcm-http.client';
 
 @Injectable({ providedIn: 'root' })
 export class HcmStore {
-  private readonly api = inject(HcmApi);
+  private readonly contractsApi = inject(ContractsApi);
+  private readonly employeesApi = inject(EmployeesApi);
   private readonly contractsState = signal<Contract[]>([]);
   private readonly selectedState = signal<Contract | null>(null);
   private readonly employeesState = signal<EmployeeOption[]>([]);
@@ -33,7 +36,7 @@ export class HcmStore {
   async loadContracts(): Promise<void> {
     this.loading.set(true); this.error.set(null);
     try {
-      const page = await this.api.listContracts(this.filters());
+      const page = await this.contractsApi.listContracts(this.filters());
       this.contractsState.set(page.content); this.totalElements.set(page.totalElements); this.totalPages.set(page.totalPages);
     }
     catch (error) {
@@ -46,13 +49,13 @@ export class HcmStore {
 
   async selectContract(employeeId: number, contractId: number): Promise<void> {
     this.loading.set(true); this.error.set(null);
-    try { this.selectedState.set(await this.api.getContract(employeeId, contractId)); }
+    try { this.selectedState.set(await this.contractsApi.getContract(employeeId, contractId)); }
     catch (error) { this.error.set(error instanceof Error ? error.message : 'No se pudo consultar el contrato'); }
     finally { this.loading.set(false); }
   }
 
   async loadEmployees(): Promise<void> {
-    try { this.employeesState.set(await this.api.listEmployees()); }
+    try { this.employeesState.set(await this.employeesApi.listEmployees()); }
     catch (error) { this.error.set(error instanceof Error ? error.message : 'No se pudieron consultar los empleados'); }
   }
 
@@ -67,8 +70,8 @@ export class HcmStore {
     void this.loadContracts();
   }
 
-  async saveContract(input: CreateContract): Promise<Contract> { return this.api.createContract(input); }
+  async saveContract(input: CreateContract): Promise<Contract> { return this.contractsApi.createContract(input); }
   async updateContract(employeeId: number, contractId: number, input: UpdateContract): Promise<Contract> {
-    return this.api.updateContract(employeeId, contractId, input);
+    return this.contractsApi.updateContract(employeeId, contractId, input);
   }
 }

@@ -1,6 +1,10 @@
 import { ContractFilters, CreateContract, UpdateContract } from '../domain/contract.entity';
 import { BUSINESS_ID_KEY } from '../../shared/infrastructure/api.config';
-import { HcmApi, HcmApiError } from './hcm.api';
+import { TestBed } from '@angular/core/testing';
+import { ContractsApi } from './contracts.api';
+import { EmployeesApi } from './employees.api';
+import { HcmApiError, HcmHttpClient } from './hcm-http.client';
+import { WorkSchedulesApi } from './work-schedules.api';
 
 const filters: ContractFilters = {
   search: 'field', status: 'ACTIVE', modality: 'HOURLY', page: 1, size: 10,
@@ -17,11 +21,17 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 }
 
-describe('HcmApi', () => {
-  let api: HcmApi;
+describe('ContractsApi, EmployeesApi and HcmHttpClient', () => {
+  let contracts: ContractsApi;
+  let employees: EmployeesApi;
+  let schedules: WorkSchedulesApi;
+  let http: HcmHttpClient;
 
   beforeEach(() => {
-    api = new HcmApi();
+    contracts = TestBed.inject(ContractsApi);
+    employees = TestBed.inject(EmployeesApi);
+    schedules = TestBed.inject(WorkSchedulesApi);
+    http = TestBed.inject(HcmHttpClient);
     localStorage.clear();
     sessionStorage.clear();
     sessionStorage.setItem(BUSINESS_ID_KEY, '1');
@@ -32,7 +42,7 @@ describe('HcmApi', () => {
     const fetchMock = vi.fn().mockResolvedValue(json({ content: [] }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await api.listEmployees();
+    await employees.listEmployees();
     expect(String(fetchMock.mock.calls[0]![0])).not.toContain('businessId');
   });
 
@@ -46,7 +56,7 @@ describe('HcmApi', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const page = await api.listContracts(filters);
+    const page = await contracts.listContracts(filters);
 
     expect(page.content[0]?.employeeName).toBe('Ana Pérez');
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain('search=field');
@@ -62,12 +72,12 @@ describe('HcmApi', () => {
       return Promise.resolve(json(contract));
     }));
 
-    expect((await api.listEmployees())[0]?.id).toBe(3);
-    expect((await api.getContract(3, 7)).employeeName).toBe('Ana Pérez');
+    expect((await employees.listEmployees())[0]?.id).toBe(3);
+    expect((await contracts.getContract(3, 7)).employeeName).toBe('Ana Pérez');
     const createInput: CreateContract = { ...contract, initialStatus: 'ACTIVE' };
-    expect((await api.createContract(createInput)).employeeName).toBe('Empleado #3');
+    expect((await contracts.createContract(createInput)).employeeName).toBe('Empleado #3');
     const updateInput: UpdateContract = { position: contract.position, modality: contract.modality, weeklyHours: 40, startDate: contract.startDate, endDate: contract.endDate, notes: '' };
-    expect((await api.updateContract(3, 7, updateInput)).id).toBe(7);
+    expect((await contracts.updateContract(3, 7, updateInput)).id).toBe(7);
   });
 
   it('uses the access token and reports HTTP and network errors', async () => {
@@ -84,7 +94,7 @@ describe('HcmApi', () => {
       return Promise.resolve(responses.shift()!);
     });
     vi.stubGlobal('fetch', fetchMock);
-    const request = (api as unknown as { request<T>(url: string): Promise<T> }).request.bind(api);
+    const request = (url: string) => http.request(url);
 
     await expect(request('/one')).rejects.toMatchObject({ status: 401, message: 'Debes iniciar sesión para consultar capital humano.' });
     await expect(request('/two')).rejects.toMatchObject({ status: 403 });
