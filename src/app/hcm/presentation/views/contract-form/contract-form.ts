@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HcmStore } from '../../../application/hcm.store';
-import { CreateContract } from '../../../domain/contract.entity';
+import { ContractStatus, CreateContract } from '../../../domain/contract.entity';
 import { HcmApiError } from '../../../infrastructure/hcm-http.client';
 import { currentBusinessId } from '../../../../shared/infrastructure/api.config';
 
@@ -11,6 +11,8 @@ export class ContractForm implements OnInit {
   protected readonly store = inject(HcmStore); private readonly router = inject(Router); private readonly route = inject(ActivatedRoute);
   protected readonly saving = signal(false); protected readonly message = signal(''); protected readonly editing = signal(false);
   protected readonly conflict = signal(false);
+  /** Status the contract had when the form was opened; a pending one can be activated from here. */
+  protected readonly storedStatus = signal<ContractStatus | null>(null);
   protected readonly form = new FormGroup({
     code: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^CTR-ALV-\d{4}-\d{4,8}$/)] }),
     employeeId: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(1)] }),
@@ -39,6 +41,8 @@ export class ContractForm implements OnInit {
     this.editing.set(true);
     await this.store.selectContract(employeeId, contractId);
     const contract = this.store.selected();
+    this.storedStatus.set(contract?.status ?? null);
+    if (contract?.status !== 'PENDING') this.form.controls.initialStatus.disable();
     if (contract) this.form.patchValue({ code: contract.code, employeeId: contract.employeeId, position: contract.position, modality: contract.modality, weeklyHours: contract.weeklyHours, startDate: contract.startDate, endDate: contract.endDate ?? '', initialStatus: contract.status === 'ACTIVE' ? 'ACTIVE' : 'PENDING', notes: contract.notes });
   }
   protected async submit(): Promise<void> {
@@ -51,6 +55,7 @@ export class ContractForm implements OnInit {
       if (this.editing() && employeeId && contractId) {
         const { position, modality, weeklyHours, startDate, endDate, notes } = input;
         await this.store.updateContract(employeeId, contractId, { position, modality, weeklyHours, startDate, endDate, notes });
+        if (this.storedStatus() === 'PENDING' && value.initialStatus === 'ACTIVE') await this.store.activateContract(employeeId, contractId);
       } else await this.store.saveContract(input);
       await this.router.navigate(['/hcm/contracts']);
     } catch (error) {

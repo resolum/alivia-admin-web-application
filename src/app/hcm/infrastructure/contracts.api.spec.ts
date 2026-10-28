@@ -78,6 +78,7 @@ describe('ContractsApi, EmployeesApi and HcmHttpClient', () => {
     expect((await contracts.createContract(createInput)).employeeName).toBe('Empleado #3');
     const updateInput: UpdateContract = { position: contract.position, modality: contract.modality, weeklyHours: 40, startDate: contract.startDate, endDate: contract.endDate, notes: '' };
     expect((await contracts.updateContract(3, 7, updateInput)).id).toBe(7);
+    expect((await contracts.activateContract(3, 7)).id).toBe(7);
   });
 
   it('uses the access token and reports HTTP and network errors', async () => {

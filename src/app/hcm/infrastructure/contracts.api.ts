@@ -45,6 +45,14 @@ export class ContractsApi {
     });
     return withEmployeeName(contract, []);
   }
+
+  /** Puts a pending contract into force. */
+  async activateContract(employeeId: number, contractId: number): Promise<Contract> {
+    const contract = await this.http.request<ContractResponse>(this.http.url(`${contractPath(employeeId, contractId)}/activation`, this.http.params()), {
+      method: 'POST',
+    });
+    return withEmployeeName(contract, []);
+  }
 }
 
 /** `/employees/{employeeId}/contracts[/{contractId}]` */

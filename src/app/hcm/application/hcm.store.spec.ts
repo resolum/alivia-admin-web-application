@@ -14,7 +14,7 @@ const contract = {
 describe('HcmStore', () => {
   const api = {
     listContracts: vi.fn(), getContract: vi.fn(), listEmployees: vi.fn(),
-    createContract: vi.fn(), updateContract: vi.fn(),
+    createContract: vi.fn(), updateContract: vi.fn(), activateContract: vi.fn(),
   };
   let store: HcmStore;
 
@@ -63,5 +63,11 @@ describe('HcmStore', () => {
     api.updateContract.mockResolvedValue(contract);
     expect(await store.saveContract({ ...contract, initialStatus: 'ACTIVE' })).toEqual(contract);
     expect(await store.updateContract(2, 1, contract)).toEqual(contract);
+
+    api.getContract.mockResolvedValue({ ...contract, status: 'PENDING' });
+    await store.selectContract(contract.employeeId, contract.id);
+    api.activateContract.mockResolvedValue({ ...contract, status: 'ACTIVE', employeeName: 'Empleado #2' });
+    await store.activateContract(contract.employeeId, contract.id);
+    expect(store.selected()).toMatchObject({ status: 'ACTIVE', employeeName: contract.employeeName });
   });
 });

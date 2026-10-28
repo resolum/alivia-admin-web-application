@@ -74,4 +74,11 @@ export class HcmStore {
   async updateContract(employeeId: number, contractId: number, input: UpdateContract): Promise<Contract> {
     return this.contractsApi.updateContract(employeeId, contractId, input);
   }
+  /** Activates the contract and refreshes it when it is the one on screen. */
+  async activateContract(employeeId: number, contractId: number): Promise<Contract> {
+    const contract = await this.contractsApi.activateContract(employeeId, contractId);
+    const selected = this.selectedState();
+    if (selected?.id === contractId) this.selectedState.set({ ...contract, employeeName: selected.employeeName });
+    return contract;
+  }
 }
