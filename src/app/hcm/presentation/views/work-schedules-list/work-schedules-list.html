@@ -1,6 +1,5 @@
 <section class="page">
-  <div class="breadcrumb">Capital humano <b>›</b> Horarios laborales</div>
-  <div class="page-heading"><div><h1>Horarios laborales</h1><p>Gestiona las jornadas de los empleados</p></div><div class="actions"><a class="button primary" routerLink="new">＋ Registrar horario</a></div></div>
+    <div class="page-heading"><div><h1>Horarios laborales</h1><p>Gestiona las jornadas de los empleados</p></div><div class="actions"><a class="button primary" routerLink="new">＋ Registrar horario</a></div></div>
   <div class="stats schedule-stats">
     <article><span>Total</span><strong>{{ store.summary().totalSchedules }}</strong><em class="plain">horarios configurados</em><i>▦</i></article>
     <article><span>Personal</span><strong>{{ store.summary().employeesWithSchedule }}</strong><em class="plain">empleados con turno</em><i class="green">♙</i></article>
@@ -18,7 +17,7 @@
   } @else if (!store.error()) {
     <div class="filters">
       <label for="schedule-search">⌕<input id="schedule-search" placeholder="Buscar por horario o código..." [value]="store.filters().search" (input)="search($event)" /></label>
-      <label class="select-label" for="schedule-role"><span>Rol</span><select id="schedule-role" [value]="store.filters().role" (change)="role($event)"><option value="ALL">Todos los roles</option><option value="TECH">Técnico</option><option value="SUBSCRIPTION_MANAGER">Gestor de suscripciones</option><option value="CLEANING">Limpieza</option></select></label>
+      <label class="select-label" for="schedule-role"><span>Rol</span><select id="schedule-role" [value]="store.filters().role" (change)="role($event)"><option value="ALL">Todos los roles</option><option value="TECH">Soporte técnico</option><option value="SUBSCRIPTION_MANAGER">Gestor de suscripciones</option><option value="CLEANING">Limpieza</option></select></label>
       <label class="select-label" for="schedule-status"><span>Vigencia</span><select id="schedule-status" [value]="store.filters().status" (change)="status($event)"><option value="ALL">Cualquier vigencia</option><option value="ACTIVE">Vigentes</option><option value="SCHEDULED">Programados</option><option value="DRAFT">Borradores</option><option value="FINISHED">Periodo concluido</option><option value="INACTIVE">Dados de baja</option></select></label>
     </div>
     @if (store.hasActiveFilters()) {

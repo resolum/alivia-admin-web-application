@@ -1,5 +1,5 @@
 .form-page .page-heading p { max-width: 640px; }
-.schedule-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.schedule-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
 .schedule-sections { display: flex; flex-direction: column; gap: 18px; }
 .step-title { display: flex; gap: 12px; }
 .schedule-summary { position: sticky; top: 20px; }
@@ -11,8 +11,9 @@
 .step-title > span { display: grid; flex: 0 0 auto; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #0c307a; color: #fff; font-size: 12px; font-weight: 800; }
 .button.small { min-height: 34px; padding: 0 12px; font-size: 11px; }
 .form-grid small.hint { align-self: flex-start; color: #727e91; font-size: 10px; font-weight: 500; }
-.label-row { display: flex; justify-content: space-between; }
+.label-row { display: flex; justify-content: space-between; align-items: center; height: 15px; }
 .check { display: inline-flex; align-items: center; gap: 5px; color: #4f5b70; font-size: 11px; font-weight: 700; }
+.form-grid .check input { width: 14px; height: 14px; margin: 0; padding: 0; }
 .day-plan { padding: 14px 0; border-bottom: 1px solid #edf0f7; }
 .day-plan header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .day-plan header strong { color: #0a2c69; font-size: 14px; }
@@ -40,3 +41,4 @@
 .danger-link { border: 0; background: none; color: #c52828; font-size: 12px; font-weight: 800; }
 @media (max-width: 950px) { .schedule-layout { grid-template-columns: 1fr; } .schedule-summary { position: static; } }
 @media (max-width: 600px) { .block-row { flex-wrap: wrap; } .schedule-footer .submit { width: 100%; margin-left: 0; } }
+.form-grid input.ng-invalid.ng-touched, .form-grid select.ng-invalid.ng-touched { border-color: #d64545; background: #fff5f5; }

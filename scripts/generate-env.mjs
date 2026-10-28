@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 const source = existsSync('.env') ? '.env' : '.env.example';
 process.loadEnvFile(source);
 
-const keys = ['API_BASE_URL', 'API_AUTH_SIGN_IN_PATH', 'API_EMPLOYEES_PATH', 'API_CONTRACTS_PATH', 'API_WORK_SCHEDULES_PATH'];
+const keys = ['API_BASE_URL', 'API_AUTH_SIGN_IN_PATH', 'API_AUTH_ACTIVATION_PATH', 'API_AUTH_ACTIVATE_PATH', 'API_EMPLOYEES_PATH', 'API_CONTRACTS_PATH', 'API_WORK_SCHEDULES_PATH'];
 const missing = keys.filter(key => !process.env[key]);
 if (missing.length) throw new Error(`Missing in ${source}: ${missing.join(', ')}`);
 

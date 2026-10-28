@@ -1,6 +1,5 @@
 <section class="page form-page">
-  <div class="breadcrumb">Capital humano <b>›</b> Contratos <b>›</b> {{ editing() ? 'Editar contrato' : 'Registrar contrato' }}</div>
-  <a class="back" routerLink="/hcm/contracts">← Volver a contratos</a>
+    <a class="back" routerLink="/hcm/contracts">← Volver a contratos</a>
   <div class="page-heading"><div><h1>{{ editing() ? 'Editar contrato' : 'Registrar contrato' }}</h1><p>{{ editing() ? 'Actualiza las condiciones del expediente laboral.' : 'Define las condiciones contractuales del nuevo expediente.' }}</p></div><span class="draft-badge">{{ editing() ? 'EDICIÓN CONTROLADA' : 'NUEVO CONTRATO' }}</span></div>
   <form [formGroup]="form" (ngSubmit)="submit()" class="contract-form card">
     <div class="card-title"><div><h2>Condiciones del contrato</h2><p>Define los términos, vigencia y jornada laboral pactada.</p></div></div>
@@ -12,7 +11,7 @@
       <label>Horas contratadas por semana *<div class="unit"><input type="number" formControlName="weeklyHours"/><span>h / semana</span></div></label>
       <label>Fecha de inicio de labores *<input type="date" formControlName="startDate" /></label>
       <label>Fecha de término *<input type="date" formControlName="endDate" /></label>
-      <fieldset><legend>Estado inicial del contrato</legend><label><input type="radio" formControlName="initialStatus" value="PENDING"/> Pendiente de activación <small>Recomendado</small></label><label><input type="radio" formControlName="initialStatus" value="ACTIVE"/> Vigente inmediatamente</label></fieldset>
+      <fieldset><legend>{{ editing() ? 'Estado del contrato' : 'Estado inicial del contrato' }}</legend><label><input type="radio" formControlName="initialStatus" value="PENDING"/> Pendiente de activación <small>Recomendado</small></label><label><input type="radio" formControlName="initialStatus" value="ACTIVE"/> Vigente inmediatamente</label></fieldset>
       <label class="full">Observaciones o cláusulas particulares <small>{{ form.controls.notes.value.length }} / 300</small><textarea formControlName="notes" placeholder="Anotaciones adicionales o cláusulas especiales (opcional)..."></textarea></label>
     </div>
     @if (message()) {

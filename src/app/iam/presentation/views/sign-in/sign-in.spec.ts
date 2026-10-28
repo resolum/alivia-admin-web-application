@@ -6,7 +6,7 @@ import { SignIn } from './sign-in';
 type SignInInternals = { form: { setValue(value: object): void }; submit(): Promise<void>; error(): string; loading(): boolean };
 
 describe('SignIn', () => {
-  const iam = { signIn: vi.fn() };
+  const iam = { signIn: vi.fn(), homeUrl: vi.fn(() => '/hcm/contracts') };
   const router = { navigateByUrl: vi.fn() };
   let returnUrl: string | null;
   let component: SignInInternals;

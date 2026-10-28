@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HcmApi, HcmApiError } from '../infrastructure/hcm.api';
+import { ContractsApi } from '../infrastructure/contracts.api';
+import { EmployeesApi } from '../infrastructure/employees.api';
+import { HcmApiError } from '../infrastructure/hcm-http.client';
 import { HcmStore } from './hcm.store';
 
 const contract = {
@@ -12,13 +14,13 @@ const contract = {
 describe('HcmStore', () => {
   const api = {
     listContracts: vi.fn(), getContract: vi.fn(), listEmployees: vi.fn(),
-    createContract: vi.fn(), updateContract: vi.fn(),
+    createContract: vi.fn(), updateContract: vi.fn(), activateContract: vi.fn(),
   };
   let store: HcmStore;
 
   beforeEach(() => {
     Object.values(api).forEach(mock => mock.mockReset());
-    TestBed.configureTestingModule({ providers: [HcmStore, { provide: HcmApi, useValue: api }] });
+    TestBed.configureTestingModule({ providers: [HcmStore, { provide: ContractsApi, useValue: api }, { provide: EmployeesApi, useValue: api }] });
     store = TestBed.inject(HcmStore);
   });
 
@@ -61,5 +63,11 @@ describe('HcmStore', () => {
     api.updateContract.mockResolvedValue(contract);
     expect(await store.saveContract({ ...contract, initialStatus: 'ACTIVE' })).toEqual(contract);
     expect(await store.updateContract(2, 1, contract)).toEqual(contract);
+
+    api.getContract.mockResolvedValue({ ...contract, status: 'PENDING' });
+    await store.selectContract(contract.employeeId, contract.id);
+    api.activateContract.mockResolvedValue({ ...contract, status: 'ACTIVE', employeeName: 'Empleado #2' });
+    await store.activateContract(contract.employeeId, contract.id);
+    expect(store.selected()).toMatchObject({ status: 'ACTIVE', employeeName: contract.employeeName });
   });
 });

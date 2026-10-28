@@ -1,6 +1,5 @@
 <section class="page form-page">
-  <div class="breadcrumb">Capital humano <b>›</b> Horarios laborales <b>›</b> {{ editing() ? 'Editar horario' : 'Registrar horario' }}</div>
-  <a class="back" routerLink="/hcm/work-schedules">← Volver a horarios laborales</a>
+    <a class="back" routerLink="/hcm/work-schedules">← Volver a horarios laborales</a>
   <div class="page-heading">
     <div><h1>{{ editing() ? 'Editar horario laboral' : 'Registrar horario laboral' }}</h1><p>{{ editing() ? 'Modifica los parámetros de vigencia y la distribución de jornada semanal para este horario.' : 'Configura la jornada semanal del colaborador según las condiciones de su contrato laboral vigente.' }}</p></div>
     @if (editing(); as schedule) { <span class="draft-badge">Código: {{ schedule.code }}</span> } @else { <span class="draft-badge">NUEVO HORARIO</span> }
@@ -26,7 +25,7 @@
         <div class="form-grid">
           <label class="full">Nombre del horario *<input formControlName="name" maxlength="100" placeholder="Jornada Ordinaria Diurna (40h)" /><small class="hint">Identificador interno visible para asignación a cuadrillas y colaboradores</small></label>
           <label>Fecha de inicio de vigencia *<input type="date" formControlName="startDate" [min]="bindingContract()?.startDate ?? ''" [max]="bindingContract()?.endDate ?? ''" /><small class="hint">Inicio del ciclo operativo</small></label>
-          <label><span class="label-row">Fecha de término (opcional)<span class="check"><input type="checkbox" style="width:auto" [checked]="form.controls.indefinite.value" (change)="setIndefinite($event)" /> Indefinido</span></span><input type="date" formControlName="endDate" [readOnly]="form.controls.indefinite.value" [min]="form.controls.startDate.value" [max]="bindingContract()?.endDate ?? ''" /><small class="hint">{{ form.controls.indefinite.value ? 'Rige hasta el fin del contrato asociado' : 'No puede pasar del fin del contrato' }}</small></label>
+          <label><span class="label-row">Fecha de término (opcional)<span class="check"><input type="checkbox" [checked]="form.controls.indefinite.value" (change)="setIndefinite($event)" /> Indefinido</span></span><input type="date" formControlName="endDate" [readOnly]="form.controls.indefinite.value" [min]="form.controls.startDate.value" [max]="bindingContract()?.endDate ?? ''" /><small class="hint">{{ form.controls.indefinite.value ? 'Rige hasta el fin del contrato asociado' : 'Por defecto vence con el contrato; puedes acortarla' }}</small></label>
           <label class="full">Estado de aplicación<input readonly [value]="applicationStatus() === 'SCHEDULED' ? 'Programado (activación automática)' : applicationStatus() === 'DRAFT' ? 'Borrador (sin efecto hasta publicarlo)' : 'Activo (en ejecución)'" /><small class="hint">Se calcula con la fecha de inicio; visibilidad para asignaciones de campo</small></label>
         </div>
       </article>

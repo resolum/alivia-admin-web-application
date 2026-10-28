@@ -8,7 +8,7 @@ import {
   dayBlocksError, DayOfWeek, dayLabel, dayShortLabel, formatDate, formatHours, SaveWorkSchedule, toInputTime, totalHours,
   WEEK_DAYS, WorkSchedule, WorkScheduleStatus,
 } from '../../../domain/work-schedule.entity';
-import { HcmApiError } from '../../../infrastructure/hcm.api';
+import { HcmApiError } from '../../../infrastructure/hcm-http.client';
 import { WorkScheduleSummary } from '../../components/work-schedule-summary/work-schedule-summary';
 
 interface TimeBlock { startTime: string; endTime: string; }
@@ -46,7 +46,7 @@ export class WorkScheduleForm implements OnInit {
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
     startDate: new FormControl(today(), { nonNullable: true, validators: Validators.required }),
     endDate: new FormControl('', { nonNullable: true }),
-    indefinite: new FormControl(true, { nonNullable: true }),
+    indefinite: new FormControl(false, { nonNullable: true }),
   });
   private readonly value = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
@@ -91,9 +91,13 @@ export class WorkScheduleForm implements OnInit {
 
   protected changeContract(): void { this.selectContract(this.bindingContract()); }
 
-  /** Starts the schedule with the contract (or today, if the contract already started). */
+  /** Starts the schedule with the contract (or today, if the contract already started) and ends it with the contract. */
   private selectContract(contract: ScheduleContract | null): void {
-    this.form.patchValue({ contractId: contract?.id ?? 0, startDate: contract && contract.startDate > today() ? contract.startDate : today() });
+    this.form.patchValue({
+      contractId: contract?.id ?? 0,
+      startDate: contract && contract.startDate > today() ? contract.startDate : today(),
+      endDate: contract?.endDate ?? '', indefinite: false,
+    });
   }
 
   protected toggleDay(day: DayOfWeek): void {
@@ -124,14 +128,24 @@ export class WorkScheduleForm implements OnInit {
       ? { ...plan, enabled: monday.enabled, blocks: monday.blocks.map(block => ({ ...block })) } : plan));
   }
 
+  /** Names the required fields that are still empty, in the order they appear on screen. */
+  private missingFields(): string[] {
+    const { contractId, name, startDate } = this.form.controls;
+    return [
+      contractId.enabled && contractId.invalid ? 'el contrato' : null,
+      name.invalid ? 'el nombre del horario' : null,
+      startDate.invalid ? 'la fecha de inicio' : null,
+    ].filter((field): field is string => field !== null);
+  }
+
   protected setIndefinite(event: Event): void {
     const indefinite = (event.target as HTMLInputElement).checked;
-    this.form.patchValue({ indefinite, endDate: indefinite ? '' : this.form.controls.endDate.value });
+    this.form.patchValue({ indefinite, endDate: indefinite ? '' : this.form.controls.endDate.value || (this.bindingContract()?.endDate ?? '') });
   }
 
   protected async save(draft: boolean): Promise<void> {
     this.message.set(''); this.conflict.set(false);
-    if (this.form.invalid) { this.form.markAllAsTouched(); this.message.set('Completa los campos obligatorios.'); return; }
+    if (this.form.invalid) { this.form.markAllAsTouched(); this.message.set(`Completa: ${this.missingFields().join(', ')}.`); return; }
     if (this.hasBlockErrors()) { this.message.set('Corrige los bloques horarios marcados antes de guardar.'); return; }
     const value = this.form.getRawValue();
     const endDate = value.indefinite || !value.endDate ? null : value.endDate;

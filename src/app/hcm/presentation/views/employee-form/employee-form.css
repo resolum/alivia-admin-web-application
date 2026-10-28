@@ -1,0 +1,39 @@
+.form-page .page-heading p { max-width: none; }
+.stepper { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 18px; padding: 18px; list-style: none; }
+.stepper button { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; border: 0; background: none; color: #8a93a5; }
+.stepper button:disabled { cursor: default; }
+.stepper span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #eef1ff; font-weight: 800; }
+.stepper b { font-size: 12px; }
+.stepper small { font-size: 10px; }
+.stepper .current span { background: #0c307a; color: #fff; }
+.stepper .current b, .stepper .done b { color: #0a2c69; }
+.stepper .done span { background: #168978; color: #fff; }
+.form-grid small.error { align-self: flex-start; color: #c52828; font-size: 11px; font-weight: 600; }
+.prefix span { padding: 0 0 0 13px; font-weight: 700; }
+.role-options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding-top: 20px; }
+.role-options label { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; padding: 18px; border: 2px solid #e4e8f2; border-radius: 12px; cursor: pointer; }
+.role-options label.on { border-color: #0c307a; background: #f5f7ff; }
+.role-options b { color: #0a2c69; }
+.role-options em { padding: 3px 8px; border-radius: 10px; background: #e3e9f7; color: #264a94; font-size: 10px; font-style: normal; font-weight: 800; }
+.role-options small { grid-column: 2 / -1; color: #5d687a; }
+.notice { margin: 18px 0 0; }
+.review { margin-top: 12px; border: 1px solid #edf0f7; border-radius: 12px; background: #fff; }
+.review header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #edf0f7; color: #33415a; font-size: 13px; }
+.review header b { font-weight: 700; }
+.review header button { border: 0; background: none; padding: 4px 6px; color: #2c5aa0; font-size: 11px; font-weight: 600; }
+.review dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 16px; margin: 0; padding: 14px 16px; }
+.review dt { color: #7a8496; font-size: 11px; }
+.review dd { margin: 3px 0 0; color: #26344d; font-size: 13px; font-weight: 500; }
+.confirm { display: flex; gap: 10px; margin-top: 16px; padding: 14px; border-radius: 10px; background: #f5f7ff; color: #344056; font-size: 12px; }
+.form-error { margin: 14px 0 0; }
+.wizard-footer { display: flex; align-items: center; gap: 14px; margin-top: 24px; padding-top: 18px; border-top: 1px solid #edf0f7; }
+.wizard-footer a { margin-right: auto; color: #c52828; font-size: 12px; font-weight: 700; text-decoration: none; }
+.done { text-align: center; }
+.done-icon { display: grid; place-items: center; width: 60px; height: 60px; margin: 0 auto 14px; border-radius: 50%; background: #d9faf2; color: #168978; font-size: 26px; }
+.done h2 { margin: 0; color: #0a2c69; }
+.done p { max-width: 560px; margin: 10px auto 20px; color: #5d687a; line-height: 1.5; }
+.done .actions { justify-content: center; }
+@media (max-width: 760px) { .stepper { grid-template-columns: repeat(2, 1fr); } .role-options { grid-template-columns: 1fr; } }
+
+/* Same look as the form labels; the date picker is a group of selects, not a single control. */
+.form-grid > .field { display: flex; flex-direction: column; gap: 7px; color: #193763; font-size: 12px; font-weight: 800; }

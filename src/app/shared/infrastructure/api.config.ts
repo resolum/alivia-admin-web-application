@@ -4,6 +4,8 @@ import { environment } from '../../../environments/environment.generated';
 export const API_BASE_URL = environment.API_BASE_URL;
 export const API_PATHS = {
   signIn: environment.API_AUTH_SIGN_IN_PATH,
+  activation: environment.API_AUTH_ACTIVATION_PATH,
+  activate: environment.API_AUTH_ACTIVATE_PATH,
   employees: environment.API_EMPLOYEES_PATH,
   contracts: environment.API_CONTRACTS_PATH,
   workSchedules: environment.API_WORK_SCHEDULES_PATH,

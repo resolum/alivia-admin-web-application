@@ -1,0 +1,13 @@
+.preview { margin-top: 18px; overflow: hidden; border: 1px solid #e4e8f2; border-radius: 12px; }
+header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f7ff; }
+h3 { margin: 0; color: #0a2c69; font-size: 14px; }
+header span { color: #5d687a; font-size: 11px; font-weight: 700; }
+.envelope { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; padding: 10px 16px; border-bottom: 1px solid #e4e8f2; font-size: 12px; }
+.envelope dt { color: #5d687a; }
+.envelope dd { margin: 0; color: #26344d; font-weight: 600; }
+.mail { max-width: 520px; margin: 0 auto; padding: 22px 16px; color: #33415a; font-size: 13px; line-height: 1.6; }
+.logo { margin: 0 0 12px; color: #0c307a; font-weight: 800; }
+.logo span { color: #5d687a; font-weight: 400; }
+h4 { margin: 0 0 8px; color: #0a2c69; font-size: 16px; }
+.cta { display: inline-block; margin: 6px 0 12px; padding: 10px 18px; border-radius: 8px; background: #0c307a; color: #fff; font-weight: 700; }
+.expiry { margin: 0; padding: 8px 10px; border-radius: 8px; background: #eef1ff; font-size: 12px; }

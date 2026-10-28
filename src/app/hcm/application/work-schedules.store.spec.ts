@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HcmApi, HcmApiError } from '../infrastructure/hcm.api';
+import { WorkSchedulesApi } from '../infrastructure/work-schedules.api';
+import { ContractsApi } from '../infrastructure/contracts.api';
+import { HcmApiError } from '../infrastructure/hcm-http.client';
 import { WorkSchedulesStore } from './work-schedules.store';
 
 describe('WorkSchedulesStore', () => {
@@ -10,7 +12,7 @@ describe('WorkSchedulesStore', () => {
 
   beforeEach(() => {
     Object.values(api).forEach(mock => mock.mockReset());
-    TestBed.configureTestingModule({ providers: [{ provide: HcmApi, useValue: api }] });
+    TestBed.configureTestingModule({ providers: [{ provide: WorkSchedulesApi, useValue: api }, { provide: ContractsApi, useValue: api }] });
     store = TestBed.inject(WorkSchedulesStore);
   });
 

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HcmStore } from '../../../application/hcm.store';
-import { HcmApiError } from '../../../infrastructure/hcm.api';
+import { HcmApiError } from '../../../infrastructure/hcm-http.client';
 import { ContractForm } from './contract-form';
 
 const contract = {
@@ -14,7 +14,7 @@ const contract = {
 describe('ContractForm', () => {
   const store = {
     loadEmployees: vi.fn(), employees: vi.fn(), selectContract: vi.fn(), selected: vi.fn(),
-    saveContract: vi.fn(), updateContract: vi.fn(),
+    saveContract: vi.fn(), updateContract: vi.fn(), activateContract: vi.fn(),
   };
   const router = { navigate: vi.fn() };
 
@@ -56,6 +56,18 @@ describe('ContractForm', () => {
 
     expect(store.selectContract).toHaveBeenCalledWith(3, 7);
     expect(store.updateContract).toHaveBeenCalledWith(3, 7, expect.objectContaining({ position: contract.position }));
+    expect(store.activateContract).not.toHaveBeenCalled();
+  });
+
+  it('activates a pending contract when it is marked as in force', async () => {
+    store.selected.mockReturnValue({ ...contract, status: 'PENDING' });
+    const component = create('3', '7');
+    const internals = component as unknown as { initialize(): Promise<void>; submit(): Promise<void>; form: { patchValue(value: object): void } };
+    await internals.initialize();
+    internals.form.patchValue({ initialStatus: 'ACTIVE' });
+    await internals.submit();
+
+    expect(store.activateContract).toHaveBeenCalledWith(3, 7);
   });
 
   it('marks invalid forms and presents backend conflicts', async () => {

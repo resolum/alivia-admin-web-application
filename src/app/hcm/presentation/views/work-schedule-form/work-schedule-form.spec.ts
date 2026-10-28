@@ -5,7 +5,12 @@ import { WorkSchedulesStore } from '../../../application/work-schedules.store';
 import { WorkScheduleForm } from './work-schedule-form';
 
 type FormInternals = {
-  form: { patchValue(value: object): void; controls: { contractId: { value: number; disabled: boolean } } };
+  form: {
+    patchValue(value: object): void;
+    getRawValue(): { endDate: string; indefinite: boolean };
+    controls: { contractId: { value: number; disabled: boolean }; endDate: { value: string } };
+  };
+  setIndefinite(event: Event): void;
   days: () => { day: string; enabled: boolean; blocks: { startTime: string; endTime: string }[] }[];
   configuredHours: () => number;
   save(draft: boolean): Promise<void>;
@@ -63,6 +68,14 @@ describe('WorkScheduleForm', () => {
     expect(fromContract.form.controls.contractId.disabled).toBe(true);
   });
 
+  it('ends the schedule with the contract by default', () => {
+    expect(component.form.getRawValue()).toMatchObject({ endDate: '2999-12-31', indefinite: false });
+    component.setIndefinite({ target: { checked: true } } as unknown as Event);
+    expect(component.form.controls.endDate.value).toBe('');
+    component.setIndefinite({ target: { checked: false } } as unknown as Event);
+    expect(component.form.controls.endDate.value).toBe('2999-12-31');
+  });
+
   it('edits the weekly plan', () => {
     component.toggleDay('SATURDAY');
     expect(component.configuredHours()).toBe(44);
@@ -75,7 +88,7 @@ describe('WorkScheduleForm', () => {
 
   it('requires a name and sends the shifts of enabled days', async () => {
     await component.save(false);
-    expect(component.message()).toContain('obligatorios');
+    expect(component.message()).toBe('Completa: el nombre del horario.');
     expect(store.createSchedule).not.toHaveBeenCalled();
 
     component.form.patchValue({ name: 'Jornada Ordinaria Diurna' });
@@ -83,7 +96,7 @@ describe('WorkScheduleForm', () => {
     const [employeeId, contractId, input] = store.createSchedule.mock.calls[0]!;
     expect(employeeId).toBe(3);
     expect(contractId).toBe(5);
-    expect(input).toMatchObject({ name: 'Jornada Ordinaria Diurna', endDate: null, draft: false });
+    expect(input).toMatchObject({ name: 'Jornada Ordinaria Diurna', endDate: '2999-12-31', draft: false });
     expect(input.shifts).toHaveLength(10);
     expect(router.navigate).toHaveBeenCalledWith(['/hcm/work-schedules']);
   });

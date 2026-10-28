@@ -44,4 +44,34 @@ describe('IamApi', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 401 })));
     await expect(new IamApi().signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('Correo o contraseña incorrectos.');
   });
+
+  it('reads an invitation and activates the account', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ email: 'ana@alivia.pe', fullName: 'Ana Pérez', expiresAt: '2026-10-29T15:00:00' }), { status: 200, headers: { 'content-type': 'application/json' } }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const api = new IamApi();
+
+    expect((await api.getActivation('a b')).fullName).toBe('Ana Pérez');
+    await api.activate('a b', 'Clave#2026x');
+    expect(String(fetchMock.mock.calls[0]![0])).toBe('/api/v1/auth/activation?token=a+b');
+    expect(JSON.parse(fetchMock.mock.calls[1]![1].body)).toEqual({ token: 'a b', password: 'Clave#2026x' });
+  });
+
+  it('explains expired links, weak passwords and unknown links', async () => {
+    const problem = (body: object) => new Response(JSON.stringify(body), { status: 400, headers: { 'content-type': 'application/problem+json' } });
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(problem({ code: 'verification_token_expired' }))
+      .mockResolvedValueOnce(problem({ code: 'validation_failed', errors: [{ field: 'password', code: 'password_weak' }] }))
+      .mockResolvedValueOnce(new Response('', { status: 404 }))
+      .mockResolvedValueOnce(new Response('', { status: 500 }))
+      .mockRejectedValueOnce(new TypeError('offline')));
+    const api = new IamApi();
+
+    await expect(api.getActivation('x')).rejects.toThrow('venció');
+    await expect(api.activate('x', 'debil')).rejects.toThrow('requisitos de seguridad');
+    await expect(api.getActivation('x')).rejects.toThrow('no es válido');
+    await expect(api.getActivation('x')).rejects.toThrow('(500)');
+    await expect(api.getActivation('x')).rejects.toThrow('No se pudo conectar');
+  });
 });

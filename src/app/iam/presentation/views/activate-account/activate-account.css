@@ -1,0 +1,36 @@
+.activation { display: flex; min-height: 100vh; flex-direction: column; align-items: center; padding: 40px 16px 24px; background: #f6f7ff; }
+.portal { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 26px; }
+.logo { display: flex; align-items: center; gap: 6px; }
+.logo strong { color: #0a2c69; font-size: 26px; letter-spacing: -.5px; }
+.mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #0c307a; color: #5fe0cc; font-weight: 800; }
+.mark.small { width: 34px; height: 34px; background: #fff; color: #20aa91; }
+.portal small { padding: 4px 12px; border-radius: 12px; background: #eceffd; color: #33415a; font-size: 11px; font-weight: 700; letter-spacing: .4px; }
+.panel { display: flex; flex-direction: column; align-items: center; width: min(460px, 100%); padding: 32px 28px; border-radius: 18px; background: #fff; box-shadow: 0 10px 30px rgba(9, 22, 49, .06); text-align: center; }
+.badge { display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: 14px; border-radius: 50%; background: #eef1ff; }
+.badge svg, .field-error svg, .rules svg, .eye svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.badge svg { width: 30px; height: 30px; }
+.done-badge { background: #d9faf2; color: #168978; box-shadow: 0 0 0 8px #eef1ff; }
+.error-badge { background: #ffe5e5; color: #c52828; }
+h1 { margin: 0 0 8px; color: #0a2c69; font-size: 22px; }
+.lead { margin: 0; color: #4f5b70; font-size: 13px; line-height: 1.6; }
+.account { margin: 6px 0 0; color: #173b77; font-size: 13px; font-weight: 700; }
+form { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 20px; text-align: left; }
+label { display: flex; justify-content: space-between; margin-top: 8px; color: #0a2c69; font-size: 12px; font-weight: 800; }
+label small { color: #5d687a; font-size: 11px; }
+.field { display: flex; align-items: center; border: 1px solid transparent; border-radius: 10px; background: #f1f3fd; }
+.field:focus-within { border-color: #6b8ac4; }
+.field input { flex: 1; min-width: 0; padding: 13px 14px; border: 0; outline: 0; background: none; color: #263a58; }
+.eye { display: grid; place-items: center; width: 40px; height: 40px; border: 0; background: none; color: #5d687a; }
+.eye svg { width: 20px; height: 20px; }
+.rules { padding: 12px 14px; border-radius: 10px; background: #f1f3fd; }
+.rules b { color: #33415a; font-size: 11px; letter-spacing: .4px; }
+.rules ul { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; color: #4f5b70; font-size: 13px; }
+.rules li { display: flex; align-items: center; gap: 8px; }
+.rules li svg { width: 18px; height: 18px; color: #c3c9d8; }
+.rules li.ok { color: #168978; }
+.rules li.ok svg { color: #fff; fill: #168978; stroke: #fff; }
+.field-error { display: flex; align-items: center; gap: 6px; margin: 0; color: #c52828; font-size: 12px; }
+.field-error svg { flex: 0 0 auto; width: 16px; height: 16px; }
+.wide { width: 100%; margin-top: 14px; min-height: 46px; }
+.button:disabled { cursor: not-allowed; opacity: .55; }
+footer { margin-top: 24px; color: #6a7487; font-size: 11px; font-weight: 700; }

@@ -1,0 +1,19 @@
+<div class="shell" [class.menu-open]="mobileMenuOpen()">
+  <aside class="sidebar">
+    <div class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 7l3-3 3 3-3 3zM4 20l6-6M10 14l-3-3 5-5 3 3M15 9l-1 6 4 4"/></svg></span><div><strong>ALIVIA</strong><small>TÉCNICOS DE CAMPO</small></div></div>
+    <nav>
+      @for (link of links; track link.path) {
+        <a [routerLink]="link.path" routerLinkActive="active" (click)="mobileMenuOpen.set(false)"><svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="link.icon"/></svg>{{ link.label }}</a>
+      }
+    </nav>
+    <div class="account">
+      <a routerLink="profile" routerLinkActive="active"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6 6 0 0 1 11 0"/></svg>Mi perfil</a>
+      <button type="button" class="sign-out" (click)="signOut()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></svg>Cerrar sesión</button>
+    </div>
+  </aside>
+  <section class="workspace">
+    <header class="topbar"><button class="menu-button" aria-label="Abrir menú" (click)="mobileMenuOpen.set(!mobileMenuOpen())">☰</button></header>
+    <main><router-outlet /></main>
+  </section>
+  @if (mobileMenuOpen()) { <button class="backdrop" aria-label="Cerrar menú" (click)="mobileMenuOpen.set(false)"></button> }
+</div>

@@ -1,0 +1,11 @@
+<div class="date-select" role="group" [attr.aria-label]="label()">
+  <select [attr.aria-label]="label() + ': día'" [value]="day()" [disabled]="disabled()" (change)="set('day', $event)" (blur)="onTouched()">
+    <option value="">Día</option>@for (item of days(); track item) { <option [value]="item">{{ +item }}</option> }
+  </select>
+  <select [attr.aria-label]="label() + ': mes'" [value]="month()" [disabled]="disabled()" (change)="set('month', $event)" (blur)="onTouched()">
+    <option value="">Mes</option>@for (name of months; track name; let index = $index) { <option [value]="(index + 1).toString().padStart(2, '0')">{{ name }}</option> }
+  </select>
+  <select [attr.aria-label]="label() + ': año'" [value]="year()" [disabled]="disabled()" (change)="set('year', $event)" (blur)="onTouched()">
+    <option value="">Año</option>@for (item of years(); track item) { <option [value]="item">{{ item }}</option> }
+  </select>
+</div>
