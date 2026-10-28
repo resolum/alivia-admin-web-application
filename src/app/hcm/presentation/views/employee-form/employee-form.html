@@ -24,7 +24,7 @@
             <label class="full">Nombres completos *<input formControlName="firstName" />@if (invalid(personal.controls.firstName)) { <small class="error">Ingresa los nombres.</small> }</label>
             <label>Apellido paterno *<input formControlName="paternalSurname" />@if (invalid(personal.controls.paternalSurname)) { <small class="error">Ingresa el apellido paterno.</small> }</label>
             <label>Apellido materno *<input formControlName="maternalSurname" />@if (invalid(personal.controls.maternalSurname)) { <small class="error">Ingresa el apellido materno.</small> }</label>
-            <label>Fecha de nacimiento *<app-date-select formControlName="birthDate" label="Fecha de nacimiento" />@if (invalid(personal.controls.birthDate)) { <small class="error">{{ personal.controls.birthDate.hasError('notPast') ? 'La fecha debe ser anterior a hoy.' : 'Elige día, mes y año.' }}</small> }</label>
+            <div class="field"><span>Fecha de nacimiento *</span><app-date-select formControlName="birthDate" label="Fecha de nacimiento" />@if (invalid(personal.controls.birthDate)) { <small class="error">{{ personal.controls.birthDate.hasError('notPast') ? 'La fecha debe ser anterior a hoy.' : 'Elige día, mes y año.' }}</small> }</div>
             <label>Teléfono celular *<div class="unit prefix"><span>+51</span><input formControlName="mobile" type="tel" inputmode="numeric" maxlength="9" placeholder="9XX XXX XXX" (input)="digitsOnly(personal.controls.mobile, $event)" /></div>@if (invalid(personal.controls.mobile)) { <small class="error">{{ mobileError() }}</small> }</label>
           </form>
         }

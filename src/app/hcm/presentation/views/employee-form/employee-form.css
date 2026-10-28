@@ -34,3 +34,6 @@
 .done p { max-width: 560px; margin: 10px auto 20px; color: #5d687a; line-height: 1.5; }
 .done .actions { justify-content: center; }
 @media (max-width: 760px) { .stepper { grid-template-columns: repeat(2, 1fr); } .role-options { grid-template-columns: 1fr; } }
+
+/* Same look as the form labels; the date picker is a group of selects, not a single control. */
+.form-grid > .field { display: flex; flex-direction: column; gap: 7px; color: #193763; font-size: 12px; font-weight: 800; }

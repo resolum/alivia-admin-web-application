@@ -115,7 +115,8 @@ export function toEmployeeRow(employee: Employee, contracts: readonly Contract[]
   const schedule = schedules.find(item => item.employeeId === employee.id && (item.status === 'ACTIVE' || item.status === 'SCHEDULED')) ?? null;
   // From the earliest start to the latest end, so split shifts (08-12 and 13-17) read 08:00 – 17:00.
   const times = (schedule?.shifts ?? []).map(shift => [toInputTime(shift.startTime), toInputTime(shift.endTime)] as const);
-  const span = times.length ? `${times.map(([start]) => start).sort()[0]} – ${times.map(([, end]) => end).sort().at(-1)}` : null;
+  const byTime = (a: string, b: string) => a.localeCompare(b);
+  const span = times.length ? `${times.map(([start]) => start).sort(byTime)[0]} – ${times.map(([, end]) => end).sort(byTime).at(-1)}` : null;
   return {
     employee, code: employeeCode(employee), contractState: state, contract, schedule,
     scheduleDays: schedule ? daysLabel(schedule.workingDays) : null,
