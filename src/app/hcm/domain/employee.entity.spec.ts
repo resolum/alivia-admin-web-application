@@ -47,6 +47,8 @@ describe('employee domain', () => {
     expect(row).toMatchObject({ code: 'ALV-TEC-0007', contractState: 'ACTIVE', scheduleDays: 'Lu. – Mi.', scheduleHours: '08:00 – 17:00', availability: 'AVAILABLE' });
     expect(toEmployeeRow(employee, [], [], monday)).toMatchObject({ contractState: 'NONE', schedule: null, scheduleDays: null, availability: 'UNAVAILABLE' });
     expect(availabilityChecks(row).every(check => check.met)).toBe(true);
+    const split = { ...schedule, shifts: [{ day: 'MONDAY', startTime: '13:00:00', endTime: '17:00:00' }, { day: 'MONDAY', startTime: '08:00:00', endTime: '12:00:00' }] } as unknown as WorkSchedule;
+    expect(toEmployeeRow(employee, [], [split], monday).scheduleHours).toBe('08:00 – 17:00');
     expect(availabilityChecks(toEmployeeRow(employee, [], [], monday)).map(check => check.met)).toEqual([false, false, false]);
   });
 });
