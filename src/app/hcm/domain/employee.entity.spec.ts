@@ -1,5 +1,5 @@
 import { Contract } from './contract.entity';
-import { availability, contractState, currentContract, daysLabel, Employee, employeeCode, toEmployeeRow, toPhoneNumber } from './employee.entity';
+import { availability, availabilityChecks, contractState, currentContract, daysLabel, Employee, employeeCode, toEmployeeRow, toPhoneNumber } from './employee.entity';
 import { WorkSchedule } from './work-schedule.entity';
 
 const contract = (id: number, status: Contract['status'], startDate: string, endDate: string) =>
@@ -45,6 +45,8 @@ describe('employee domain', () => {
   it('joins an employee with its contract and schedule', () => {
     const row = toEmployeeRow(employee, [contract(1, 'ACTIVE', '2026-01-01', '2027-06-30')], [schedule], monday);
     expect(row).toMatchObject({ code: 'ALV-TEC-0007', contractState: 'ACTIVE', scheduleDays: 'Lu. – Mi.', scheduleHours: '08:00 – 17:00', availability: 'AVAILABLE' });
-    expect(toEmployeeRow(employee, [], [], monday)).toMatchObject({ contractState: 'NONE', scheduleDays: null, availability: 'UNAVAILABLE' });
+    expect(toEmployeeRow(employee, [], [], monday)).toMatchObject({ contractState: 'NONE', schedule: null, scheduleDays: null, availability: 'UNAVAILABLE' });
+    expect(availabilityChecks(row).every(check => check.met)).toBe(true);
+    expect(availabilityChecks(toEmployeeRow(employee, [], [], monday)).map(check => check.met)).toEqual([false, false, false]);
   });
 });

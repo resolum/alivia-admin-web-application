@@ -1,0 +1,46 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<aside class="drawer" role="dialog" aria-modal="true" [attr.aria-label]="'Detalle de ' + fullName()">
+  <header>
+    <div><small>DETALLE DEL EMPLEADO</small><h2>{{ fullName() }}</h2><span>#{{ row().code }} · {{ roleLabel[row().employee.role] }}</span></div>
+    <button class="close" type="button" aria-label="Cerrar detalle" (click)="closed.emit()">✕</button>
+  </header>
+  <div class="body">
+    <section class="identity">
+      <span class="avatar">{{ initials(fullName()) }}</span>
+      <div><strong>{{ statusLabel[row().employee.status] }}</strong><small>Registrado el {{ formatDate(row().employee.createdAt.slice(0, 10)) }}</small></div>
+      <b [class]="'pill ' + row().availability.toLowerCase()">● {{ availabilityLabel[row().availability] }}</b>
+    </section>
+
+    <h3>Requisitos para estar disponible</h3>
+    <ul class="checks">
+      @for (check of checks(); track check.label) { <li [class.met]="check.met"><span aria-hidden="true">{{ check.met ? '✓' : '✕' }}</span>{{ check.label }}</li> }
+    </ul>
+
+    <h3>Datos personales</h3>
+    <dl>
+      <dt>Correo corporativo</dt><dd>{{ row().employee.corporateEmail }}</dd>
+      <dt>Teléfono</dt><dd>{{ phone(row().employee.phoneNumber) }}</dd>
+      <dt>DNI</dt><dd>{{ row().employee.dni }}</dd>
+      <dt>Fecha de nacimiento</dt><dd>{{ formatDate(row().employee.birthDate) }}</dd>
+    </dl>
+
+    <h3>Contrato</h3>
+    @if (row().contract; as contract) {
+      <div class="card"><div><strong>{{ contract.code }}</strong><small>{{ contract.position }} · {{ formatDate(contract.startDate) }} – {{ formatDate(contract.endDate) }}</small></div><b [class]="'pill ' + row().contractState.toLowerCase()">{{ contractLabel[row().contractState] }}</b></div>
+      <a class="link" [routerLink]="['/hcm/contracts', row().employee.id, contract.id]" (click)="closed.emit()">Ver contrato ›</a>
+    } @else {
+      <p class="empty">Todavía no tiene contrato.</p>
+      <a class="link" routerLink="/hcm/contracts/new" [queryParams]="{ employeeId: row().employee.id }" (click)="closed.emit()">Registrar contrato ›</a>
+    }
+
+    <h3>Horario laboral</h3>
+    @if (row().schedule; as schedule) {
+      <div class="card"><div><strong>{{ schedule.name }}</strong><small>{{ row().scheduleDays }} · {{ row().scheduleHours }} · {{ formatHours(schedule.weeklyHours) }} h/sem</small></div></div>
+      <a class="link" [routerLink]="['/hcm/work-schedules', schedule.employeeId, schedule.id, 'edit']" (click)="closed.emit()">Ver horario ›</a>
+    } @else {
+      <p class="empty">Sin horario configurado.</p>
+      @if (canConfigureSchedule()) { <a class="link" routerLink="/hcm/work-schedules/new" [queryParams]="{ contractId: row().contract!.id }" (click)="closed.emit()">Configurar horario ›</a> }
+    }
+  </div>
+  <footer><button class="button secondary" type="button" (click)="closed.emit()">Cerrar</button></footer>
+</aside>

@@ -31,7 +31,7 @@
         <table><thead><tr><th>EMPLEADO</th><th>ROL</th><th>CONTRATO</th><th>HORARIO</th><th>DISPONIBILIDAD</th><th>ACCIONES</th></tr></thead><tbody>
           @for (row of store.page(); track row.employee.id) {
             <tr [class.muted-row]="row.employee.status === 'TERMINATED'">
-              <td><div class="employee-cell"><span class="avatar">{{ initials(row.employee.firstName + ' ' + row.employee.lastName) }}<i [class]="'dot ' + row.availability.toLowerCase()"></i></span><div><strong>{{ row.employee.firstName }} {{ row.employee.lastName }}</strong><small class="code">#{{ row.code }}</small></div></div></td>
+              <td><div class="employee-cell"><span class="avatar">{{ initials(row.employee.firstName + ' ' + row.employee.lastName) }}<i [class]="'dot ' + row.availability.toLowerCase()"></i></span><div><button type="button" class="name-link" (click)="selected.set(row)">{{ row.employee.firstName }} {{ row.employee.lastName }}</button><small class="code">#{{ row.code }}</small></div></div></td>
               <td><span class="pill role">{{ roleLabel[row.employee.role] }}</span></td>
               <td><span [class]="'pill contract ' + row.contractState.toLowerCase()">{{ contractLabel[row.contractState] }}</span></td>
               <td>@if (row.scheduleDays) { <strong>{{ row.scheduleDays }}</strong><small class="code">{{ row.scheduleHours }}</small> } @else { <em class="muted">Sin configurar</em> }</td>
@@ -39,6 +39,7 @@
               <td class="row-actions"><button type="button" class="menu-trigger" [attr.aria-label]="'Acciones de ' + row.employee.firstName" (click)="toggleMenu(row.employee.id)">⋮</button>
                 @if (openMenu() === row.employee.id) {
                   <div class="row-menu">
+                    <button type="button" (click)="selected.set(row); openMenu.set(null)">Ver detalle</button>
                     @if (row.contract) { <a [routerLink]="['/hcm/contracts', row.employee.id, row.contract.id]">Ver contrato</a> }
                     <a routerLink="/hcm/contracts/new" [queryParams]="{ employeeId: row.employee.id }">Registrar contrato</a>
                     @if (canConfigureSchedule(row)) { <a routerLink="/hcm/work-schedules/new" [queryParams]="{ contractId: row.contract!.id }">Configurar horario</a> }
@@ -53,3 +54,4 @@
     }
   }
 </section>
+@if (selected(); as row) { <app-employee-drawer [row]="row" (closed)="selected.set(null)" /> }

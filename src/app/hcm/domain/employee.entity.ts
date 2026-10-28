@@ -37,6 +37,7 @@ export interface EmployeeRow {
   code: string;
   contractState: ContractState;
   contract: Contract | null;
+  schedule: WorkSchedule | null;
   scheduleDays: string | null;
   scheduleHours: string | null;
   availability: Availability;
@@ -95,6 +96,18 @@ export function availability(state: ContractState, schedule: WorkSchedule | null
   return onShift ? 'AVAILABLE' : 'OFF_SHIFT';
 }
 
+export interface AvailabilityCheck { label: string; met: boolean; }
+
+/** The three conditions that make an employee available, so the admin sees which one is missing. */
+export function availabilityChecks(row: Pick<EmployeeRow, 'contractState' | 'schedule' | 'availability'>): AvailabilityCheck[] {
+  const inForce = row.contractState === 'ACTIVE' || row.contractState === 'EXPIRING';
+  return [
+    { label: 'Contrato vigente', met: inForce },
+    { label: 'Horario laboral activo dentro del contrato', met: row.schedule !== null },
+    { label: 'En uno de sus bloques horarios en este momento', met: row.availability === 'AVAILABLE' },
+  ];
+}
+
 export function toEmployeeRow(employee: Employee, contracts: readonly Contract[], schedules: readonly WorkSchedule[], now: Date): EmployeeRow {
   const today = now.toISOString().slice(0, 10);
   const contract = currentContract(contracts.filter(item => item.employeeId === employee.id));
@@ -102,7 +115,7 @@ export function toEmployeeRow(employee: Employee, contracts: readonly Contract[]
   const schedule = schedules.find(item => item.employeeId === employee.id && (item.status === 'ACTIVE' || item.status === 'SCHEDULED')) ?? null;
   const first = schedule?.shifts[0];
   return {
-    employee, code: employeeCode(employee), contractState: state, contract,
+    employee, code: employeeCode(employee), contractState: state, contract, schedule,
     scheduleDays: schedule ? daysLabel(schedule.workingDays) : null,
     scheduleHours: first ? `${toInputTime(first.startTime)} – ${toInputTime(first.endTime)}` : null,
     availability: availability(state, schedule, now),

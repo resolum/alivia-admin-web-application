@@ -6,7 +6,8 @@
 .role-tabs button.on { background: #fff; color: #0c307a; box-shadow: 0 1px 3px rgba(9, 22, 49, .1); }
 .employee-cell { display: flex; align-items: center; gap: 10px; }
 .employee-cell .avatar { position: relative; display: grid; flex: 0 0 auto; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #0c307a; color: #fff; font-size: 11px; font-weight: 800; }
-.employee-cell strong { color: #173b77 !important; font-size: 13px; }
+.name-link { display: block; padding: 0; border: 0; background: none; color: #173b77; font-size: 13px; font-weight: 800; text-align: left; }
+.name-link:hover { text-decoration: underline; }
 .dot { position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border: 2px solid #fff; border-radius: 50%; background: #9aa3b5; }
 .dot.available { background: #168978; }
 .dot.unavailable { background: #c52828; }
@@ -21,6 +22,6 @@
 .row-actions { position: relative; }
 .menu-trigger { width: 30px; height: 30px; border: 0; border-radius: 7px; background: #f0f3ff; color: #22478d; font-weight: 900; }
 .row-menu { position: absolute; top: 46px; right: 15px; z-index: 5; display: flex; flex-direction: column; min-width: 170px; padding: 6px; border: 1px solid #e4e8f2; border-radius: 8px; background: #fff; box-shadow: 0 8px 20px rgba(9, 22, 49, .12); }
-.row-menu a { padding: 8px 10px; border-radius: 6px; color: #28364b; font-size: 12px; text-decoration: none; }
-.row-menu a:hover { background: #f0f3ff; }
+.row-menu a, .row-menu button { padding: 8px 10px; border: 0; background: none; text-align: left; border-radius: 6px; color: #28364b; font-size: 12px; text-decoration: none; }
+.row-menu a:hover, .row-menu button:hover { background: #f0f3ff; }
 @media (max-width: 950px) { .employee-filters { flex-wrap: wrap; } }
