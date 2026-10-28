@@ -1,6 +1,5 @@
 <section class="page form-page">
-  <div class="breadcrumb">Capital humano <b>›</b> Contratos <b>›</b> {{ editing() ? 'Editar contrato' : 'Registrar contrato' }}</div>
-  <a class="back" routerLink="/hcm/contracts">← Volver a contratos</a>
+    <a class="back" routerLink="/hcm/contracts">← Volver a contratos</a>
   <div class="page-heading"><div><h1>{{ editing() ? 'Editar contrato' : 'Registrar contrato' }}</h1><p>{{ editing() ? 'Actualiza las condiciones del expediente laboral.' : 'Define las condiciones contractuales del nuevo expediente.' }}</p></div><span class="draft-badge">{{ editing() ? 'EDICIÓN CONTROLADA' : 'NUEVO CONTRATO' }}</span></div>
   <form [formGroup]="form" (ngSubmit)="submit()" class="contract-form card">
     <div class="card-title"><div><h2>Condiciones del contrato</h2><p>Define los términos, vigencia y jornada laboral pactada.</p></div></div>

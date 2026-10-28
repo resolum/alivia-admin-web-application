@@ -1,5 +1,5 @@
 <section class="page detail-page">
-  <div class="breadcrumb">Capital humano <b>›</b> Contratos <b>›</b> Detalle</div><a class="back" routerLink="/hcm/contracts">← Volver a contratos</a>
+  <a class="back" routerLink="/hcm/contracts">← Volver a contratos</a>
   @if (store.selected(); as contract) {
     <div class="detail-heading"><div><h1>{{ contract.code }}</h1><span class="status {{ contract.status.toLowerCase() }}">● {{ statusLabel[contract.status] }}</span></div><div class="actions">@if (contract.status === 'PENDING') { <button type="button" class="button primary" [disabled]="activating()" (click)="activate(contract.employeeId, contract.id)">{{ activating() ? 'Activando…' : '✓ Activar contrato' }}</button> }<a class="button secondary" routerLink="edit">✎ Editar</a></div></div>
     @if (message()) { <p class="form-error" role="alert">{{ message() }}</p> }

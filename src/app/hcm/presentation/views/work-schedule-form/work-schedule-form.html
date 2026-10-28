@@ -1,6 +1,5 @@
 <section class="page form-page">
-  <div class="breadcrumb">Capital humano <b>›</b> Horarios laborales <b>›</b> {{ editing() ? 'Editar horario' : 'Registrar horario' }}</div>
-  <a class="back" routerLink="/hcm/work-schedules">← Volver a horarios laborales</a>
+    <a class="back" routerLink="/hcm/work-schedules">← Volver a horarios laborales</a>
   <div class="page-heading">
     <div><h1>{{ editing() ? 'Editar horario laboral' : 'Registrar horario laboral' }}</h1><p>{{ editing() ? 'Modifica los parámetros de vigencia y la distribución de jornada semanal para este horario.' : 'Configura la jornada semanal del colaborador según las condiciones de su contrato laboral vigente.' }}</p></div>
     @if (editing(); as schedule) { <span class="draft-badge">Código: {{ schedule.code }}</span> } @else { <span class="draft-badge">NUEVO HORARIO</span> }

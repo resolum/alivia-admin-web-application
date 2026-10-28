@@ -1,9 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map, startWith } from 'rxjs';
 import { IamStore } from '../../../../iam/application/iam.store';
 
 type NavLink = { path: string; label: string; icon: string };
 type NavSection = { title: string; links: NavLink[] };
+export type Crumb = { label: string; link?: string };
 
 @Component({ selector: 'app-admin-shell', imports: [RouterOutlet, RouterLink, RouterLinkActive], templateUrl: './admin-shell.html', styleUrl: './admin-shell.css' })
 export class AdminShell {
@@ -32,6 +35,17 @@ export class AdminShell {
     { title: 'Analítica', links: [{ path: '/metrics', label: 'Métricas', icon: 'M3 17l5-5 4 3 7-7M15 8h4v4M3 21h.01' }] },
     { title: 'Configuración', links: [{ path: '/business-profile', label: 'Perfil del negocio', icon: 'M4 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16M15 9h3a2 2 0 0 1 2 2v10M3 21h18M8 7h3M8 11h3M8 15h3' }] },
   ];
+
+  /** Trail declared as `breadcrumb` in the data of the deepest active route. */
+  protected readonly breadcrumb = toSignal(this.router.events.pipe(
+    filter(event => event instanceof NavigationEnd), startWith(null), map(() => this.currentBreadcrumb()),
+  ), { initialValue: [] as Crumb[] });
+
+  private currentBreadcrumb(): Crumb[] {
+    let route = this.router.routerState.snapshot.root;
+    while (route.firstChild) route = route.firstChild;
+    return (route.data['breadcrumb'] as Crumb[] | undefined) ?? [];
+  }
 
   protected closeMobileMenu(): void { this.mobileMenuOpen.set(false); }
   protected signOut(): void { this.iam.signOut(); void this.router.navigate(['/sign-in']); }
