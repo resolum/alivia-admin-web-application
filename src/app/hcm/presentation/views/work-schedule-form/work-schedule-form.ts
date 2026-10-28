@@ -128,6 +128,16 @@ export class WorkScheduleForm implements OnInit {
       ? { ...plan, enabled: monday.enabled, blocks: monday.blocks.map(block => ({ ...block })) } : plan));
   }
 
+  /** Names the required fields that are still empty, in the order they appear on screen. */
+  private missingFields(): string[] {
+    const { contractId, name, startDate } = this.form.controls;
+    return [
+      contractId.enabled && contractId.invalid ? 'el contrato' : null,
+      name.invalid ? 'el nombre del horario' : null,
+      startDate.invalid ? 'la fecha de inicio' : null,
+    ].filter((field): field is string => field !== null);
+  }
+
   protected setIndefinite(event: Event): void {
     const indefinite = (event.target as HTMLInputElement).checked;
     this.form.patchValue({ indefinite, endDate: indefinite ? '' : this.form.controls.endDate.value || (this.bindingContract()?.endDate ?? '') });
@@ -135,7 +145,7 @@ export class WorkScheduleForm implements OnInit {
 
   protected async save(draft: boolean): Promise<void> {
     this.message.set(''); this.conflict.set(false);
-    if (this.form.invalid) { this.form.markAllAsTouched(); this.message.set('Completa los campos obligatorios.'); return; }
+    if (this.form.invalid) { this.form.markAllAsTouched(); this.message.set(`Completa: ${this.missingFields().join(', ')}.`); return; }
     if (this.hasBlockErrors()) { this.message.set('Corrige los bloques horarios marcados antes de guardar.'); return; }
     const value = this.form.getRawValue();
     const endDate = value.indefinite || !value.endDate ? null : value.endDate;

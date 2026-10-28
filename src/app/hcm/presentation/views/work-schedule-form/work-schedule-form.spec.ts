@@ -88,7 +88,7 @@ describe('WorkScheduleForm', () => {
 
   it('requires a name and sends the shifts of enabled days', async () => {
     await component.save(false);
-    expect(component.message()).toContain('obligatorios');
+    expect(component.message()).toBe('Completa: el nombre del horario.');
     expect(store.createSchedule).not.toHaveBeenCalled();
 
     component.form.patchValue({ name: 'Jornada Ordinaria Diurna' });
