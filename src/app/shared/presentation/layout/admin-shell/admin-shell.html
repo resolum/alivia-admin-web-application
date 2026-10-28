@@ -1,20 +1,36 @@
-<div class="shell" [class.menu-open]="mobileMenuOpen()">
+<div class="shell" [class.menu-open]="mobileMenuOpen()" [class.collapsed]="collapsed()">
   <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">A</span><strong>Alivia</strong><span>ADMINISTRACIÓN GENERAL</span></div>
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><path d="M8.5 13.5 12 7l3.5 6.5M9.7 11.3h4.6"/></svg><b>Alivia</b></span>
+      <span class="area">Administración general</span>
+      <button type="button" class="collapse" [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'" (click)="collapsed.set(!collapsed())">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h12M4 12h8M4 18h12M20 9l-3 3 3 3"/></svg>
+      </button>
+    </div>
     <nav>
-      <small>PRINCIPAL</small><a routerLink="/home">⌂ <span>Inicio</span></a>
-      <small>CAPITAL HUMANO</small><a routerLink="/hcm/employees" routerLinkActive="active">♙ <span>Empleados</span></a><a routerLink="/hcm/contracts" routerLinkActive="active">▣ <span>Contratos</span></a><a routerLink="/hcm/work-schedules" routerLinkActive="active">◷ <span>Horarios laborales</span></a>
-      <small>OPERACIONES TÉCNICAS</small><a routerLink="/operations">⚒ <span>Órdenes técnicas</span></a>
-      <small>CLIENTES Y SERVICIO</small><a routerLink="/households">⌂ <span>Hogares</span></a><a routerLink="/devices">⌘ <span>Dispositivos</span></a>
-      <small>GESTIÓN COMERCIAL</small><a routerLink="/plans">▤ <span>Planes</span></a><a routerLink="/hiring">▱ <span>Contrataciones</span></a><a routerLink="/subscriptions">⟳ <span>Suscripciones</span></a>
-      <small>ANALÍTICA</small><a routerLink="/metrics">⌁ <span>Métricas</span></a>
-      <small>CONFIGURACIÓN</small><a routerLink="/business-profile">▦ <span>Perfil del negocio</span></a>
+      @for (section of sections; track section.title) {
+        <small>{{ section.title }}</small>
+        @for (link of section.links; track link.path) {
+          <a [routerLink]="link.path" routerLinkActive="active" [title]="link.label" (click)="closeMobileMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="link.icon"/></svg><span>{{ link.label }}</span></a>
+        }
+      }
     </nav>
-    <div class="account"><span class="avatar">MV</span><div><strong>Dra. Mariana Valdivia</strong><small>Administradora general</small></div><button type="button" class="sign-out" title="Cerrar sesión" aria-label="Cerrar sesión" (click)="signOut()">⎋</button></div>
+    <div class="account">
+      <span class="avatar">MV<i aria-hidden="true"></i></span>
+      <div class="who"><strong>Dra. Mariana Valdivia</strong><small>Administradora general</small></div>
+      <button type="button" class="more" aria-label="Opciones de la cuenta" [attr.aria-expanded]="accountMenuOpen()" (click)="accountMenuOpen.set(!accountMenuOpen())">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5h.01M12 12h.01M12 19h.01"/></svg>
+      </button>
+      @if (accountMenuOpen()) {
+        <div class="account-menu" role="menu">
+          <button type="button" role="menuitem" (click)="signOut()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></svg>Cerrar sesión</button>
+        </div>
+      }
+    </div>
   </aside>
   <section class="workspace">
-    <header class="topbar"><button class="menu-button" (click)="mobileMenuOpen.set(!mobileMenuOpen())">☰</button><span class="bell">♟<i></i></span><div class="top-user"><strong>Dra. Mariana Valdivia</strong><small>Administradora General</small></div></header>
+    <header class="topbar"><button class="menu-button" aria-label="Abrir menú" (click)="mobileMenuOpen.set(!mobileMenuOpen())">☰</button><span class="bell">♟<i></i></span><div class="top-user"><strong>Dra. Mariana Valdivia</strong><small>Administradora General</small></div></header>
     <main><router-outlet /></main>
   </section>
-  @if (mobileMenuOpen()) { <button class="backdrop" aria-label="Cerrar menú" (click)="mobileMenuOpen.set(false)"></button> }
+  @if (mobileMenuOpen()) { <button class="backdrop" aria-label="Cerrar menú" (click)="closeMobileMenu()"></button> }
 </div>
