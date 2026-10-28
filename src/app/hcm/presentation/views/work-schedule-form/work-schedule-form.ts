@@ -46,7 +46,7 @@ export class WorkScheduleForm implements OnInit {
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
     startDate: new FormControl(today(), { nonNullable: true, validators: Validators.required }),
     endDate: new FormControl('', { nonNullable: true }),
-    indefinite: new FormControl(true, { nonNullable: true }),
+    indefinite: new FormControl(false, { nonNullable: true }),
   });
   private readonly value = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
@@ -91,9 +91,13 @@ export class WorkScheduleForm implements OnInit {
 
   protected changeContract(): void { this.selectContract(this.bindingContract()); }
 
-  /** Starts the schedule with the contract (or today, if the contract already started). */
+  /** Starts the schedule with the contract (or today, if the contract already started) and ends it with the contract. */
   private selectContract(contract: ScheduleContract | null): void {
-    this.form.patchValue({ contractId: contract?.id ?? 0, startDate: contract && contract.startDate > today() ? contract.startDate : today() });
+    this.form.patchValue({
+      contractId: contract?.id ?? 0,
+      startDate: contract && contract.startDate > today() ? contract.startDate : today(),
+      endDate: contract?.endDate ?? '', indefinite: false,
+    });
   }
 
   protected toggleDay(day: DayOfWeek): void {
@@ -126,7 +130,7 @@ export class WorkScheduleForm implements OnInit {
 
   protected setIndefinite(event: Event): void {
     const indefinite = (event.target as HTMLInputElement).checked;
-    this.form.patchValue({ indefinite, endDate: indefinite ? '' : this.form.controls.endDate.value });
+    this.form.patchValue({ indefinite, endDate: indefinite ? '' : this.form.controls.endDate.value || (this.bindingContract()?.endDate ?? '') });
   }
 
   protected async save(draft: boolean): Promise<void> {
