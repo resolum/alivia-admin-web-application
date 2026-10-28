@@ -14,7 +14,7 @@ export const PASSWORD_RULES = [
 
 export function meetsPasswordPolicy(value: string): boolean { return PASSWORD_RULES.every(rule => rule.test(value)); }
 
-interface TokenClaims { exp?: number; businessId?: number | string; }
+interface TokenClaims { exp?: number; businessId?: number | string; role?: string; }
 
 function claimsOf(token: string): TokenClaims | null {
   try { return JSON.parse(atob(token.split('.')[1]!.replace(/-/g, '+').replace(/_/g, '/'))) as TokenClaims; }
@@ -25,6 +25,14 @@ function claimsOf(token: string): TokenClaims | null {
 export function isTokenAlive(token: string | null, now = Date.now()): boolean {
   const claims = token ? claimsOf(token) : null;
   return claims !== null && (!claims.exp || claims.exp * 1000 > now);
+}
+
+/** Field technicians use their own portal; every other staff role uses the administration one. */
+export const TECHNICIAN_ROLE = 'TECHNICIAN';
+
+/** The "role" claim of the JWT (ADMINISTRATOR, TECHNICIAN, ...). */
+export function roleOf(token: string | null): string | null {
+  return (token ? claimsOf(token)?.role : null) ?? null;
 }
 
 /** The "businessId" claim of the JWT, when the backend includes it. */

@@ -17,7 +17,7 @@ export class SignIn {
     this.loading.set(true); this.error.set('');
     try {
       await this.iam.signIn(this.form.getRawValue());
-      await this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') || '/hcm/contracts');
+      await this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') || this.iam.homeUrl());
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'No se pudo iniciar sesión.'); }
     finally { this.loading.set(false); }
   }

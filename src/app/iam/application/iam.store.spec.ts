@@ -19,4 +19,15 @@ describe('IamStore', () => {
     expect(api.signIn).toHaveBeenCalledWith({ email: 'a@b.c', password: 'x' });
     expect(api.signOut).toHaveBeenCalled();
   });
+
+  it('sends technicians to their portal', () => {
+    const technician = `h.${btoa(JSON.stringify({ role: 'TECHNICIAN' }))}.s`;
+    const admin = `h.${btoa(JSON.stringify({ role: 'ADMINISTRATOR' }))}.s`;
+    const api = { accessToken: vi.fn().mockReturnValueOnce(technician).mockReturnValueOnce(admin) };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [{ provide: IamApi, useValue: api }] });
+    const store = TestBed.inject(IamStore);
+    expect(store.homeUrl()).toBe('/technician/my-day');
+    expect(store.homeUrl()).toBe('/hcm/contracts');
+  });
 });
