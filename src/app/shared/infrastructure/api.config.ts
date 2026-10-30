@@ -9,10 +9,15 @@ export const API_PATHS = {
   employees: environment.API_EMPLOYEES_PATH,
   contracts: environment.API_CONTRACTS_PATH,
   workSchedules: environment.API_WORK_SCHEDULES_PATH,
+  staffProfiles: environment.API_STAFF_PROFILES_PATH,
+  plans: environment.API_PLANS_PATH,
+  hiringRequests: environment.API_HIRING_REQUESTS_PATH,
 } as const;
 export const ACCESS_TOKEN_KEY = 'alivia.iam.access-token';
 /** Business of the signed-in user, saved at sign-in next to the access token. */
 export const BUSINESS_ID_KEY = 'alivia.iam.business-id';
+/** Staff profile of the signed-in user (technicians and managers), used to show their name. */
+export const PROFILE_ID_KEY = 'alivia.iam.profile-id';
 
 /** The signed-in user's business, or null when the session does not carry one. */
 export function currentBusinessId(): number | null {
