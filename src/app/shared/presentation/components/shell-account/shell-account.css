@@ -1,0 +1,16 @@
+:host { display: block; }
+svg { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.account { position: relative; display: flex; align-items: center; gap: 12px; padding: 18px 16px 18px 20px; border-top: 1px solid #e3e8f2; background: #f7f8fb; }
+.avatar { position: relative; padding: 0; cursor: pointer; display: grid; flex: 0 0 auto; place-items: center; width: 40px; height: 40px; border: 2px solid #fff; border-radius: 50%; background: #0c307a; color: #fff; font-size: 13px; font-weight: 800; box-shadow: 0 0 0 1px #e3e8f2; }
+.avatar i { position: absolute; right: -2px; bottom: -2px; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; background: #6fd9c8; }
+.who { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.who strong { overflow: hidden; color: #1f2d43; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.who small { color: #6f7a8e; font-size: 12px; }
+.more { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 7px; background: none; color: #7e899d; }
+.more:hover { background: #eef1f8; }
+.account-menu { position: absolute; right: 14px; bottom: calc(100% - 6px); z-index: 30; min-width: 170px; padding: 6px; border: 1px solid #e8ebf5; border-radius: 10px; background: #fff; box-shadow: 0 8px 24px #0a173b22; }
+.account-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: 7px; background: none; color: #c52828; font-size: 13px; font-weight: 700; }
+.account-menu button:hover { background: #fff1f1; }
+:host-context(.collapsed) .account { justify-content: center; padding: 14px 0; }
+:host-context(.collapsed) .who, :host-context(.collapsed) .more { display: none; }
+:host-context(.collapsed) .account-menu { left: 64px; right: auto; bottom: 14px; }

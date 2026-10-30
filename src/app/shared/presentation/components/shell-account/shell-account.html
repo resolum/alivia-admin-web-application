@@ -1,0 +1,12 @@
+<div class="account">
+  <button type="button" class="avatar" [attr.aria-label]="'Cuenta de ' + name()" [title]="name()" (click)="menuOpen.set(!menuOpen())">{{ initials() }}<i aria-hidden="true"></i></button>
+  <div class="who"><strong [title]="name()">{{ name() }}</strong><small>{{ role() }}</small></div>
+  <button type="button" class="more" aria-label="Opciones de la cuenta" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(!menuOpen())">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5h.01M12 12h.01M12 19h.01"/></svg>
+  </button>
+  @if (menuOpen()) {
+    <div class="account-menu" role="menu">
+      <button type="button" role="menuitem" (click)="signOut()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></svg>Cerrar sesión</button>
+    </div>
+  }
+</div>

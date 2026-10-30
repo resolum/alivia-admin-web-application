@@ -1,0 +1,29 @@
+<div class="shell" [class.menu-open]="mobileMenuOpen()" [class.collapsed]="collapsed()">
+  <aside class="sidebar">
+    <div class="brand portal-brand">
+      <span class="portal-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.4 3 8.3 7 10 4-1.7 7-5.6 7-10V6z"/><path d="M12 9v6M9 12h6"/></svg></span>
+      <span class="portal-name"><strong>Alivia</strong><small>Suscripciones</small></span>
+      <button type="button" class="collapse" [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'" (click)="collapsed.set(!collapsed())">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h12M4 12h8M4 18h12M20 9l-3 3 3 3"/></svg>
+      </button>
+    </div>
+    <span class="portal-badge">Portal Comercial</span>
+    <nav>
+      @for (section of sections; track section.title) {
+        <small>{{ section.title }}</small>
+        @for (link of section.links; track link.path) {
+          <a [routerLink]="link.path" routerLinkActive="active" [title]="link.label" (click)="closeMobileMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="link.icon"/></svg><span>{{ link.label }}</span></a>
+        }
+      }
+    </nav>
+    <app-shell-account role="Gestor de suscripciones" />
+  </aside>
+  <section class="workspace">
+    <header class="topbar">
+      <button class="menu-button" aria-label="Abrir menú" (click)="mobileMenuOpen.set(!mobileMenuOpen())">☰</button>
+      <div class="trail" role="navigation" aria-label="Ruta"><span>Portal comercial</span>@if (breadcrumb()) { <b aria-hidden="true">›</b><span class="current">{{ breadcrumb() }}</span> }</div>
+    </header>
+    <main><router-outlet /></main>
+  </section>
+  @if (mobileMenuOpen()) { <button class="backdrop" aria-label="Cerrar menú" (click)="closeMobileMenu()"></button> }
+</div>
