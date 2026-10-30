@@ -1,0 +1,41 @@
+<div class="drawer-backdrop" (click)="closed.emit()"></div>
+<aside class="schedule-drawer" role="dialog" aria-modal="true" [attr.aria-label]="'Detalle del horario ' + schedule().name">
+  <div class="drawer-body">
+    <section class="drawer-employee">
+      <span class="avatar">{{ initials(schedule().employeeName) }}</span>
+      <div><strong>{{ schedule().employeeName }}</strong><small>{{ schedule().employeeRole ? roleLabel[schedule().employeeRole!] : 'Empleado #' + schedule().employeeId }}</small><b [class]="schedule().status.toLowerCase()">● {{ statusLabel[schedule().status] }}</b></div>
+    </section>
+    <div class="drawer-stats">
+      <article><span>Total semanal</span><strong>{{ formatHours(schedule().weeklyHours) }} <small>horas</small></strong><em>{{ schedule().workingDays.length }} días laborales</em></article>
+      <article><span>Vigencia operativa</span><strong>{{ formatDate(schedule().startDate) }}</strong><em class="muted">{{ schedule().endDate ? 'Hasta el ' + formatDate(schedule().endDate!) : 'Indefinido (sin término)' }}</em></article>
+    </div>
+    <h3>Bloques horarios configurados</h3>
+    <ul class="drawer-days">
+      @for (item of days(); track item.day) {
+        <li [class.rest]="item.blocks.length === 0">
+          <span class="day-chip">{{ dayShortLabel[item.day] }}</span><strong>{{ dayLabel[item.day] }}</strong>
+          @if (item.blocks.length) {
+            <span class="blocks">@for (block of item.blocks; track $index) { <b>{{ block.startTime }} - {{ block.endTime }}</b> }<small>({{ formatHours(item.hours) }} h)</small></span>
+          } @else { <span class="blocks rest-label">DESCANSO</span> }
+        </li>
+      }
+    </ul>
+    <section class="drawer-contract">
+      <header><strong>Contrato asociado</strong><span [class]="'compliance-badge ' + schedule().compliance.toLowerCase()">{{ complianceLabel[schedule().compliance] }}</span></header>
+      <p>{{ complianceText() }}</p>
+      @if (schedule().contract; as contract) {
+        <dl><dt>Vigencia del contrato</dt><dd>{{ formatDate(contract.startDate) }} – {{ formatDate(contract.endDate) }}</dd></dl>
+        <a class="contract-link" [routerLink]="['/hcm/contracts', schedule().employeeId, contract.id]" (click)="closed.emit()">Ver contrato {{ contract.code }} ›</a>
+      }
+      @if (schedule().exceedsLegalLimit) { <p class="legal-warning">△ Supera la jornada máxima legal de 48 h semanales.</p> }
+    </section>
+  </div>
+  <footer class="drawer-footer">
+    <div><small>DETALLE DEL HORARIO</small><h2>{{ schedule().name }}</h2><span>Código correlativo: {{ schedule().code }}</span></div>
+    <button class="drawer-close" type="button" aria-label="Cerrar detalle" (click)="closed.emit()">✕</button>
+    <div class="drawer-actions">
+      <button class="button secondary" type="button" (click)="closed.emit()">Cerrar</button>
+      @if (schedule().status !== 'INACTIVE') { <button class="button primary" type="button" (click)="edit.emit(schedule())">Editar horario</button> }
+    </div>
+  </footer>
+</aside>

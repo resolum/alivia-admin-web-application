@@ -1,0 +1,36 @@
+<section class="page">
+    <div class="page-heading"><div><h1>Contratos</h1><p>Administra los contratos laborales registrados en Alivia</p></div><div class="actions"><button class="button secondary">⇩ Exportar listado</button><a class="button primary" routerLink="new">＋ Registrar contrato</a></div></div>
+  <div class="stats">
+    <article><span>Total contratos</span><strong>{{ store.summary().total }}</strong><i>▤</i></article>
+    <article><span>Vigentes</span><strong>{{ store.summary().active }}</strong><i class="green">●</i></article>
+    <article><span>Pendientes de activación</span><strong>{{ store.summary().pending }}</strong><i>◷</i></article>
+    <article><span>Vencidos</span><strong>{{ store.summary().expired }}</strong><i class="red">△</i></article>
+  </div>
+  @if (store.error()) { <div class="notice error-notice"><span>⚠ {{ store.error() }}</span><button (click)="store.loadContracts()">Reintentar</button></div> }
+  @if (store.loading()) { <div class="loading card">Cargando contratos…</div> }
+  @else if (!store.error() && store.contracts().length === 0 && !store.hasActiveFilters()) {
+    <section class="contracts-empty-state">
+      <div class="empty-state-icon">▣<span>＋</span></div>
+      <h2>No tienes contratos todavía</h2>
+      <p>Crea tu primer contrato laboral y vincúlalo a uno de tus empleados para comenzar a gestionar su vigencia y condiciones.</p>
+      <a class="button primary" routerLink="new">＋ Crear mi primer contrato</a>
+      <small>Podrás definir el cargo, modalidad, horas y vigencia.</small>
+    </section>
+  } @else if (!store.error()) {
+    <div class="filters">
+      <label for="contract-search">⌕<input id="contract-search" placeholder="Buscar contrato..." (input)="search($event)" /></label>
+      <label class="select-label" for="contract-status"><span>Estado</span><select id="contract-status" (change)="status($event)"><option value="ALL">Todos los estados</option><option value="ACTIVE">Vigentes</option><option value="PENDING">Pendientes</option><option value="EXPIRED">Vencidos</option><option value="TERMINATED">Finalizados</option></select></label>
+      <label class="select-label" for="contract-modality"><span>Modalidad</span><select id="contract-modality" (change)="modality($event)"><option value="ALL">Todas las modalidades</option><option value="HOURLY">Por horas</option><option value="SERVICE">Servicio específico</option></select></label>
+    </div>
+    @if (store.contracts().length === 0) {
+      <section class="contracts-empty-state compact"><div class="empty-state-icon">⌕</div><h2>No encontramos contratos</h2><p>Prueba con otro término de búsqueda o cambia los filtros seleccionados.</p></section>
+    } @else {
+      <div class="table-card">
+        <table><thead><tr><th>CONTRATO / CÓDIGO</th><th>POSICIÓN</th><th>MODALIDAD / HORAS</th><th>VIGENCIA</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead><tbody>
+          @for (contract of store.contracts(); track contract.id) { <tr><td><strong>Contrato {{ contract.position }}</strong><small>{{ contract.code }}</small></td><td>{{ contract.position }}</td><td>{{ modalityLabel[contract.modality] }} · {{ contract.weeklyHours }}h/sem</td><td>{{ contract.startDate }} – {{ contract.endDate }}</td><td><span class="status" [class]="'status '+contract.status.toLowerCase()">● {{ statusLabel[contract.status] }}</span></td><td><a class="view-link" [routerLink]="[contract.employeeId, contract.id]">Ver</a></td></tr> }
+        </tbody></table>
+        <footer><span>Mostrando <b>{{ store.contracts().length }}</b> de <b>{{ store.totalElements() }}</b> contratos registrados</span><span>Mostrar: <b>{{ store.filters().size }} por página</b></span><div><button [disabled]="store.filters().page === 0" (click)="store.goToPage(store.filters().page - 1)">‹</button><button class="current">{{ store.filters().page + 1 }}</button><button [disabled]="store.filters().page + 1 >= store.totalPages()" (click)="store.goToPage(store.filters().page + 1)">›</button></div></footer>
+      </div>
+    }
+  }
+</section>

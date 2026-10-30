@@ -1,0 +1,11 @@
+<section class="preview" aria-label="Vista previa del correo de invitación">
+  <header><h3>Vista previa del correo de invitación</h3><span>Referencia</span></header>
+  <dl class="envelope"><dt>Para:</dt><dd>{{ email() || 'correo institucional' }}</dd><dt>Asunto:</dt><dd>Bienvenido al equipo de Alivia · Activa tu cuenta</dd></dl>
+  <div class="mail">
+    <p class="logo">ALIVIA <span>| Red Asistencial</span></p>
+    <h4>Hola {{ fullName() || 'colaborador' }},</h4>
+    <p>Has sido registrado como <b>{{ roleLabel() }}</b> en Alivia. Para empezar a usar la plataforma, activa tu cuenta y crea tu contraseña desde el enlace inferior.</p>
+    <span class="cta">Activar mi cuenta y crear contraseña</span>
+    <p class="expiry">Este enlace expira en {{ expirationHours() }} horas.</p>
+  </div>
+</section>

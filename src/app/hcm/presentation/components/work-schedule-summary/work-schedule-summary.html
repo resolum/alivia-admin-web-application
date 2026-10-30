@@ -1,0 +1,21 @@
+<article class="card">
+  <div class="card-title"><h2>Resumen de jornada</h2><span>En tiempo real</span></div>
+  <div class="summary-hours">
+    <div><small>Contratadas</small><strong>{{ contractedHours() ?? '—' }}</strong><span>hrs/sem</span></div>
+    <div class="configured"><small>Configuradas</small><strong>{{ formatHours(configuredHours()) }}</strong><span>hrs/sem</span></div>
+  </div>
+  <div class="balance" [class.over]="(balance() ?? 0) > 0" [class.under]="(balance() ?? 0) < 0">
+    <small>Balance horario</small>
+    @if (balance() === null) { <span>{{ contract() ? 'El contrato no pacta horas' : 'Elige un contrato' }}</span> }
+    @else if (balance() === 0) { <span>✓ 0 hrs (exacto y conforme)</span> }
+    @else if (balance()! > 0) { <span>△ +{{ formatHours(balance()!) }} hrs sobre lo pactado</span> }
+    @else { <span>{{ formatHours(balance()!) }} hrs por asignar</span> }
+  </div>
+  <dl>
+    <dt>Días laborables</dt><dd>{{ workingDays().length }} días @if (workingDays().length) { ({{ dayShortLabel[workingDays()[0]!] }} - {{ dayShortLabel[workingDays().at(-1)!] }}) }</dd>
+    <dt>Vigencia configurada</dt><dd>{{ startDate() ? formatDate(startDate()) : '—' }} {{ endDate() ? 'al ' + formatDate(endDate()!) : '(indefinido)' }}</dd>
+    <dt>Contrato asociado</dt><dd>{{ contract()?.code ?? 'Ninguno' }}</dd>
+  </dl>
+  @if (configuredHours() > legalLimit) { <p class="legal-warning">△ Supera la jornada máxima legal de {{ legalLimit }} h semanales.</p> }
+  @if (lastModified(); as updatedAt) { <p class="last-change">◷ Última modificación: {{ updatedAt.slice(0, 10) }}</p> }
+</article>

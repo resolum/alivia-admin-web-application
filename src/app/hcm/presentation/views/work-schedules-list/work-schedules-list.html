@@ -1,0 +1,53 @@
+<section class="page">
+    <div class="page-heading"><div><h1>Horarios laborales</h1><p>Gestiona las jornadas de los empleados</p></div><div class="actions"><a class="button primary" routerLink="new">＋ Registrar horario</a></div></div>
+  <div class="stats schedule-stats">
+    <article><span>Total</span><strong>{{ store.summary().totalSchedules }}</strong><em class="plain">horarios configurados</em><i>▦</i></article>
+    <article><span>Personal</span><strong>{{ store.summary().employeesWithSchedule }}</strong><em class="plain">empleados con turno</em><i class="green">♙</i></article>
+    <article><span>Promedio semanal</span><strong>{{ formatHours(store.summary().averageWeeklyHours) }} h</strong><em class="plain">horas por horario</em><i>⧖</i></article>
+  </div>
+  @if (store.error()) { <div class="notice error-notice"><span>⚠ {{ store.error() }}</span><button (click)="store.loadSchedules()">Reintentar</button></div> }
+  @if (store.loading() && store.schedules().length === 0) { <div class="loading card">Cargando horarios…</div> }
+  @else if (!store.error() && store.schedules().length === 0 && !store.hasActiveFilters()) {
+    <section class="contracts-empty-state">
+      <div class="empty-state-icon">◷<span>＋</span></div>
+      <h2>No tienes horarios todavía</h2>
+      <p>Registra la jornada semanal de un empleado. El horario se vincula a su contrato vigente y compara las horas configuradas con las pactadas.</p>
+      <a class="button primary" routerLink="new">＋ Registrar mi primer horario</a>
+    </section>
+  } @else if (!store.error()) {
+    <div class="filters">
+      <label for="schedule-search">⌕<input id="schedule-search" placeholder="Buscar por horario o código..." [value]="store.filters().search" (input)="search($event)" /></label>
+      <label class="select-label" for="schedule-role"><span>Rol</span><select id="schedule-role" [value]="store.filters().role" (change)="role($event)"><option value="ALL">Todos los roles</option><option value="TECH">Soporte técnico</option><option value="SUBSCRIPTION_MANAGER">Gestor de suscripciones</option><option value="CLEANING">Limpieza</option></select></label>
+      <label class="select-label" for="schedule-status"><span>Vigencia</span><select id="schedule-status" [value]="store.filters().status" (change)="status($event)"><option value="ALL">Cualquier vigencia</option><option value="ACTIVE">Vigentes</option><option value="SCHEDULED">Programados</option><option value="DRAFT">Borradores</option><option value="FINISHED">Periodo concluido</option><option value="INACTIVE">Dados de baja</option></select></label>
+    </div>
+    @if (store.hasActiveFilters()) {
+      <div class="applied-filters">Filtros aplicados:
+        @if (store.filters().role !== 'ALL') { <button type="button" (click)="store.setFilters({ role: 'ALL' })">Rol: {{ roleFilterLabel() }} ✕</button> }
+        @if (store.filters().status !== 'ALL') { <button type="button" (click)="store.setFilters({ status: 'ALL' })">Vigencia: {{ statusFilterLabel() }} ✕</button> }
+        <a (click)="store.clearFilters()">Limpiar filtros</a>
+      </div>
+    }
+    @if (store.schedules().length === 0) {
+      <section class="contracts-empty-state compact"><div class="empty-state-icon">⌕</div><h2>No encontramos horarios</h2><p>Prueba con otro término de búsqueda o cambia los filtros seleccionados.</p></section>
+    } @else {
+      <div class="table-card">
+        <table><thead><tr><th>EMPLEADO</th><th>HORARIO &amp; CÓDIGO</th><th>VIGENCIA</th><th>DÍAS LABORALES</th><th>HORAS</th><th>ACCIONES</th></tr></thead><tbody>
+          @for (schedule of store.schedules(); track schedule.id) {
+            <tr [class.muted-row]="schedule.status === 'FINISHED' || schedule.status === 'INACTIVE'" [class.warning-row]="isOverloaded(schedule)">
+              <td><div class="employee-cell"><span class="avatar">{{ initials(schedule.employeeName) }}</span><div><strong>{{ schedule.employeeName }}</strong><small>{{ schedule.employeeRole ? roleLabel[schedule.employeeRole] : 'Empleado #' + schedule.employeeId }}</small></div></div></td>
+              <td><strong>{{ schedule.name }}</strong><small>{{ schedule.code }}</small></td>
+              <td><strong>{{ formatDate(schedule.startDate) }}{{ schedule.endDate ? ' – ' + formatDate(schedule.endDate) : '' }}</strong><small>{{ schedule.status === 'ACTIVE' && !schedule.endDate ? 'Sin fecha de término' : statusLabel[schedule.status] }}</small></td>
+              <td><div class="day-chips">@for (day of weekDays; track day) { <span [class.on]="worksOn(schedule, day)">{{ dayShortLabel[day] }}</span> }</div></td>
+              <td><span class="hours" [class.over]="isOverloaded(schedule)">{{ formatHours(schedule.weeklyHours) }} h @if (isOverloaded(schedule)) { <b title="Excede las horas pactadas o la jornada legal">△</b> }</span></td>
+              <td class="row-actions"><button type="button" class="menu-trigger" [attr.aria-label]="'Acciones de ' + schedule.name" (click)="toggleMenu(schedule.id)">⋮</button>
+                @if (openMenu() === schedule.id) { <div class="row-menu"><button type="button" (click)="showDetail(schedule)">Ver detalle</button>@if (schedule.status !== 'INACTIVE') { <button type="button" (click)="edit(schedule)">Editar horario</button> }</div> }
+              </td>
+            </tr>
+          }
+        </tbody></table>
+        <footer><span>Mostrando <b>{{ store.schedules().length }}</b> de <b>{{ store.totalElements() }}</b> horarios</span><span>Filas: <b>{{ store.filters().size }} por página</b></span><div><button [disabled]="store.filters().page === 0" (click)="store.goToPage(store.filters().page - 1)">‹</button><button class="current">{{ store.filters().page + 1 }}</button><button [disabled]="store.filters().page + 1 >= store.totalPages()" (click)="store.goToPage(store.filters().page + 1)">›</button></div></footer>
+      </div>
+    }
+  }
+</section>
+@if (store.selected(); as schedule) { <app-work-schedule-drawer [schedule]="schedule" (closed)="store.closeDetail()" (edit)="edit($event)" /> }

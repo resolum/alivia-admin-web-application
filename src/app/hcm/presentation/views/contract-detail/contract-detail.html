@@ -1,0 +1,19 @@
+<section class="page detail-page">
+  <a class="back" routerLink="/hcm/contracts">← Volver a contratos</a>
+  @if (store.selected(); as contract) {
+    <div class="detail-heading"><div><h1>{{ contract.code }}</h1><span class="status {{ contract.status.toLowerCase() }}">● {{ statusLabel[contract.status] }}</span></div><div class="actions">@if (contract.status === 'PENDING') { <button type="button" class="button primary" [disabled]="activating()" (click)="activate(contract.employeeId, contract.id)">{{ activating() ? 'Activando…' : '✓ Activar contrato' }}</button> }<a class="button secondary" routerLink="edit">✎ Editar</a></div></div>
+    @if (message()) { <p class="form-error" role="alert">{{ message() }}</p> }
+    <article class="card conditions"><div class="card-title"><div><h2>Condiciones del contrato</h2><p>Especificaciones normativas y cláusulas aplicadas</p></div></div>
+      <div class="detail-grid"><div><small>CÓDIGO DEL CONTRATO</small><strong>{{ contract.code }} ⧉</strong></div><div><small>CARGO O ROL CONTRACTUAL</small><span>{{ contract.position }}</span></div><div><small>SEDE ADMINISTRATIVA</small><span>⌾ Sede Lima Central</span></div><div><small>MODALIDAD CONTRACTUAL</small><span>{{ modalityLabel[contract.modality] }}</span></div><div><small>HORAS SEMANALES CONTRATADAS</small><span>{{ contract.weeklyHours }} h / semana (Jornada ordinaria completa)</span></div><div><small>FECHA DE INICIO</small><span>▣ {{ contract.startDate }}</span></div><div><small>FECHA DE TÉRMINO</small><strong>▣ {{ contract.endDate || 'Indefinido' }}</strong><em>Duración acumulada según vigencia</em></div><div><small>ESTADO LEGAL</small><span class="status {{ contract.status.toLowerCase() }}">● {{ statusLabel[contract.status] }}</span></div></div>
+      <footer><span>♙ Contrato creado: {{ contract.createdAt }}</span><span>◷ Última modificación: {{ contract.updatedAt }}</span></footer>
+    </article>
+    <article class="card employees"><div class="card-title"><div><h2>Empleado asignado</h2><p>Colaborador vinculado a este contrato laboral</p></div><span>1 colaborador</span></div><div class="employee-card"><span class="avatar">{{ contract.employeeName.slice(0,2).toUpperCase() }}</span><div><strong>{{ contract.employeeName }}</strong><small>Empleado #{{ contract.employeeId }}</small><span>{{ contract.position }}</span></div><b>● {{ contract.eligible ? 'Elegible' : 'No elegible' }}</b></div></article>
+    <article class="card contract-schedule"><div class="card-title"><div><h2>Horario laboral</h2><p>Jornada semanal configurada dentro de este contrato</p></div>
+      @if (contract.status === 'ACTIVE' || contract.status === 'PENDING') { <a class="button primary" routerLink="/hcm/work-schedules/new" [queryParams]="{ employeeId: contract.employeeId, contractId: contract.id }">◷ Configurar horario</a> }</div>
+      @for (schedule of schedules.contractSchedules(); track schedule.id) {
+        <div class="employee-card"><span class="avatar">◷</span><div><strong>{{ schedule.name }}</strong><small>{{ schedule.code }}</small><span>{{ formatDate(schedule.startDate) }} – {{ schedule.endDate ? formatDate(schedule.endDate) : 'fin del contrato' }} · {{ formatHours(schedule.weeklyHours) }} h de {{ contract.weeklyHours }} h pactadas</span></div><a class="view-link" [routerLink]="['/hcm/work-schedules', schedule.employeeId, schedule.id, 'edit']">{{ scheduleStatusLabel[schedule.status] }} · Editar</a></div>
+      } @empty { <p class="empty">Este contrato todavía no tiene horario. Configúralo para definir los días y bloques de trabajo.</p> }
+    </article>
+  } @else if (store.error()) { <div class="loading card">{{ store.error() }}</div> }
+  @else { <div class="loading card">Cargando detalle del contrato…</div> }
+</section>

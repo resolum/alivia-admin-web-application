@@ -1,0 +1,50 @@
+<main class="activation">
+  <header class="portal">
+    <div class="logo"><span class="mark">A</span><strong>alivia</strong></div>
+    <small>PORTAL ADMINISTRATIVO CLÍNICO</small>
+  </header>
+  <section class="panel">
+    @switch (state()) {
+      @case ('loading') { <p class="lead">Revisando tu enlace de activación…</p> }
+      @case ('invalid') {
+        <div class="badge error-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+        <h1>No pudimos activar tu cuenta</h1>
+        <p class="lead">{{ error() }}</p>
+        <a class="button primary wide" routerLink="/sign-in">Ir a iniciar sesión →</a>
+      }
+      @case ('done') {
+        <div class="badge done-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+        <h1>Contraseña creada</h1>
+        <p class="lead">Tu cuenta está activa. Ya puedes iniciar sesión con {{ account()?.email }} y tu nueva contraseña.</p>
+        <a class="button primary wide" routerLink="/sign-in">Ir a iniciar sesión →</a>
+      }
+      @default {
+        <div class="badge" aria-hidden="true"><span class="mark small">A</span></div>
+        <h1>Crea una nueva contraseña</h1>
+        <p class="lead">Hola {{ account()?.fullName }}. Por seguridad, elige una contraseña robusta que no hayas usado antes.</p>
+        <p class="account">{{ account()?.email }}</p>
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <label for="new-password"><span>Nueva contraseña</span><small>Requerido</small></label>
+          <div class="field">
+            <input id="new-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" />
+            <button type="button" class="eye" [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'" (click)="showPassword.set(!showPassword())"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+          @if (submitted() && !meetsPolicy()) { <p class="field-error"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>La contraseña no cumple con los requisitos de seguridad.</p> }
+          <div class="rules">
+            <b>REQUISITOS DE SEGURIDAD</b>
+            <ul>@for (rule of rules; track rule.label) { <li [class.ok]="rule.test(password())"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>{{ rule.label }}</li> }</ul>
+          </div>
+          <label for="confirm-password"><span>Confirmar contraseña</span><small>Requerido</small></label>
+          <div class="field">
+            <input id="confirm-password" [type]="showConfirmation() ? 'text' : 'password'" formControlName="confirmation" autocomplete="new-password" />
+            <button type="button" class="eye" [attr.aria-label]="showConfirmation() ? 'Ocultar contraseña' : 'Mostrar contraseña'" (click)="showConfirmation.set(!showConfirmation())"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+          @if ((submitted() || form.controls.confirmation.touched) && form.controls.confirmation.value && !matches()) { <p class="field-error"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Las contraseñas no coinciden.</p> }
+          @if (error()) { <p class="field-error" role="alert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>{{ error() }}</p> }
+          <button class="button primary wide" [disabled]="saving()">{{ saving() ? 'Creando contraseña…' : 'Crear contraseña y activar cuenta' }}</button>
+        </form>
+      }
+    }
+  </section>
+  <footer>Alivia Asistencia &amp; Salud S.A.C.</footer>
+</main>
