@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ACCESS_TOKEN_KEY, API_BASE_URL, API_PATHS, BUSINESS_ID_KEY } from '../../shared/infrastructure/api.config';
+import { ACCESS_TOKEN_KEY, API_BASE_URL, API_PATHS, BUSINESS_ID_KEY, PROFILE_ID_KEY } from '../../shared/infrastructure/api.config';
 import { AccountActivation, businessIdOf, SignInCommand } from '../domain/sign-in.command';
 
 @Injectable({ providedIn: 'root' })
@@ -20,8 +20,10 @@ export class IamApi {
         : 'El backend rechazó este origen (CORS). Agrega esta URL a alivia.cors.allowed-origins.');
     }
     if (!response.ok) throw new Error(`No se pudo iniciar sesión (${response.status}).`);
-    const session = await response.json() as { accessToken: string; user?: { businessId?: number | null } };
+    const session = await response.json() as { accessToken: string; user?: { businessId?: number | null; profileId?: number | null } };
     window.sessionStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken);
+    if (session.user?.profileId) window.sessionStorage.setItem(PROFILE_ID_KEY, String(session.user.profileId));
+    else window.sessionStorage.removeItem(PROFILE_ID_KEY);
     const businessId = session.user?.businessId ?? businessIdOf(session.accessToken);
     if (businessId) window.sessionStorage.setItem(BUSINESS_ID_KEY, String(businessId));
     else window.sessionStorage.removeItem(BUSINESS_ID_KEY);
@@ -48,10 +50,26 @@ export class IamApi {
   }
 
   signOut(): void {
-    for (const key of [ACCESS_TOKEN_KEY, BUSINESS_ID_KEY]) {
+    for (const key of [ACCESS_TOKEN_KEY, BUSINESS_ID_KEY, PROFILE_ID_KEY]) {
       window.sessionStorage.removeItem(key);
       window.localStorage.removeItem(key);
     }
+  }
+
+  /** Full name of the signed-in staff member, or null when the account has no staff profile. */
+  async staffName(): Promise<string | null> {
+    const profileId = window.sessionStorage.getItem(PROFILE_ID_KEY);
+    const token = this.accessToken();
+    if (!profileId || !token) return null;
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_PATHS.staffProfiles}/${encodeURIComponent(profileId)}`, {
+        headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) return null;
+      const profile = await response.json() as { firstName?: string; lastName?: string };
+      const name = `${profile.firstName ?? ''} ${profile.lastName ?? ''}`.trim();
+      return name || null;
+    } catch { return null; }
   }
 
   accessToken(): string | null {

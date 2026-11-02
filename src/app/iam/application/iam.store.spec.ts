@@ -20,14 +20,18 @@ describe('IamStore', () => {
     expect(api.signOut).toHaveBeenCalled();
   });
 
-  it('sends technicians to their portal', () => {
-    const technician = `h.${btoa(JSON.stringify({ role: 'TECHNICIAN' }))}.s`;
-    const admin = `h.${btoa(JSON.stringify({ role: 'ADMINISTRATOR' }))}.s`;
-    const api = { accessToken: vi.fn().mockReturnValueOnce(technician).mockReturnValueOnce(admin) };
+  it('sends each staff role to its portal', () => {
+    const token = (claims: object) => `h.${btoa(JSON.stringify(claims))}.s`;
+    let current = token({ role: 'TECHNICIAN' });
+    const api = { accessToken: vi.fn(() => current) };
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({ providers: [{ provide: IamApi, useValue: api }] });
     const store = TestBed.inject(IamStore);
-    expect(store.homeUrl()).toBe('/technician/my-day');
+    expect(store.homeUrl()).toBe('/technician/home');
+    current = token({ role: 'SUBSCRIPTION_MANAGER', email: 'diego.ramos@alivia.test' });
+    expect(store.homeUrl()).toBe('/commercial/home');
+    expect(store.currentEmail()).toBe('diego.ramos@alivia.test');
+    current = token({ role: 'ADMINISTRATOR' });
     expect(store.homeUrl()).toBe('/hcm/contracts');
   });
 });

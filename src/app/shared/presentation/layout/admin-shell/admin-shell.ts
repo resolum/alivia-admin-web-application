@@ -3,17 +3,17 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { IamStore } from '../../../../iam/application/iam.store';
+import { ShellAccount } from '../../components/shell-account/shell-account';
 
 type NavLink = { path: string; label: string; icon: string };
 type NavSection = { title: string; links: NavLink[] };
 export type Crumb = { label: string; link?: string };
 
-@Component({ selector: 'app-admin-shell', imports: [RouterOutlet, RouterLink, RouterLinkActive], templateUrl: './admin-shell.html', styleUrl: './admin-shell.css' })
+@Component({ selector: 'app-admin-shell', imports: [RouterOutlet, RouterLink, RouterLinkActive, ShellAccount], templateUrl: './admin-shell.html', styleUrl: './admin-shell.css' })
 export class AdminShell {
   private readonly iam = inject(IamStore); private readonly router = inject(Router);
   protected readonly mobileMenuOpen = signal(false);
   protected readonly collapsed = signal(false);
-  protected readonly accountMenuOpen = signal(false);
   /** Line icons drawn on a 24x24 grid, one path per link. */
   protected readonly sections: NavSection[] = [
     { title: 'Principal', links: [{ path: '/home', label: 'Inicio', icon: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z' }] },
