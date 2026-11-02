@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { PlansStore } from '../../../application/plans.store';
 import { PlansApi } from '../../../infrastructure/plans.api';
-import { basePlan, customPlan } from '../../../domain/plan.entity.spec';
+import { basePlan, customPlan } from '../../../domain/plan.fixtures';
 import { PlansCatalog } from './plans-catalog';
 
 describe('PlansCatalog', () => {

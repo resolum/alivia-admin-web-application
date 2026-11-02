@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HiringStore } from '../../../application/hiring.store';
-import { hiringRequest } from '../../../domain/hiring-request.entity.spec';
+import { hiringRequest } from '../../../domain/hiring-request.fixtures';
 import { HiringRequestsApi } from '../../../infrastructure/hiring-requests.api';
 import { HiringBoard } from './hiring-board';
 
