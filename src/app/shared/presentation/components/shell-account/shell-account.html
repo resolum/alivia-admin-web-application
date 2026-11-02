@@ -1,6 +1,6 @@
 <div class="account">
   <button type="button" class="avatar" [attr.aria-label]="'Cuenta de ' + name()" [title]="name()" (click)="menuOpen.set(!menuOpen())">{{ initials() }}<i aria-hidden="true"></i></button>
-  <div class="who"><strong [title]="name()">{{ name() }}</strong><small>{{ role() }}</small></div>
+  <div class="who"><strong [title]="name()">{{ name() }}</strong><small>{{ roleLabel() }}</small></div>
   <button type="button" class="more" aria-label="Opciones de la cuenta" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(!menuOpen())">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5h.01M12 12h.01M12 19h.01"/></svg>
   </button>

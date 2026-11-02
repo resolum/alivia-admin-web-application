@@ -1,18 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { filter, map, startWith } from 'rxjs';
-import { ShellAccount } from '../../components/shell-account/shell-account';
+import { Component } from '@angular/core';
+import { NavSection, PortalShell } from '../portal-shell/portal-shell';
 
-type NavLink = { path: string; label: string; icon: string };
-type NavSection = { title: string; links: NavLink[] };
-
-/** Layout of the field technicians' portal; same look as the administration and commercial ones. */
-@Component({ selector: 'app-technician-shell', imports: [RouterOutlet, RouterLink, RouterLinkActive, ShellAccount], templateUrl: './technician-shell.html', styleUrls: ['../admin-shell/admin-shell.css', '../commercial-shell/commercial-shell.css'] })
+/** Layout of the field technicians' portal. */
+@Component({
+  selector: 'app-technician-shell', imports: [PortalShell],
+  template: '<app-portal-shell [sections]="sections" portal="Portal técnico" area="TÉCNICO DE CAMPO" [fieldArea]="true" roleLabel="Técnico de campo" />',
+})
 export class TechnicianShell {
-  private readonly router = inject(Router);
-  protected readonly mobileMenuOpen = signal(false);
-  protected readonly collapsed = signal(false);
   protected readonly sections: NavSection[] = [
     { title: 'Principal', links: [{ path: 'home', label: 'Inicio', icon: 'M4 10.5 12 4l8 6.5V20h-5v-6h-6v6H4z' }] },
     { title: 'Operación técnica', links: [
@@ -23,17 +17,4 @@ export class TechnicianShell {
     ] },
     { title: 'Analítica', links: [{ path: 'metrics', label: 'Métricas', icon: 'M3 17l5-5 4 3 7-7M15 8h4v4M3 21h.01' }] },
   ];
-
-  /** "Portal técnico › Calendario", from the title of the active section. */
-  protected readonly breadcrumb = toSignal(this.router.events.pipe(
-    filter(event => event instanceof NavigationEnd), startWith(null), map(() => this.currentTitle()),
-  ), { initialValue: '' });
-
-  private currentTitle(): string {
-    let route = this.router.routerState.snapshot.root;
-    while (route.firstChild) route = route.firstChild;
-    return (route.data['title'] as string | undefined) ?? '';
-  }
-
-  protected closeMobileMenu(): void { this.mobileMenuOpen.set(false); }
 }

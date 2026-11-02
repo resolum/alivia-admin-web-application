@@ -10,7 +10,7 @@ import { IamStore } from '../../../../iam/application/iam.store';
 export class ShellAccount implements OnInit {
   private readonly iam = inject(IamStore); private readonly router = inject(Router);
   /** Role shown under the name. */
-  readonly role = input.required<string>();
+  readonly roleLabel = input.required<string>();
   /** Name used when the account has no staff profile, as the administrator. */
   readonly fallbackName = input<string | null>(null);
   protected readonly menuOpen = signal(false);

@@ -8,7 +8,7 @@ async function render(staffName: string | null, fallbackName: string | null = nu
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: IamStore, useValue: iam }] });
   const fixture = TestBed.createComponent(ShellAccount);
-  fixture.componentRef.setInput('role', 'Gestor de suscripciones');
+  fixture.componentRef.setInput('roleLabel', 'Gestor de suscripciones');
   fixture.componentRef.setInput('fallbackName', fallbackName);
   fixture.detectChanges();
   await fixture.whenStable();
