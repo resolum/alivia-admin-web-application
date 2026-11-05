@@ -22,6 +22,9 @@ export class PortalShell {
   readonly roleLabel = input.required<string>();
   protected readonly mobileMenuOpen = signal(false);
   protected readonly collapsed = signal(false);
+  /** Set on the first toggle, so the brand fade never plays on page load. */
+  protected readonly toggled = signal(false);
+  protected toggleCollapsed(): void { this.toggled.set(true); this.collapsed.update(value => !value); }
 
   /** "Portal comercial › Planes", from the title of the active section. */
   protected readonly breadcrumb = toSignal(this.router.events.pipe(

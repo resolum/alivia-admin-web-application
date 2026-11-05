@@ -14,6 +14,9 @@ export class AdminShell {
   private readonly iam = inject(IamStore); private readonly router = inject(Router);
   protected readonly mobileMenuOpen = signal(false);
   protected readonly collapsed = signal(false);
+  /** Set on the first toggle, so the brand fade never plays on page load. */
+  protected readonly toggled = signal(false);
+  protected toggleCollapsed(): void { this.toggled.set(true); this.collapsed.update(value => !value); }
   /** Line icons drawn on a 24x24 grid, one path per link. */
   protected readonly sections: NavSection[] = [
     { title: 'Principal', links: [{ path: '/home', label: 'Inicio', icon: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z' }] },
@@ -33,7 +36,10 @@ export class AdminShell {
       { path: '/subscriptions', label: 'Suscripciones', icon: 'M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4' },
     ] },
     { title: 'Analítica', links: [{ path: '/metrics', label: 'Métricas', icon: 'M3 17l5-5 4 3 7-7M15 8h4v4M3 21h.01' }] },
-    { title: 'Configuración', links: [{ path: '/business-profile', label: 'Perfil del negocio', icon: 'M4 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16M15 9h3a2 2 0 0 1 2 2v10M3 21h18M8 7h3M8 11h3M8 15h3' }] },
+    { title: 'Configuración', links: [
+      { path: '/iam/users', label: 'Usuarios y roles', icon: 'M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6zM9 12l2 2 4-4' },
+      { path: '/business-profile', label: 'Perfil del negocio', icon: 'M4 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16M15 9h3a2 2 0 0 1 2 2v10M3 21h18M8 7h3M8 11h3M8 15h3' },
+    ] },
   ];
 
   /** Trail declared as `breadcrumb` in the data of the deepest active route. */

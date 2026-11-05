@@ -4,8 +4,15 @@ import { environment } from '../../../environments/environment.generated';
 export const API_BASE_URL = environment.API_BASE_URL;
 export const API_PATHS = {
   signIn: environment.API_AUTH_SIGN_IN_PATH,
+  signUp: environment.API_AUTH_SIGN_UP_PATH,
+  resendVerification: environment.API_AUTH_RESEND_VERIFICATION_PATH,
   activation: environment.API_AUTH_ACTIVATION_PATH,
   activate: environment.API_AUTH_ACTIVATE_PATH,
+  refresh: environment.API_AUTH_REFRESH_PATH,
+  logout: environment.API_AUTH_LOGOUT_PATH,
+  passwordRecovery: environment.API_AUTH_PASSWORD_RECOVERY_PATH,
+  passwordReset: environment.API_AUTH_PASSWORD_RESET_PATH,
+  users: environment.API_USERS_PATH,
   employees: environment.API_EMPLOYEES_PATH,
   contracts: environment.API_CONTRACTS_PATH,
   workSchedules: environment.API_WORK_SCHEDULES_PATH,
@@ -14,6 +21,8 @@ export const API_PATHS = {
   hiringRequests: environment.API_HIRING_REQUESTS_PATH,
 } as const;
 export const ACCESS_TOKEN_KEY = 'alivia.iam.access-token';
+/** Kept next to the access token; in localStorage when the user chose "Recordarme en este equipo". */
+export const REFRESH_TOKEN_KEY = 'alivia.iam.refresh-token';
 /** Business of the signed-in user, saved at sign-in next to the access token. */
 export const BUSINESS_ID_KEY = 'alivia.iam.business-id';
 /** Staff profile of the signed-in user (technicians and managers), used to show their name. */

@@ -1,0 +1,116 @@
+<main class="sign-in">
+  <section class="side">
+    <header class="top">
+      <img class="logo" src="logo.webp" alt="Alivia" width="56" height="56" />
+      <span class="portal">Portal de negocio</span>
+    </header>
+
+    @if (sentTo(); as address) {
+      <section class="form sent" aria-live="polite">
+        <span class="sent-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span>
+        <h1>Confirma tu correo</h1>
+        <p class="lead">Enviamos un enlace de verificación a <strong>{{ address }}</strong>. Ábrelo para activar tu cuenta y luego inicia sesión.</p>
+        @if (notice()) { <p class="notice-ok" role="status">{{ notice() }}</p> }
+        @if (error()) { <div class="problem" role="alert"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7.5v5M12 16.5h.01"/></svg><span>{{ error() }}</span></div> }
+        <a class="submit" routerLink="/sign-in">Ir a iniciar sesión</a>
+        <button type="button" class="ghost" [disabled]="resending()" (click)="resend()">{{ resending() ? 'Reenviando…' : '¿No llegó? Reenviar enlace' }}</button>
+      </section>
+    } @else {
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <h1>Crea tu cuenta</h1>
+        <p class="lead">Registra al administrador de tu negocio. Desde su cuenta podrás invitar a técnicos y gestores de suscripciones.</p>
+
+        @if (emailTaken()) {
+          <div class="problem taken" role="alert">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7.5v5M12 16.5h.01"/></svg>
+            <div><strong>Ese correo ya tiene una cuenta.</strong> Inicia sesión o recupera tu acceso si olvidaste la contraseña.
+              <span class="taken-links"><a routerLink="/sign-in">Iniciar sesión</a><a routerLink="/forgot-password" [queryParams]="{ email: form.controls.email.value.trim() }">Recuperar acceso</a></span>
+            </div>
+          </div>
+        } @else if (error()) {
+          <div class="problem" role="alert"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7.5v5M12 16.5h.01"/></svg><span>{{ error() }}</span></div>
+        }
+
+        <fieldset class="pair">
+          <legend>Datos del administrador</legend>
+          <div class="group">
+            <label for="sign-up-firstName">Nombres <b aria-hidden="true">*</b></label>
+            <div class="field" [class.invalid]="invalid('firstName')"><input id="sign-up-firstName" formControlName="firstName" autocomplete="given-name" maxlength="75" [attr.aria-invalid]="invalid('firstName')" /></div>
+            @if (invalid('firstName')) { <p class="field-error">Ingresa tus nombres</p> }
+          </div>
+          <div class="group">
+            <label for="sign-up-lastName">Apellidos <b aria-hidden="true">*</b></label>
+            <div class="field" [class.invalid]="invalid('lastName')"><input id="sign-up-lastName" formControlName="lastName" autocomplete="family-name" maxlength="75" [attr.aria-invalid]="invalid('lastName')" /></div>
+            @if (invalid('lastName')) { <p class="field-error">Ingresa tus apellidos</p> }
+          </div>
+        </fieldset>
+
+        <div class="group">
+          <label for="sign-up-email">Correo electrónico institucional <b aria-hidden="true">*</b></label>
+          <div class="field" [class.invalid]="invalid('email')">
+            <svg class="lead-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.9 7.9"/></svg>
+            <input id="sign-up-email" type="email" formControlName="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="nombre.apellido@tunegocio.pe" [attr.aria-invalid]="invalid('email')" />
+          </div>
+          @if (invalid('email')) { <p class="field-error">Ingresa un correo institucional válido</p> }
+        </div>
+
+        <div class="group">
+          <label for="sign-up-phone">Celular <b aria-hidden="true">*</b></label>
+          <div class="field" [class.invalid]="invalid('phone')">
+            <span class="prefix" aria-hidden="true">+51</span>
+            <input id="sign-up-phone" type="tel" formControlName="phone" autocomplete="tel-national" inputmode="tel" placeholder="987 654 321" (blur)="normalizePhone()" [attr.aria-invalid]="invalid('phone')" aria-describedby="sign-up-phone-hint" />
+          </div>
+          @if (invalid('phone')) { <p class="field-error">Ingresa un celular de 9 dígitos que empiece con 9</p> }
+          @else { <p class="hint" id="sign-up-phone-hint">Lo usaremos solo para avisos de tu cuenta.</p> }
+        </div>
+
+        <div class="group">
+          <label for="sign-up-password">Contraseña <b aria-hidden="true">*</b></label>
+          <div class="field" [class.invalid]="invalid('password')">
+            <svg class="lead-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input id="sign-up-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" [attr.aria-invalid]="invalid('password')" aria-describedby="sign-up-rules" />
+            <button type="button" class="eye" [class.on]="showPassword()" [attr.aria-label]="showPassword() ? 'Ocultar contraseñas' : 'Mostrar contraseñas'" [attr.aria-pressed]="showPassword()" (click)="showPassword.set(!showPassword())">
+              <svg class="open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="shut" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A9.7 9.7 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3 3.8M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+            </button>
+          </div>
+          @if (invalid('password')) { <p class="field-error">La contraseña no cumple con los requisitos de seguridad</p> }
+          <ul class="rules" id="sign-up-rules" aria-label="Requisitos de seguridad">
+            @for (rule of rules; track rule.label) { <li [class.ok]="rule.test(password())"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>{{ rule.label }}</li> }
+          </ul>
+        </div>
+
+        <div class="group">
+          <label for="sign-up-confirmation">Confirmar contraseña <b aria-hidden="true">*</b></label>
+          <div class="field" [class.invalid]="invalid('confirmation')">
+            <svg class="lead-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input id="sign-up-confirmation" [type]="showPassword() ? 'text' : 'password'" formControlName="confirmation" autocomplete="new-password" [attr.aria-invalid]="invalid('confirmation')" />
+          </div>
+          @if (invalid('confirmation')) { <p class="field-error">{{ form.controls.confirmation.value ? 'Las contraseñas no coinciden' : 'Confirma tu contraseña' }}</p> }
+        </div>
+
+        <div class="group terms">
+          <label class="check"><input id="sign-up-acceptedTerms" type="checkbox" formControlName="acceptedTerms" [attr.aria-invalid]="invalid('acceptedTerms')" /><span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Acepto los términos y condiciones y la política de privacidad de Alivia</label>
+          @if (invalid('acceptedTerms')) { <p class="field-error">Debes aceptar los términos para crear la cuenta</p> }
+        </div>
+
+        <button class="submit" [disabled]="loading()" [attr.aria-busy]="loading()">
+          @if (loading()) { <span class="spinner" aria-hidden="true"></span>Creando cuenta… } @else { Crear cuenta }
+        </button>
+        <p class="switch-page">¿Ya tienes cuenta? <a routerLink="/sign-in">Inicia sesión</a></p>
+      </form>
+    }
+
+    <footer class="foot"><i aria-hidden="true"></i>Alivia Admin <span aria-hidden="true">·</span> Lima, Perú</footer>
+  </section>
+
+  <section class="art" aria-hidden="true">
+    <div class="stage">
+      <img src="casa.webp" alt="" width="1000" height="976" />
+      <span class="chip network"><i class="dot"></i>Red operativa en Lima</span>
+      <span class="chip voice"><span class="tile"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span><b>Control por voz local</b><small>100% privado • Offline</small></span></span>
+      <span class="chip monitor"><span class="tile"><svg viewBox="0 0 24 24"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></svg></span><span><b>Monitoreo activo</b><small>Telemetría de campo</small></span></span>
+      <span class="chip node"><i class="dot"></i>Nodo Central San Isidro <code>IoT Online</code></span>
+    </div>
+  </section>
+</main>

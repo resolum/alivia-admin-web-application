@@ -16,8 +16,24 @@ describe('IamStore', () => {
     await store.getActivation('t');
     await store.activate('t', 'Clave#2026x');
     expect(api.activate).toHaveBeenCalledWith('t', 'Clave#2026x');
-    expect(api.signIn).toHaveBeenCalledWith({ email: 'a@b.c', password: 'x' });
+    expect(api.signIn).toHaveBeenCalledWith({ email: 'a@b.c', password: 'x' }, false);
     expect(api.signOut).toHaveBeenCalled();
+  });
+
+  it('renews an expired session with the refresh token', async () => {
+    const live = `h.${btoa(JSON.stringify({ exp: Date.now() / 1000 + 600 }))}.s`;
+    const expired = `h.${btoa(JSON.stringify({ exp: Date.now() / 1000 - 1 }))}.s`;
+    let current = expired;
+    const api = { accessToken: vi.fn(() => current), refresh: vi.fn(async () => { current = live; return true; }) };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [{ provide: IamApi, useValue: api }] });
+    const store = TestBed.inject(IamStore);
+
+    expect(await store.ensureSession()).toBe(true);
+    expect(await store.ensureSession()).toBe(true);
+    expect(api.refresh).toHaveBeenCalledTimes(1);
+    current = expired; api.refresh.mockResolvedValueOnce(false);
+    expect(await store.ensureSession()).toBe(false);
   });
 
   it('sends each staff role to its portal', () => {
@@ -33,5 +49,13 @@ describe('IamStore', () => {
     expect(store.currentEmail()).toBe('diego.ramos@alivia.test');
     current = token({ role: 'ADMINISTRATOR' });
     expect(store.homeUrl()).toBe('/hcm/contracts');
+    expect(store.isAdministrator()).toBe(true);
+    for (const role of ['CLEANING', 'EMPLOYEE']) {
+      current = token({ role });
+      expect(store.isAdministrator()).toBe(false);
+      expect(store.homeUrl()).toBe('/access-denied');
+    }
+    current = token({});
+    expect(store.homeUrl()).toBe('/access-denied');
   });
 });

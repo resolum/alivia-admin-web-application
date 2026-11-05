@@ -9,7 +9,11 @@ const comingSoon = (path: string, title: string) => ({ path, component: ComingSo
 
 export const routes: Routes = [
   { path: 'sign-in', loadChildren: () => import('./iam/presentation/iam.routes').then(module => module.IAM_ROUTES) },
+  { path: 'sign-up', loadChildren: () => import('./iam/presentation/iam.routes').then(module => module.SIGN_UP_ROUTES) },
+  { path: 'access-denied', canActivate: [requireSession], loadChildren: () => import('./iam/presentation/iam.routes').then(module => module.ACCESS_DENIED_ROUTES) },
   { path: 'activate-account', loadChildren: () => import('./iam/presentation/iam.routes').then(module => module.ACTIVATION_ROUTES) },
+  { path: 'forgot-password', loadChildren: () => import('./iam/presentation/iam.routes').then(module => module.FORGOT_PASSWORD_ROUTES) },
+  { path: 'reset-password', loadChildren: () => import('./iam/presentation/iam.routes').then(module => module.RESET_PASSWORD_ROUTES) },
   { path: 'technician', component: TechnicianShell, canActivate: [requireSession, requireTechnician], children: [
     { path: '', pathMatch: 'full', redirectTo: 'home' },
     comingSoon('home', 'Inicio'),
@@ -32,6 +36,7 @@ export const routes: Routes = [
   { path: '', component: AdminShell, canActivate: [requireSession, requireAdministration], children: [
     { path: '', pathMatch: 'full', redirectTo: 'hcm/contracts' },
     { path: 'hcm', loadChildren: () => import('./hcm/presentation/hcm.routes').then(module => module.HCM_ROUTES) },
+    { path: 'iam/users', loadChildren: () => import('./iam/presentation/iam.routes').then(module => module.USER_ROLES_ROUTES) },
     { path: '**', redirectTo: 'hcm/contracts' },
   ] },
 ];
