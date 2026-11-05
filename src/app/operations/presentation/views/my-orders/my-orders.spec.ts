@@ -55,7 +55,7 @@ describe('MyOrders', () => {
     element.querySelector<HTMLButtonElement>('.see')!.click();
     fixture.detectChanges();
     expect(element.querySelector('aside.drawer')?.textContent).toContain('Hogar de María');
-    expect(element.querySelector('aside.drawer iframe.map')).not.toBeNull();
+    expect(element.querySelector<HTMLAnchorElement>('aside.drawer a.map')?.href).toContain('google.com/maps/search/');
     expect(view.description(orders[1])).toBe('No responde');
     expect(view.description(order({ serviceType: 'EVALUATION' }))).toContain('Evaluación');
     expect(view.description(order({ serviceType: 'INSTALLATION' }))).toContain('Instalación');

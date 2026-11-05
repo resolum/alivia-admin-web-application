@@ -31,4 +31,5 @@ h3 { margin: 22px 0 8px; color: #5e687a; font-size: 11px; letter-spacing: .5px; 
 .status.in-progress { background: #d9faf2; color: #168978; } .status.completed { background: #e8ebf2; color: #626b7b; }
 @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } .summary { grid-template-columns: 1fr 1fr; } .incident { grid-template-columns: 1fr; } }
 .map { display: block; width: 100%; height: 220px; margin-top: 16px; border: 0; border-radius: 12px; background: #eef1f8; }
+.map-preview { display: flex; align-items: center; justify-content: center; color: #22478d; font-size: 13px; font-weight: 800; text-decoration: none; }
 .map-note { margin: 6px 0 0; color: #6e7889; font-size: 10px; }

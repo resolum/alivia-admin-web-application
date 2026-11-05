@@ -46,7 +46,7 @@
             }
           </div>
           @if (order.directions; as directions) {
-            <iframe class="map" [src]="mapEmbed(directions)" title="Mapa del hogar" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <a class="map map-preview" [href]="mapSearch(directions)" target="_blank" rel="noopener">Ver ubicación en Google Maps ↗</a>
             <p class="map-note">Ubicación según la dirección registrada en la solicitud.</p>
           }
         </article>

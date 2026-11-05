@@ -50,9 +50,9 @@
         <span>⌖ {{ order.directions || 'Sin dirección registrada' }}</span>
         <span>◷ {{ day(order.date) }} · {{ window(order) }}</span>
       </div>
-      @if (mapEmbed(); as embed) {
+      @if (order.directions; as directions) {
         <small class="label">UBICACIÓN</small>
-        <iframe class="map" [src]="embed" title="Mapa del hogar" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <a class="map map-preview" [href]="mapSearch(directions)" target="_blank" rel="noopener">Ver ubicación en Google Maps ↗</a>
         <a class="map-link" [href]="mapSearch(order.directions!)" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>
       }
       @if (order.contactName || order.contactPhone) {

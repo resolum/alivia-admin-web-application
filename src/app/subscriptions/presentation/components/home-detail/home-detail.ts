@@ -1,7 +1,6 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { districtOf, mapEmbedUrl, mapSearchUrl } from '../../../../shared/domain/map-links';
+import { districtOf, mapSearchUrl } from '../../../../shared/domain/map-links';
 import { paymentState } from '../../../domain/hiring-request.entity';
 import {
   deviceLabel, formatLongDate, formatOrderDay, homeName, homePrice, nextBilling, orderState, orderTypeLabel, ServicedHome,
@@ -19,7 +18,6 @@ export class HomeDetail {
   readonly home = input.required<ServicedHome>();
   /** Base route of the order detail ("/operations" or "/technician/orders"); null hides the order links. */
   readonly orderLink = input<string | null>(null);
-  private readonly sanitizer = inject(DomSanitizer);
   protected readonly tab = signal<HomeTab>('info');
   protected readonly name = homeName;
   protected readonly price = homePrice;
@@ -40,11 +38,6 @@ export class HomeDetail {
   protected readonly attended = computed(() => this.home().orders.filter(order => order.status === 'COMPLETED').length);
   protected readonly active = computed(() => this.home().orders.filter(order => orderState(order).tone === 'active' || orderState(order).tone === 'scheduled').length);
   protected readonly mapSearch = computed(() => this.home().directions ? mapSearchUrl(this.home().directions!) : null);
-  protected readonly mapEmbed = computed<SafeResourceUrl | null>(() => {
-    const directions = this.home().directions;
-    // Only this URL, built from the home's address, is trusted as a frame source.
-    return directions ? this.sanitizer.bypassSecurityTrustResourceUrl(mapEmbedUrl(directions)) : null;
-  });
 
   protected count(tab: HomeTab): number | null {
     if (tab === 'devices') return this.home().devices.length;

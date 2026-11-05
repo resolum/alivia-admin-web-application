@@ -1,9 +1,8 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { districtOf } from '../../../../shared/domain/map-links';
 import {
-  formatDay, homeName, limaToday, mapEmbedUrl, mapSearchUrl, matches, orderCode, processLabel, ServiceType, serviceTypeLabel,
+  formatDay, homeName, limaToday, mapSearchUrl, matches, orderCode, processLabel, ServiceType, serviceTypeLabel,
   stageOf, TechnicalOrder, window,
 } from '../../../domain/technical-order.entity';
 import { TechnicalOrdersApi } from '../../../infrastructure/technical-orders.api';
@@ -18,7 +17,6 @@ type StateFilter = 'ALL' | 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
 @Component({ selector: 'app-my-orders', imports: [RouterLink, MyCalendar], templateUrl: './my-orders.html', styleUrl: './my-orders.css' })
 export class MyOrders implements OnInit {
   private readonly api = inject(TechnicalOrdersApi);
-  private readonly sanitizer = inject(DomSanitizer);
   protected readonly orders = signal<TechnicalOrder[]>([]);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -64,12 +62,6 @@ export class MyOrders implements OnInit {
       const order = a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime);
       return this.isOpen(a) ? order : -order;
     }));
-
-  protected readonly mapEmbed = computed<SafeResourceUrl | null>(() => {
-    const directions = this.opened()?.directions;
-    // Only this URL, built from the order's address, is trusted as a frame source.
-    return directions ? this.sanitizer.bypassSecurityTrustResourceUrl(mapEmbedUrl(directions)) : null;
-  });
 
   ngOnInit(): void {
     void this.load();

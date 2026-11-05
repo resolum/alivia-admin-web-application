@@ -82,9 +82,8 @@
 
   <article class="card">
     <div class="card-title"><div><h2>Ubicación y cobertura</h2></div></div>
-    @if (mapEmbed(); as embed) {
-      <iframe class="map" [src]="embed" title="Mapa del hogar" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <a class="map-link" [href]="mapSearch()" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>
+    @if (mapSearch(); as url) {
+      <a class="map map-preview" [href]="url" target="_blank" rel="noopener">Ver ubicación en Google Maps ↗</a>
     } @else { <p class="empty">Este hogar no tiene una dirección registrada.</p> }
     <div class="grid">
       <div><small>DIRECCIÓN</small><strong>{{ home().directions || '—' }}</strong></div>

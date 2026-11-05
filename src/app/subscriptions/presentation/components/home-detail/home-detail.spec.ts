@@ -15,7 +15,7 @@ describe('HomeDetail', () => {
 
     expect(element.textContent).toContain('Hogar de María');
     expect(element.textContent).toContain('Plan Base');
-    expect(element.querySelector('iframe.map')?.getAttribute('src')).toContain('maps.google.com/maps?q=');
+    expect(element.querySelector<HTMLAnchorElement>('a.map')?.href).toContain('google.com/maps/search/');
     tab('Suscripción').click(); fixture.detectChanges();
     expect(element.textContent).toContain('S/ 99 / mes');
     expect(element.textContent).toContain('Cobro realizado');
@@ -29,7 +29,7 @@ describe('HomeDetail', () => {
     fixture.componentRef.setInput('home', servicedHome({ directions: null, devices: [], orders: [] }));
     fixture.componentRef.setInput('orderLink', null);
     fixture.detectChanges();
-    expect(element.querySelector('iframe.map')).toBeNull();
+    expect(element.querySelector('a.map')).toBeNull();
     expect(element.textContent).toContain('no tiene órdenes');
   });
 });

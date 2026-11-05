@@ -1,9 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TechnicalOrdersStore } from '../../../application/technical-orders.store';
 import {
-  createdAt, deviceTypeOf, formatDay, formatMoment, homeName, mapEmbedUrl, mapSearchUrl, orderCode, problemOf, processLabel, serviceTypeLabel, stageOf,
+  createdAt, deviceTypeOf, formatDay, formatMoment, homeName, mapSearchUrl, orderCode, problemOf, processLabel, serviceTypeLabel, stageOf,
   TechnicalOrder, window,
 } from '../../../domain/technical-order.entity';
 
@@ -15,8 +14,6 @@ export class TechnicalOrderDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   protected readonly backLink: string = this.route.snapshot.data['back'] ?? '/operations';
   protected readonly backLabel: string = this.route.snapshot.data['backLabel'] ?? 'órdenes técnicas';
-  private readonly sanitizer = inject(DomSanitizer);
-  private readonly embeds = new Map<string, SafeResourceUrl>();
   protected readonly typeLabel = serviceTypeLabel;
   protected readonly code = orderCode;
   protected readonly home = homeName;
@@ -30,19 +27,6 @@ export class TechnicalOrderDetail implements OnInit {
   ngOnInit(): void { void this.store.select(Number(this.route.snapshot.paramMap.get('orderId'))); }
 
   protected stage(order: TechnicalOrder): string { return stageOf(order).toLowerCase().replace('_', '-'); }
-
-  /**
-   * Embedded Google Maps of the home. Only this URL, built from the order's address, is trusted as a frame source;
-   * it is cached so the frame does not reload on every change detection.
-   */
-  protected mapEmbed(directions: string): SafeResourceUrl {
-    let url = this.embeds.get(directions);
-    if (!url) {
-      url = this.sanitizer.bypassSecurityTrustResourceUrl(mapEmbedUrl(directions));
-      this.embeds.set(directions, url);
-    }
-    return url;
-  }
 
   protected mapSearch(directions: string): string { return mapSearchUrl(directions); }
 

@@ -42,6 +42,7 @@
 .contact a { color: #22478d; font-weight: 800; text-decoration: none; }
 .label, .contact small { color: #5e687a; font-size: 10px; font-weight: 900; }
 .map { display: block; width: 100%; height: 200px; border: 0; border-radius: 12px; background: #eef1f8; }
+.map-preview { display: flex; align-items: center; justify-content: center; color: #22478d; font-size: 13px; font-weight: 800; text-decoration: none; }
 .map-link, .full { color: #22478d; font-size: 12px; font-weight: 800; text-decoration: none; }
 .description { margin: 0; padding: 12px; border-radius: 8px; background: #f7f8ff; color: #344056; font-size: 13px; line-height: 1.5; }
 .incident { margin: 0; color: #c52828; font-size: 12px; font-weight: 700; }
