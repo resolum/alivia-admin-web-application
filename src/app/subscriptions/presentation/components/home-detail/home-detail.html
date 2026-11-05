@@ -1,0 +1,94 @@
+<div class="home-head">
+  <div>
+    <div class="title"><h1>{{ name(home()) }}</h1><span class="status {{ status() }}">● Suscripción {{ subscription(home()).toLowerCase() }}</span></div>
+    <p>Código: <b>{{ home().code }}</b>@if (home().directions) { · {{ home().directions }} }@if (home().installedAt) { · Instalado el {{ longDate(home().installedAt!) }} }</p>
+  </div>
+  <span class="mode">Modo consulta</span>
+</div>
+
+<nav class="tabs" aria-label="Secciones del hogar">
+  @for (item of tabs; track item.id) {
+    <button type="button" [class.active]="tab() === item.id" [attr.aria-pressed]="tab() === item.id" (click)="tab.set(item.id)">
+      {{ item.label }}@if (count(item.id) !== null) { <small>{{ count(item.id) }}</small> }
+    </button>
+  }
+</nav>
+
+<div class="layout">
+  <article class="card">
+    @switch (tab()) {
+      @case ('info') {
+        <div class="card-title"><div><h2>Datos generales del hogar</h2></div><span>{{ home().code }}</span></div>
+        <h3>IDENTIFICACIÓN Y CONTACTO</h3>
+        <div class="grid">
+          <div><small>ALIAS DEL HOGAR</small><strong>{{ name(home()) }}</strong></div>
+          <div><small>CÓDIGO ÚNICO</small><strong class="mono">{{ home().code }}</strong></div>
+          <div><small>RESPONSABLE PRINCIPAL</small><strong>{{ home().contactName || 'Sin responsable registrado' }}</strong></div>
+          <div><small>TELÉFONO DE CONTACTO</small><strong>{{ home().contactPhone || 'Sin teléfono registrado' }}</strong></div>
+        </div>
+        <h3>SERVICIO Y COBERTURA</h3>
+        <div class="grid">
+          <div><small>TIPO DE SERVICIO</small><strong>{{ home().planName || 'Plan no disponible' }}</strong></div>
+          <div><small>ESTADO DEL SERVICIO</small><strong class="tone {{ status() }}">{{ subscription(home()) }}</strong></div>
+          <div><small>FECHA DE INSTALACIÓN</small><strong>{{ home().installedAt ? longDate(home().installedAt!) : '—' }}</strong></div>
+          <div><small>INSTALADO POR</small><strong>{{ home().installedBy || '—' }}</strong></div>
+        </div>
+      }
+      @case ('subscription') {
+        <div class="card-title"><div><h2>Detalle de suscripción</h2></div><span class="status {{ status() }}">{{ subscription(home()) }}</span></div>
+        <div class="box">
+          <div><small>PLAN CONTRATADO</small><strong>{{ home().planName || 'Plan no disponible' }}</strong></div>
+          <div class="grid">
+            <div><small>TARIFA</small><strong class="price">{{ price(home()) || 'Monto por definir' }}</strong></div>
+            <div><small>ESTADO DE PAGO</small><strong>{{ payment() }}</strong></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div><small>FECHA DE INICIO</small><strong>{{ home().installedAt ? longDate(home().installedAt!) : '—' }}</strong></div>
+          <div><small>PRÓXIMA FECHA DE FACTURACIÓN</small><strong>{{ nextBilling() ? longDate(nextBilling()!) : '—' }}</strong></div>
+          <div><small>CICLO DE COBRO</small><strong>{{ home().billingCycle === 'ANNUAL' ? 'Anual' : 'Mensual' }}</strong></div>
+          <div><small>HABITACIONES</small><strong>{{ home().rooms }}</strong></div>
+        </div>
+      }
+      @case ('devices') {
+        <div class="card-title"><div><h2>Dispositivos instalados</h2><p>Registrados por el técnico en la instalación</p></div><span>{{ home().devices.length }} equipos</span></div>
+        <ul class="list">
+          @for (device of home().devices; track device.macAddress) {
+            <li><div><strong>{{ device.alias }}</strong><span class="mono">{{ deviceLabel(device.type) }} · {{ device.macAddress }}</span></div><b class="badge ok">● Instalado</b></li>
+          } @empty { <li class="empty">No hay dispositivos registrados en la instalación.</li> }
+        </ul>
+      }
+      @case ('orders') {
+        <div class="card-title"><div><h2>Órdenes técnicas del hogar</h2></div><span>{{ home().orders.length }} registradas</span></div>
+        <ul class="list">
+          @for (order of home().orders; track order.id) {
+            <li>
+              <div>
+                <strong class="mono">{{ order.code }} <b class="badge {{ orderState(order).tone }}">{{ orderState(order).label }}</b></strong>
+                <span>{{ orderType(order) }}@if (order.incidentCode) { · {{ order.incidentCode }} }@if (order.technicianName) { · {{ order.technicianName }} }</span>
+                <span>{{ orderDay(order.date) }}@if (order.startTime) { · {{ order.startTime }} – {{ order.endTime }} }</span>
+              </div>
+              @if (orderLink()) { <a class="view-link" [routerLink]="[orderLink(), order.id]">Ver orden →</a> }
+            </li>
+          } @empty { <li class="empty">Este hogar no tiene órdenes técnicas.</li> }
+        </ul>
+        <div class="grid stats">
+          <div><small>ÓRDENES ATENDIDAS</small><strong>{{ attended() }} resueltas</strong></div>
+          <div><small>ORDEN ACTIVA</small><strong>{{ active() }} en atención</strong></div>
+        </div>
+      }
+    }
+  </article>
+
+  <article class="card">
+    <div class="card-title"><div><h2>Ubicación y cobertura</h2></div></div>
+    @if (mapEmbed(); as embed) {
+      <iframe class="map" [src]="embed" title="Mapa del hogar" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <a class="map-link" [href]="mapSearch()" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>
+    } @else { <p class="empty">Este hogar no tiene una dirección registrada.</p> }
+    <div class="grid">
+      <div><small>DIRECCIÓN</small><strong>{{ home().directions || '—' }}</strong></div>
+      <div><small>DISTRITO</small><strong>{{ district() || '—' }}</strong></div>
+    </div>
+  </article>
+</div>
