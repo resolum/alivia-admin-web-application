@@ -1,0 +1,14 @@
+.homes-page .page-heading p.wide { max-width: none; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.kpis article { display: flex; flex-direction: column; gap: 8px; padding: 18px; background: #fff; border: 1px solid #edf0f7; border-radius: 12px; }
+.kpis small { color: #566176; font-size: 11px; font-weight: 800; }
+.kpis strong { color: #0c307a; font-size: 30px; }
+.kpis article.danger strong { color: #c52828; }
+.kpis div { display: flex; align-items: center; gap: 10px; }
+.kpis em { padding: 3px 9px; border-radius: 10px; font-size: 10px; font-style: normal; font-weight: 800; }
+.kpis em.ok { background: #dff8f2; color: #138575; }
+.kpis span { color: #5d687a; font-size: 12px; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
+.status { white-space: nowrap; }
+.status.active { background: #d9faf2; color: #168978; } .status.attention { background: #ffe0e0; color: #c52828; } .status.canceled { background: #e8ebf2; color: #626b7b; }
+@media (max-width: 860px) { .kpis { grid-template-columns: 1fr; } .table-card { overflow-x: auto; } }

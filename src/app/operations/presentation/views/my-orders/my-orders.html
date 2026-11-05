@@ -1,0 +1,68 @@
+<section class="page my-orders">
+  <div class="head">
+    <div class="title"><h1>Mis órdenes</h1><span class="pill">{{ counts().pending }} pendientes</span><span class="pill shift">◷ {{ shiftToday() ? 'Turno de hoy: ' + shiftToday() : 'Hoy sin jornada' }}</span></div>
+    <div class="toggle" role="group" aria-label="Vista">
+      <button type="button" [class.active]="view() === 'cards'" [attr.aria-pressed]="view() === 'cards'" (click)="view.set('cards')">▤ Tarjetas</button>
+      <button type="button" [class.active]="view() === 'calendar'" [attr.aria-pressed]="view() === 'calendar'" (click)="view.set('calendar')">▦ Calendario</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <label for="my-order-search">⌕<input id="my-order-search" placeholder="Buscar por código u hogar..." (input)="onSearch($event)" /></label>
+    <select aria-label="Tipo" (change)="onType($event)"><option value="ALL">Tipo: Todos</option><option value="EVALUATION">Revisión técnica</option><option value="INSTALLATION">Instalación</option><option value="MAINTENANCE">Incidencia</option></select>
+    <select aria-label="Estado" (change)="onState($event)"><option value="ALL">Estado: Todos</option><option value="OPEN">Programadas</option><option value="IN_PROGRESS">En proceso</option><option value="COMPLETED">Completadas</option></select>
+    <input type="date" aria-label="Fecha" (change)="onDate($event)" />
+  </div>
+
+  <div class="kpis">
+    <article><small>HOY</small><strong>{{ counts().today }}</strong><span>órdenes programadas</span><i>▣</i></article>
+    <article class="teal"><small>EN PROCESO</small><strong>{{ counts().inProgress }}</strong><span>en atención</span><i>➤</i></article>
+    <article><small>ATRASADAS</small><strong>{{ counts().late }}</strong><span [class.ok]="counts().late === 0">{{ counts().late === 0 ? 'al día' : 'sin iniciar' }}</span><i>✓</i></article>
+  </div>
+
+  @if (error()) { <div class="notice error-notice"><span>⚠ {{ error() }}</span><button (click)="load()">Reintentar</button></div> }
+  @if (loading() && orders().length === 0) { <div class="loading card">Cargando tus órdenes…</div> }
+  @else if (!error() && view() === 'cards') {
+    <div class="cards">
+      @for (order of visible(); track order.id) {
+        <article class="order {{ stage(order) }}">
+          <div>
+            <p class="line"><strong>{{ code(order) }}</strong><span class="type {{ order.serviceType.toLowerCase() }}">{{ typeLabel[order.serviceType] }}</span><span class="time">◷ {{ day(order.date) }} · {{ window(order) }}</span><span class="state {{ stage(order) }}">{{ stage(order) === 'late' ? 'Atrasada' : process(order) }}</span></p>
+            <p class="home">⌖ <b>{{ home(order) }}</b>@if (district(order)) { · {{ district(order) }} }</p>
+          </div>
+          <button type="button" class="see" (click)="opened.set(order)">Ver orden ›</button>
+        </article>
+      } @empty { <div class="loading card">No tienes órdenes con estos filtros.</div> }
+    </div>
+  } @else if (!error()) {
+    <app-my-calendar [embedded]="true" />
+  }
+
+  @if (opened(); as order) {
+    <div class="backdrop" (click)="opened.set(null)" aria-hidden="true"></div>
+    <aside class="drawer" role="dialog" aria-modal="true" [attr.aria-label]="'Orden ' + code(order)">
+      <header>
+        <div><h2>{{ code(order) }} <span class="type {{ order.serviceType.toLowerCase() }}">{{ typeLabel[order.serviceType] }}</span></h2><p class="state-line {{ stage(order) }}">● {{ stage(order) === 'late' ? 'Atrasada' : process(order) }}</p></div>
+        <button type="button" class="close" (click)="opened.set(null)" aria-label="Cerrar">✕</button>
+      </header>
+      <div class="home-card">
+        <strong>{{ home(order) }}</strong>
+        <span>⌖ {{ order.directions || 'Sin dirección registrada' }}</span>
+        <span>◷ {{ day(order.date) }} · {{ window(order) }}</span>
+      </div>
+      @if (order.directions; as directions) {
+        <small class="label">UBICACIÓN</small>
+        <a class="map map-preview" [href]="mapSearch(directions)" target="_blank" rel="noopener">Ver ubicación en Google Maps ↗</a>
+        <a class="map-link" [href]="mapSearch(order.directions!)" target="_blank" rel="noopener">Abrir en Google Maps ↗</a>
+      }
+      @if (order.contactName || order.contactPhone) {
+        <div class="contact"><small>CONTACTO AUTORIZADO</small><strong>{{ order.contactName || 'Sin nombre registrado' }}</strong>@if (order.contactPhone) { <a [href]="'tel:' + order.contactPhone">{{ order.contactPhone }}</a> }</div>
+      }
+      <small class="label">DETALLE DEL SERVICIO</small>
+      <p class="description">{{ description(order) }}</p>
+      @if (order.incident; as incident) { <p class="incident">{{ incident.code }}@if (incident.device) { · {{ incident.device.alias }} }</p> }
+      <p class="hint">Inicia y cierra la atención desde la aplicación móvil.</p>
+      <a class="full" [routerLink]="['/technician/orders', order.id]">Ver expediente completo →</a>
+    </aside>
+  }
+</section>

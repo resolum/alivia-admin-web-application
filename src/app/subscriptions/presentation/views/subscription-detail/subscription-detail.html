@@ -1,0 +1,29 @@
+<section class="page detail-page">
+  <a class="back" [routerLink]="back">← Volver a suscripciones</a>
+  @if (subscription(); as item) {
+    <div class="detail-heading"><div><h1>{{ item.code }}</h1><span class="status {{ item.status.toLowerCase() }}">● {{ statusLabel[item.status] }}</span></div></div>
+    <article class="card conditions">
+      <div class="card-title"><div><h2>Servicio contratado</h2><p>Plan, cobro y próxima renovación</p></div></div>
+      <div class="detail-grid">
+        <div><small>PLAN</small><strong>{{ item.planName }}</strong></div>
+        <div><small>TARIFA</small><span>{{ price(item) }}</span></div>
+        <div><small>CICLO DE COBRO</small><span>{{ item.billingCycle === 'ANNUAL' ? 'Anual' : 'Mensual' }}</span></div>
+        <div><small>ESTADO DEL PAGO</small><span>{{ payment(item).label }}</span></div>
+        <div><small>ACTIVADA</small><span>{{ date(item.activatedAt) }}</span></div>
+        <div><small>PRÓXIMA ACCIÓN</small><strong>{{ next(item).label }}</strong><em>{{ next(item).detail }}</em></div>
+        <div><small>HABITACIONES</small><span>{{ item.rooms }}</span></div>
+        <div><small>DISPOSITIVOS</small><span>{{ item.devices }}</span></div>
+      </div>
+    </article>
+    <article class="card">
+      <div class="card-title"><div><h2>Hogar</h2><p>Dónde se presta el servicio</p></div><span>{{ home(item) }}</span></div>
+      <div class="detail-grid">
+        <div><small>DIRECCIÓN</small><span>{{ item.directions || 'Sin dirección registrada' }}</span></div>
+        <div><small>CONTACTO</small><span>{{ item.contactName || 'Sin contacto registrado' }}@if (item.contactPhone) { · {{ item.contactPhone }} }</span></div>
+        <div><small>TÉCNICO DE LA INSTALACIÓN</small><span>{{ item.technicianName || 'Sin registro' }}</span></div>
+      </div>
+    </article>
+  } @else if (store.error()) { <div class="loading card">{{ store.error() }}</div> }
+  @else if (store.loading()) { <div class="loading card">Cargando suscripción…</div> }
+  @else { <div class="loading card">No encontramos esta suscripción.</div> }
+</section>
