@@ -5,7 +5,8 @@ import { IamStore } from './iam.store';
 describe('IamStore', () => {
   it('checks the session token and delegates sign in and sign out', async () => {
     const live = `h.${btoa(JSON.stringify({ exp: Date.now() / 1000 + 600 }))}.s`;
-    const api = { accessToken: vi.fn().mockReturnValueOnce(live).mockReturnValueOnce(null), signIn: vi.fn(), signOut: vi.fn(), getActivation: vi.fn(), activate: vi.fn() };
+    const api = { accessToken: vi.fn().mockReturnValueOnce(live).mockReturnValueOnce(null), signIn: vi.fn(), signOut: vi.fn(), getActivation: vi.fn(), activate: vi.fn(),
+      requestPasswordRecovery: vi.fn(), getPasswordReset: vi.fn(), resetPassword: vi.fn(), signUp: vi.fn(), resendVerification: vi.fn(), staffName: vi.fn() };
     TestBed.configureTestingModule({ providers: [{ provide: IamApi, useValue: api }] });
     const store = TestBed.inject(IamStore);
 
@@ -18,6 +19,17 @@ describe('IamStore', () => {
     expect(api.activate).toHaveBeenCalledWith('t', 'Clave#2026x');
     expect(api.signIn).toHaveBeenCalledWith({ email: 'a@b.c', password: 'x' }, false);
     expect(api.signOut).toHaveBeenCalled();
+    await store.requestPasswordRecovery('a@b.c');
+    await store.getPasswordReset('t');
+    await store.resetPassword('t', 'Clave#2026x');
+    await store.resendVerification('a@b.c');
+    await store.staffName();
+    const command = { firstName: 'A', lastName: 'B', email: 'a@b.c', phoneNumber: '51987654321', password: 'Clave#2026x', acceptedTerms: true };
+    await store.signUp(command);
+    expect(api.requestPasswordRecovery).toHaveBeenCalledWith('a@b.c');
+    expect(api.resetPassword).toHaveBeenCalledWith('t', 'Clave#2026x');
+    expect(api.signUp).toHaveBeenCalledWith(command);
+    expect(api.resendVerification).toHaveBeenCalledWith('a@b.c');
   });
 
   it('renews an expired session with the refresh token', async () => {
