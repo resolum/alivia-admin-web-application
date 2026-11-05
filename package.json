@@ -16,7 +16,6 @@
     "test:coverage": "ng test --watch=false --coverage --coverage-reporters=lcov --coverage-reporters=text-summary --coverage-include='src/app/**/*.ts' --coverage-exclude='src/app/**/*.routes.ts' --coverage-exclude='src/app/**/*.spec.ts'"
   },
   "private": true,
-  "packageManager": "npm@11.17.0",
   "dependencies": {
     "@angular/common": "^22.2.0",
     "@angular/compiler": "^22.2.0",
