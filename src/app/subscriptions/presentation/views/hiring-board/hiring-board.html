@@ -38,8 +38,9 @@
               <p>{{ request.billingCycle === 'MONTHLY' ? 'Mensual' : 'Anual' }} · {{ plural(request.devices, 'dispositivo', 'dispositivos') }}</p>
               <footer>
                 <span [class]="'state ' + state(request).tone">● {{ state(request).label }}</span>
+                @if (held(request); as amount) { <span>{{ amount }}</span> }
                 @if (expiresIn(request) !== null) { <span class="due">Vence en {{ expiresIn(request) }} días</span> }
-                @else { <span>{{ held(request) ?? timeAgo(request.updatedAt) }}</span> }
+                @else if (!held(request)) { <span>{{ timeAgo(request.updatedAt) }}</span> }
               </footer>
             </article>
           } @empty { <p class="empty">{{ stage.empty }}</p> }

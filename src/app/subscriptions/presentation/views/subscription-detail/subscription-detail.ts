@@ -9,7 +9,7 @@ export class SubscriptionDetail implements OnInit {
   protected readonly store = inject(SubscriptionsStore);
   private readonly route = inject(ActivatedRoute);
   private readonly id = this.route.snapshot.paramMap.get('subscriptionId') ?? '';
-  protected readonly back = this.route.snapshot.data['back'] as string ?? '/subscriptions';
+  protected readonly back = this.route.snapshot.data?.['back'] as string ?? '/subscriptions';
   protected readonly subscription = computed(() => this.store.find(this.id));
   protected readonly statusLabel = subscriptionStatusLabel;
   protected readonly home = homeOf;
