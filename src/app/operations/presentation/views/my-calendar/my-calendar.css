@@ -1,0 +1,64 @@
+.top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 14px; }
+.top h1 { margin: 0; color: #092765; font-size: 28px; letter-spacing: -1px; }
+.top h1 span { color: #5d687a; font-size: 20px; font-weight: 500; letter-spacing: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+.legend button { display: flex; align-items: center; gap: 6px; border: 0; background: none; color: #334057; font-size: 13px; }
+.legend button.off { opacity: .4; }
+.legend i { width: 8px; height: 8px; border-radius: 50%; }
+.legend .evaluation i { background: #3b63d6; } .legend .installation i { background: #119a80; } .legend .maintenance i { background: #cb2727; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.segmented { display: flex; gap: 2px; padding: 4px; border-radius: 10px; background: #eef1fa; }
+.segmented button { padding: 7px 13px; border: 0; border-radius: 7px; background: none; color: #334057; font-size: 13px; font-weight: 700; }
+.segmented button.active { background: #fff; color: #0c307a; box-shadow: 0 1px 3px rgba(15, 42, 107, .12); }
+.range { padding: 9px 13px; border-radius: 10px; background: #eef1fa; color: #0c307a; font-size: 13px; font-weight: 800; }
+.summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 0 0 14px; padding: 12px 18px; color: #5d687a; font-size: 13px; }
+.summary em { color: #138575; font-style: normal; font-weight: 800; }
+.summary .regular { color: #334057; font-weight: 700; }
+.summary b { color: #0c307a; }
+.board { padding: 0; overflow: hidden; }
+.head, .body { display: grid; }
+.head { border-bottom: 1px solid #e9edf5; background: #f6f7fd; }
+.zone { align-self: center; color: #5e687a; font-size: 11px; font-weight: 800; text-align: center; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 0; border: 0; background: none; color: #334057; }
+.day small { font-size: 11px; font-weight: 800; }
+.day b { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; }
+.day.today b { background: #0c307a; color: #fff; }
+.body { position: relative; }
+.times span { display: block; padding: 6px 8px 0 0; color: #5e687a; font-size: 11px; text-align: right; }
+.column { position: relative; border-left: 1px solid #e9edf5; background-color: #f1f3f9; background-image: linear-gradient(#e3e7f1 1px, transparent 1px), repeating-linear-gradient(135deg, transparent 0 8px, rgba(120, 132, 160, .08) 8px 9px); }
+.shift { position: absolute; left: 0; right: 0; background: #fff; border-top: 2px solid #c4ede2; border-bottom: 2px solid #c4ede2; background-image: linear-gradient(#eef1f8 1px, transparent 1px); background-size: 100% 64px; }
+.day em { color: #6e7889; font-size: 10px; font-style: normal; }
+.event { z-index: 1; }
+.event.outside { border-style: dashed; }
+.flag { margin-left: 4px; color: #c52828; font-size: 10px; }
+.shift-label { color: #138575; font-size: 10px; font-weight: 700; }
+
+.event { position: absolute; left: 6px; right: 6px; display: flex; flex-direction: column; gap: 3px; overflow: hidden; padding: 8px 10px; border: 1px solid transparent; border-radius: 10px; text-align: left; }
+.event.evaluation { background: #edf2ff; border-color: #d5def9; } .event.installation { background: #e9faf5; border-color: #c4ede2; } .event.maintenance { background: #fff1f1; border-color: #f6d0d0; }
+.event.completed { opacity: .6; } .event.in-progress { box-shadow: inset 3px 0 0 #119a80; }
+.event .code { color: #0c307a; font-size: 11px; font-weight: 800; }
+.event.maintenance .code { color: #c52828; }
+.event em { margin-left: 4px; color: #3b63d6; font-size: 10px; font-style: normal; }
+.event.installation em { color: #138575; } .event.maintenance em { color: #c52828; }
+.event strong { color: #172540; font-size: 14px; }
+.event .time { color: #485368; font-size: 11px; }
+.free { position: relative; z-index: 1; margin: 24px 12px; color: #778196; font-size: 12px; text-align: center; }
+.now { position: absolute; left: 64px; right: 0; height: 2px; background: #cb2727; pointer-events: none; }
+.now span { position: absolute; left: -2px; top: -10px; padding: 2px 6px; border-radius: 6px; background: #cb2727; color: #fff; font-size: 10px; font-weight: 800; }
+.month .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.weekday { color: #5e687a; font-size: 11px; text-align: center; }
+.cell { display: flex; flex-direction: column; gap: 4px; min-height: 96px; padding: 6px; border-radius: 8px; background: #f6f7fd; }
+.cell.out { opacity: .45; } .cell.today { outline: 2px solid #0c307a; }
+.number { align-self: flex-start; border: 0; background: none; color: #334057; font-size: 12px; font-weight: 800; }
+.chip { overflow: hidden; padding: 3px 6px; border: 0; border-radius: 6px; font-size: 10px; font-weight: 700; text-align: left; white-space: nowrap; text-overflow: ellipsis; }
+.chip.maintenance { background: #ffe9e9; color: #c52828; } .chip.installation { background: #dcf7f0; color: #138575; } .chip.evaluation { background: #e6eaff; color: #264a94; }
+.backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(15, 30, 60, .2); }
+.popover { position: fixed; top: 50%; left: 50%; z-index: 41; display: flex; flex-direction: column; gap: 8px; width: min(380px, calc(100% - 32px)); transform: translate(-50%, -50%); font-size: 13px; color: #344056; }
+.popover header { display: flex; justify-content: space-between; align-items: center; }
+.popover .code { color: #0c307a; font-weight: 800; }
+.popover em { margin-left: 6px; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-style: normal; }
+.popover em.evaluation { background: #e6eaff; color: #264a94; } .popover em.installation { background: #dcf7f0; color: #138575; } .popover em.maintenance { background: #ffe9e9; color: #c52828; }
+.popover strong { color: #092765; font-size: 17px; }
+.close { border: 0; background: none; font-size: 16px; }
+.see { margin-top: 6px; padding: 10px; border-radius: 8px; background: #0c307a; color: #fff; font-weight: 800; text-align: center; text-decoration: none; }
+@media (max-width: 860px) { .board { overflow-x: auto; } .head, .body { min-width: 720px; } }

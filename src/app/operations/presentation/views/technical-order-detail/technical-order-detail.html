@@ -1,0 +1,88 @@
+<section class="page detail-page order-detail">
+  <a class="back" [routerLink]="backLink">← Volver a {{ backLabel }}</a>
+  @if (store.selected(); as order) {
+    <div class="detail-heading">
+      <div>
+        <h1>{{ code(order) }}</h1>
+        <span class="type {{ order.serviceType.toLowerCase() }}">{{ typeLabel[order.serviceType] }}</span>
+        <span class="status {{ stage(order) }}">● {{ process(order) }}</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="main">
+        <article class="card">
+          <div class="card-title"><div><h2>Resumen de la solicitud</h2><p>Lo que se agendó para esta visita</p></div></div>
+          <div class="summary">
+            <div><small>TIPO DE ORDEN</small><strong>{{ typeLabel[order.serviceType] }}</strong></div>
+            <div><small>FECHA DE LA VISITA</small><strong>{{ day(order.date) }}</strong></div>
+            <div><small>BLOQUE HORARIO</small><strong>{{ window(order) }}</strong><em>Elegido por el cuidador</em></div>
+            <div><small>ESTADO DEL PROCESO</small><strong>{{ process(order) }}</strong></div>
+          </div>
+          <h3>DESCRIPCIÓN DEL SERVICIO</h3>
+          <p class="description">{{ description(order) }}</p>
+          @if (order.incident; as incident) {
+            <div class="incident">
+              <div><small>INCIDENCIA</small><strong>{{ incident.code }} · {{ problem(incident) }}</strong></div>
+              @if (incident.device; as device) { <div><small>DISPOSITIVO</small><strong>{{ device.alias }} · {{ deviceType(device.type) }}</strong><em>{{ device.macAddress }}</em></div> }
+              @if (incident.occurredAt) { <div><small>OCURRIÓ</small><strong>{{ moment(incident.occurredAt) }}</strong></div> }
+            </div>
+          }
+          @if (order.installedDevices?.length) {
+            <h3>DISPOSITIVOS INSTALADOS ({{ order.installedDevices!.length }})</h3>
+            <ul class="devices">
+              @for (device of order.installedDevices; track device.macAddress) { <li><strong>{{ device.alias }}</strong><span>{{ deviceType(device.type) }} · {{ device.macAddress }}</span></li> }
+            </ul>
+          }
+          @if (order.completionNotes) { <h3>NOTAS DEL CIERRE</h3><p class="description">{{ order.completionNotes }}</p> }
+        </article>
+
+        <article class="card">
+          <div class="card-title"><div><h2>Hogar</h2><p>Dónde se realiza la visita</p></div><strong class="home">{{ home(order) }}</strong></div>
+          <div class="summary two">
+            <div><small>DIRECCIÓN REGISTRADA</small><strong>{{ order.directions || 'Sin dirección registrada' }}</strong></div>
+            @if (order.directions) {
+              <div><small>UBICACIÓN</small><a class="map-link" [href]="mapSearch(order.directions)" target="_blank" rel="noopener">Abrir en Google Maps ↗</a></div>
+            }
+          </div>
+          @if (order.directions; as directions) {
+            <a class="map map-preview" [href]="mapSearch(directions)" target="_blank" rel="noopener">Ver ubicación en Google Maps ↗</a>
+            <p class="map-note">Ubicación según la dirección registrada en la solicitud.</p>
+          }
+        </article>
+
+        <article class="card">
+          <div class="card-title"><div><h2>Técnico</h2><p>Responsable de la visita</p></div><span>{{ order.technicianName ? 'Asignado' : 'No asignado' }}</span></div>
+          @if (order.technicianName) {
+            <div class="employee-card"><span class="avatar">{{ order.technicianName.slice(0, 2).toUpperCase() }}</span><div><strong>{{ order.technicianName }}</strong><span>Técnico de soporte Alivia</span></div></div>
+          } @else { <p class="empty">Técnico aún no asignado para la franja {{ window(order) }}.</p> }
+          @if ((order.assignments?.length ?? 0) > 1) {
+            <h3>HISTORIAL DE ASIGNACIONES</h3>
+            <ul class="devices">
+              @for (item of order.assignments; track item.assignedAt) { <li><strong>{{ item.technicianName }}</strong><span>{{ moment(item.assignedAt) }}</span></li> }
+            </ul>
+          }
+        </article>
+      </div>
+
+      <aside class="side">
+        <article class="card">
+          <div class="card-title"><div><h2>Contacto</h2></div></div>
+          <dl class="contact">
+            <dt>Recibe la visita</dt><dd>{{ order.contactName || 'La familia no indicó quién recibe la visita' }}</dd>
+            <dt>Teléfono de contacto</dt><dd>{{ order.contactPhone || 'Sin teléfono registrado' }}</dd>
+          </dl>
+        </article>
+        <article class="card">
+          <div class="card-title"><div><h2>Proceso</h2></div></div>
+          <ol class="timeline">
+            @for (step of steps(order); track step.label) {
+              <li [class.done]="step.done"><b></b><div><strong>{{ step.label }}</strong><span>{{ step.at ? moment(step.at) : (step.done ? 'Registrado' : 'Pendiente') }}</span></div></li>
+            }
+          </ol>
+        </article>
+      </aside>
+    </div>
+  } @else if (store.error()) { <div class="loading card">{{ store.error() }}</div> }
+  @else { <div class="loading card">Cargando detalle de la orden…</div> }
+</section>
