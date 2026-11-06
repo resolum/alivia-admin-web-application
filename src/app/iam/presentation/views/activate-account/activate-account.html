@@ -1,27 +1,39 @@
 <main class="activation">
   <header class="portal">
-    <div class="logo"><span class="mark">A</span><strong>alivia</strong></div>
+    <img class="logo" src="logo.webp" alt="Alivia" width="64" height="64" />
     <small>PORTAL ADMINISTRATIVO CLÍNICO</small>
   </header>
   <section class="panel">
     @switch (state()) {
-      @case ('loading') { <p class="lead">Revisando tu enlace de activación…</p> }
+      @case ('loading') { <p class="lead" role="status"><span class="spinner" aria-hidden="true"></span>Revisando tu enlace…</p> }
       @case ('invalid') {
         <div class="badge error-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
-        <h1>No pudimos activar tu cuenta</h1>
-        <p class="lead">{{ error() }}</p>
-        <a class="button primary wide" routerLink="/sign-in">Ir a iniciar sesión →</a>
+        @if (mode === 'reset') {
+          <h1>No pudimos validar tu enlace</h1>
+          <p class="lead">{{ error() }}</p>
+          <a class="button primary wide" routerLink="/forgot-password">Solicitar un nuevo enlace</a>
+          <a class="back-link" routerLink="/sign-in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Volver a iniciar sesión</a>
+        } @else {
+          <h1>No pudimos activar tu cuenta</h1>
+          <p class="lead">{{ error() }}</p>
+          <a class="button primary wide" routerLink="/sign-in">Ir a iniciar sesión →</a>
+        }
       }
       @case ('done') {
         <div class="badge done-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
-        <h1>Contraseña creada</h1>
-        <p class="lead">Tu cuenta está activa. Ya puedes iniciar sesión con {{ account()?.email }} y tu nueva contraseña.</p>
+        @if (mode === 'reset') {
+          <h1>Contraseña actualizada</h1>
+          <p class="lead">Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tus nuevas credenciales institucionales.</p>
+        } @else {
+          <h1>Contraseña creada</h1>
+          <p class="lead">Tu cuenta está activa. Ya puedes iniciar sesión con {{ account()?.email }} y tu nueva contraseña.</p>
+        }
         <a class="button primary wide" routerLink="/sign-in">Ir a iniciar sesión →</a>
       }
       @default {
-        <div class="badge" aria-hidden="true"><span class="mark small">A</span></div>
+        <div class="badge" aria-hidden="true"><img src="logo.webp" alt="" width="44" height="44" /></div>
         <h1>Crea una nueva contraseña</h1>
-        <p class="lead">Hola {{ account()?.fullName }}. Por seguridad, elige una contraseña robusta que no hayas usado antes.</p>
+        <p class="lead">@if (account()?.fullName) { Hola {{ account()?.fullName }}. }Por seguridad, elige una contraseña robusta que no hayas usado antes.</p>
         <p class="account">{{ account()?.email }}</p>
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <label for="new-password"><span>Nueva contraseña</span><small>Requerido</small></label>
@@ -41,7 +53,11 @@
           </div>
           @if ((submitted() || form.controls.confirmation.touched) && form.controls.confirmation.value && !matches()) { <p class="field-error"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Las contraseñas no coinciden.</p> }
           @if (error()) { <p class="field-error" role="alert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>{{ error() }}</p> }
-          <button class="button primary wide" [disabled]="saving()">{{ saving() ? 'Creando contraseña…' : 'Crear contraseña y activar cuenta' }}</button>
+          @if (mode === 'reset') {
+            <button class="button primary wide" [disabled]="saving()"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9.5a2 2 0 0 1 4 0V11"/></svg>{{ saving() ? 'Cambiando contraseña…' : 'Cambiar contraseña' }}</button>
+          } @else {
+            <button class="button primary wide" [disabled]="saving()">{{ saving() ? 'Creando contraseña…' : 'Crear contraseña y activar cuenta' }}</button>
+          }
         </form>
       }
     }

@@ -1,12 +1,120 @@
-.sign-in { display: grid; min-height: 100vh; place-items: center; padding: 16px; }
-form { display: flex; flex-direction: column; gap: 14px; width: min(380px, 100%); }
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 2px solid #20aa91; border-radius: 8px; color: #0c307a; font-weight: 800; }
-.brand strong { display: block; color: #0c307a; }
-.brand small { color: #5d687a; font-size: 9px; }
-h1 { margin: 6px 0; color: #092765; font-size: 24px; }
-label { display: flex; flex-direction: column; gap: 6px; color: #193763; font-size: 12px; font-weight: 800; }
-input { padding: 12px 14px; border: 1px solid transparent; border-radius: 8px; outline: 0; background: #f1f3fd; color: #263a58; }
-input:focus { border-color: #6b8ac4; }
-.error { margin: 0; color: #c62f2f; font-size: 12px; }
-.button:disabled { cursor: not-allowed; opacity: .5; }
+:host {
+  --navy: #0c2c6e; --navy-ink: #0a2459; --teal: #168978; --mint: #2fd3b4; --ink: #22304a; --muted: #56627a;
+  --line: #d8deea; --danger: #c52828; --surface: #f7f8fc;
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  display: block; font-family: Outfit, Inter, ui-sans-serif, system-ui, sans-serif;
+}
+.sign-in { display: grid; grid-template-columns: minmax(0, 620px) 1fr; min-height: 100dvh; background: #fff; }
+
+/* Form column */
+.side { display: flex; flex-direction: column; padding: 32px clamp(20px, 5vw, 64px) 28px; }
+.top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 20px; border-bottom: 1px solid #edf0f6; }
+.logo { width: 56px; height: 56px; object-fit: contain; }
+.portal { padding: 7px 14px; border: 1px solid #dfe4f0; border-radius: 999px; background: #f1f3f9; color: #33415a; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.form { display: flex; flex-direction: column; width: 100%; max-width: 490px; margin: clamp(28px, 7vh, 56px) 0 32px; }
+h1 { margin: 0; color: var(--navy-ink); font-size: clamp(30px, 4vw, 38px); font-weight: 700; letter-spacing: -.02em; line-height: 1.1; text-wrap: balance; }
+.lead { margin: 14px 0 28px; color: var(--muted); font-size: 17px; line-height: 1.55; text-wrap: pretty; }
+
+.group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.group label { color: var(--ink); font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.group label b { color: var(--danger); font-weight: 600; }
+.field { position: relative; display: flex; align-items: center; min-height: 50px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+  transition: border-color 150ms ease, box-shadow 150ms ease; }
+.field:focus-within { border-color: #6b8ac4; box-shadow: 0 0 0 3px rgba(12, 44, 110, .12); }
+.field.invalid { border-color: #f08a8a; box-shadow: 0 0 0 3px rgba(197, 40, 40, .1); }
+.field input { flex: 1; min-width: 0; height: 48px; padding: 0 12px 0 0; border: 0; outline: 0; background: none; color: var(--ink); font-size: 16px; }
+.field input::placeholder { color: #8a94a8; }
+svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.lead-icon { flex: 0 0 auto; width: 20px; height: 20px; margin: 0 12px 0 16px; color: #7b869b; }
+.alert-icon { flex: 0 0 auto; width: 20px; height: 20px; margin-right: 14px; color: #fff; fill: var(--danger); stroke-width: 2; }
+.field-error { margin: 0; color: var(--danger); font-size: 13px; transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out); }
+
+.eye { position: relative; display: grid; place-items: center; width: 44px; height: 44px; margin-right: 3px; border: 0; border-radius: 8px; background: none; color: #7b869b; }
+.eye svg { position: absolute; width: 20px; height: 20px; transition: opacity 200ms cubic-bezier(.2, 0, 0, 1), transform 200ms cubic-bezier(.2, 0, 0, 1), filter 200ms cubic-bezier(.2, 0, 0, 1); }
+.eye .shut, .eye.on .open { opacity: 0; transform: scale(.25); filter: blur(4px); }
+.eye.on .shut { opacity: 1; transform: none; filter: none; }
+
+.row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 4px 0 26px; }
+.check { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); font-size: 16px; cursor: pointer; }
+.check input { position: absolute; opacity: 0; width: 22px; height: 22px; margin: 0; }
+.box { display: grid; place-items: center; width: 22px; height: 22px; border: 1.5px solid #b9c2d4; border-radius: 6px; background: #fff; transition: background-color 150ms ease, border-color 150ms ease; }
+.box svg { width: 15px; height: 15px; color: #fff; stroke-width: 2.6; opacity: 0; transform: scale(.6); transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out); }
+.check input:checked + .box { border-color: #21b89b; background: #21b89b; }
+.check input:checked + .box svg { opacity: 1; transform: none; }
+.check input:focus-visible + .box { outline: 2px solid var(--navy); outline-offset: 2px; }
+.forgot { display: inline-flex; align-items: center; min-height: 44px; color: var(--navy-ink); font-size: 16px; font-weight: 600; text-decoration: none; }
+
+.problem { display: flex; gap: 10px; align-items: flex-start; margin: -8px 0 18px; padding: 12px 14px; border-radius: 10px; background: #fff1f1; color: #9b2121; font-size: 14px; line-height: 1.45;
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+@starting-style { .field-error, .problem { opacity: 0; transform: translateY(-4px); } }
+.problem svg { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 1px; }
+
+.submit { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; border: 0; border-radius: 8px; background: var(--navy); color: #fff; font-size: 17px; font-weight: 600;
+  box-shadow: 0 1px 2px rgba(10, 36, 89, .25), 0 6px 16px -6px rgba(10, 36, 89, .45); transition: background-color 150ms ease, transform 160ms var(--ease-out); }
+.submit svg { width: 20px; height: 20px; stroke-width: 2; transition: transform 200ms var(--ease-out); }
+.submit:active:not(:disabled) { transform: scale(.97); }
+.submit:disabled { cursor: progress; opacity: .8; }
+.spinner { width: 18px; height: 18px; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%; animation: spin 600ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.switch-page { margin: 18px 0 0; color: var(--muted); font-size: 15px; text-align: center; }
+.switch-page a { color: var(--navy-ink); font-weight: 600; }
+.restricted { display: flex; gap: 14px; margin-top: 24px; padding: 18px; border: 1px solid #e6eaf2; border-radius: 12px; background: var(--surface); }
+.restricted-icon { display: grid; flex: 0 0 auto; place-items: center; width: 30px; height: 30px; border: 1px solid #e0e5ef; border-radius: 8px; background: #fff; color: var(--navy-ink); }
+.restricted-icon svg { width: 17px; height: 17px; }
+.restricted p { margin: 0; color: #3d4a62; font-size: 14px; line-height: 1.6; }
+.restricted strong { color: var(--navy-ink); }
+.restricted a { color: var(--navy-ink); font-weight: 600; }
+
+.foot { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 20px; border-top: 1px solid #edf0f6; color: #6a748a; font-size: 13px; }
+.foot i { width: 7px; height: 7px; border-radius: 50%; background: #21b89b; }
+
+a:focus-visible, button:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; border-radius: 6px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .submit:hover:not(:disabled) { background: #123a88; }
+  .submit:hover:not(:disabled) svg { transform: translateX(3px); }
+  .forgot:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .eye:hover { color: var(--navy-ink); }
+}
+
+/* Illustration column: shows what the staff operates, the homes Alivia equips. */
+/* Column takes the image's own cream edge, so the picture blends in instead of being stretched to fill.
+   shortcut: casa.webp is 1000px wide, so it is capped there; a 2000px export would stay sharp on retina screens. */
+.art { position: sticky; top: 0; display: grid; place-items: center; height: 100dvh; overflow: hidden; padding: 40px; background: #f7f0e3; }
+.stage { position: relative; width: min(100%, 1000px, calc((100dvh - 80px) * 1000 / 976)); aspect-ratio: 1000 / 976; }
+.stage img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.chip { position: absolute; display: inline-flex; align-items: center; gap: 10px; padding: 9px 14px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 12px;
+  background: rgba(56, 70, 102, .72); color: #fff; font-size: 13px; backdrop-filter: blur(8px); box-shadow: 0 10px 24px -10px rgba(0, 0, 0, .45); }
+.chip b { display: block; font-weight: 600; }
+.chip small { display: block; color: #b7c1d6; font-family: ui-monospace, monospace; font-size: 11px; }
+.chip code { color: var(--mint); }
+.tile { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: rgba(47, 211, 180, .16); color: var(--mint); }
+.tile svg { width: 17px; height: 17px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #22c79f; box-shadow: 0 0 0 3px rgba(34, 199, 159, .2); }
+.network { top: 3%; left: 4%; border-radius: 999px; }
+.voice { top: 13%; right: 0; }
+.monitor { bottom: 11%; left: 5%; }
+.node { bottom: 4%; right: 7%; border-radius: 10px; }
+
+/* First paint only: the page arrives in reading order, then the illustration settles. */
+@media (prefers-reduced-motion: no-preference) {
+  .form > *, .top, .foot { animation: rise 420ms var(--ease-out) both; }
+  .form > :nth-child(2) { animation-delay: 40ms; } .form > :nth-child(3) { animation-delay: 80ms; }
+  .form > :nth-child(4) { animation-delay: 120ms; } .form > :nth-child(n+5) { animation-delay: 160ms; }
+  .stage img { animation: settle 700ms var(--ease-out) both; }
+  .chip { animation: rise 420ms var(--ease-out) both; }
+  .network { animation-delay: 260ms; } .voice { animation-delay: 320ms; } .monitor { animation-delay: 380ms; } .node { animation-delay: 440ms; }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes settle { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .field-error, .problem, .eye svg, .box svg { transition-property: opacity; }
+}
+
+@media (max-width: 1100px) { .sign-in { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 860px) {
+  .sign-in { grid-template-columns: 1fr; }
+  .art { display: none; }
+  .form { max-width: none; }
+}

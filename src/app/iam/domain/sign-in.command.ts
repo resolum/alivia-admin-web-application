@@ -1,5 +1,18 @@
 export interface SignInCommand { email: string; password: string; }
 
+/** A business administrator registering from the portal; the backend sends a verification link. */
+export interface SignUpCommand { firstName: string; lastName: string; email: string; phoneNumber: string; password: string; acceptedTerms: boolean; }
+
+/** Peruvian mobile numbers: 9 digits starting with 9; the backend stores them with the 51 country code. */
+export const MOBILE_PATTERN = /^9\d{8}$/;
+export function toPhoneNumber(mobile: string): string { return `51${mobile.replace(/\D/g, '')}`; }
+
+/** Who a password reset link belongs to, while it is still valid. */
+export interface PasswordReset { email: string; expiresAt: string; }
+
+/** Families and assisted people use the Alivia mobile app; the business portal rejects their accounts. */
+export const MOBILE_APP_ROLES: readonly string[] = ['CAREGIVER', 'FAMILIAR', 'RELATIVE', 'ASSISTED_PERSON'];
+
 /** Who an invitation link belongs to, before its owner chooses a password. */
 export interface AccountActivation { email: string; fullName: string; expiresAt: string; }
 
@@ -30,6 +43,8 @@ export function isTokenAlive(token: string | null, now = Date.now()): boolean {
 /** Field technicians and subscription managers have their own portals; administrators use the general one. */
 export const TECHNICIAN_ROLE = 'TECHNICIAN';
 export const SUBSCRIPTION_MANAGER_ROLE = 'SUBSCRIPTION_MANAGER';
+/** Only business administrators use the administration portal (US-17). */
+export const ADMINISTRATOR_ROLES: readonly string[] = ['ADMINISTRATOR', 'ADMIN'];
 
 /** The "role" claim of the JWT (ADMINISTRATOR, TECHNICIAN, ...). */
 export function roleOf(token: string | null): string | null {

@@ -1,9 +1,9 @@
-<div class="shell" [class.menu-open]="mobileMenuOpen()" [class.collapsed]="collapsed()">
+<div class="shell" [class.menu-open]="mobileMenuOpen()" [class.collapsed]="collapsed()" [class.animate]="toggled()">
   <aside class="sidebar">
     <div class="brand">
       <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><path d="M8.5 13.5 12 7l3.5 6.5M9.7 11.3h4.6"/></svg><b>Alivia</b></span>
       <span class="area">Administración general</span>
-      <button type="button" class="collapse" [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'" (click)="collapsed.set(!collapsed())">
+      <button type="button" class="collapse" [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'" (click)="toggleCollapsed()">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h12M4 12h8M4 18h12M20 9l-3 3 3 3"/></svg>
       </button>
     </div>
@@ -28,5 +28,5 @@
       </div><span class="bell">♟<i></i></span><div class="top-user"><strong>Dra. Mariana Valdivia</strong><small>Administradora General</small></div></header>
     <main><router-outlet /></main>
   </section>
-  @if (mobileMenuOpen()) { <button class="backdrop" aria-label="Cerrar menú" (click)="closeMobileMenu()"></button> }
+  <button type="button" class="backdrop" [class.show]="mobileMenuOpen()" aria-label="Cerrar menú" (click)="closeMobileMenu()"></button>
 </div>

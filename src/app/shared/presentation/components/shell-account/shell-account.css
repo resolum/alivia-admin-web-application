@@ -13,4 +13,8 @@ svg { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColo
 .account-menu button:hover { background: #fff1f1; }
 :host-context(.collapsed) .account { justify-content: center; padding: 14px 0; }
 :host-context(.collapsed) .who, :host-context(.collapsed) .more { display: none; }
+:host-context(.animate.collapsed) .account { animation: swap-in 220ms ease-out both; }
+:host-context(.animate:not(.collapsed)) .account { animation: swap-out 220ms ease-out both; }
+@keyframes swap-in { from { opacity: 0; } }
+@keyframes swap-out { from { opacity: 0; } }
 :host-context(.collapsed) .account-menu { left: 64px; right: auto; bottom: 14px; }

@@ -6,8 +6,9 @@ import { HiringBoard } from './hiring-board';
 
 describe('HiringBoard', () => {
   it('places the requests in their stage and filters them', async () => {
+    // Hold captured a week from now, so the card shows the held amount instead of the expiry warning on any date.
     const api = { listHiringRequests: vi.fn().mockResolvedValue([
-      hiringRequest(),
+      hiringRequest({ captureBefore: new Date(Date.now() + 7 * 86_400_000).toISOString() }),
       hiringRequest({ id: 'd2', code: 'SOL-00000205', paymentStatus: 'PAYMENT_REJECTED', heldAmount: null }),
     ]) };
     TestBed.configureTestingModule({ providers: [{ provide: HiringRequestsApi, useValue: api }] });
