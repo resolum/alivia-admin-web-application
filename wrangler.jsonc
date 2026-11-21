@@ -1,8 +1,14 @@
 {
   "name": "alivia-admin",
   "compatibility_date": "2026-10-28",
+  "main": "./worker/index.js",
   "assets": {
     "directory": "./dist/alivia-admin-web-application/browser",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // Only API calls reach the worker; every other path is served from the build.
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    "API_ORIGIN": "https://app-alivia-production-a6gws.azurewebsites.net"
   }
 }
