@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { order } from '../domain/technical-order.fixtures';
 import { TechnicalOrdersApi } from '../infrastructure/technical-orders.api';
+import { EmployeesApi } from '../../hcm/infrastructure/employees.api';
 import { TechnicalOrdersStore } from './technical-orders.store';
 
 describe('TechnicalOrdersStore', () => {
@@ -62,5 +63,25 @@ describe('TechnicalOrdersStore', () => {
     api.getOrder.mockRejectedValue('boom');
     await store.select(9);
     expect(store.error()).toBe('No se pudo consultar la orden técnica.');
+  });
+
+  it('offers only technicians and shows the order the backend returns after each assignment', async () => {
+    const employees = { listEmployees: vi.fn().mockResolvedValue([{ id: 9, role: 'TECH' }, { id: 10, role: 'CLEANING' }]) };
+    const changes = { assignTechnician: vi.fn().mockResolvedValue(order({ id: 2, technicianId: 9 })), reassign: vi.fn().mockResolvedValue(order({ id: 2, technicianId: 11 })) };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [
+      { provide: TechnicalOrdersApi, useValue: { ...api, ...changes } }, { provide: EmployeesApi, useValue: employees },
+    ] });
+    store = TestBed.inject(TechnicalOrdersStore);
+    api.listOrders.mockResolvedValue(orders);
+    await store.load();
+
+    await store.loadTechnicians();
+    expect(store.technicians().map(item => item.id)).toEqual([9]);
+    await store.assignTechnician(2, 9, 'Llevar escalera');
+    expect(changes.assignTechnician).toHaveBeenCalledWith(2, 9, 'Llevar escalera');
+    expect(store.orders().find(item => item.id === 2)?.technicianId).toBe(9);
+    await store.reassign(2, 'Descanso médico');
+    expect(store.selected()?.technicianId).toBe(11);
   });
 });

@@ -7,9 +7,6 @@ export interface SignUpCommand { firstName: string; lastName: string; email: str
 export const MOBILE_PATTERN = /^9\d{8}$/;
 export function toPhoneNumber(mobile: string): string { return `51${mobile.replace(/\D/g, '')}`; }
 
-/** Who a password reset link belongs to, while it is still valid. */
-export interface PasswordReset { email: string; expiresAt: string; }
-
 /** Families and assisted people use the Alivia mobile app; the business portal rejects their accounts. */
 export const MOBILE_APP_ROLES: readonly string[] = ['CAREGIVER', 'FAMILIAR', 'RELATIVE', 'ASSISTED_PERSON'];
 

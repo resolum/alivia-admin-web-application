@@ -57,3 +57,15 @@ export const contractStatusLabel: Record<ContractStatus, string> = {
 export const contractModalityLabel: Record<ContractModality, string> = {
   HOURLY: 'Por horas', SERVICE: 'Servicio específico',
 };
+
+export type ContractAction = 'CREATED' | 'UPDATED' | 'ACTIVATED' | 'RENEWED' | 'TERMINATED';
+
+/** One saved version of a contract: what changed it, who and when. */
+export interface ContractVersion { version: number; action: ContractAction; actorUserId: number | null; createdAt: string; }
+
+export interface RenewContract { startDate: string; endDate: string; }
+
+export const contractActionLabel: Record<ContractAction, string> = {
+  CREATED: 'Contrato registrado', UPDATED: 'Condiciones modificadas', ACTIVATED: 'Contrato activado',
+  RENEWED: 'Contrato renovado', TERMINATED: 'Contrato finalizado',
+};

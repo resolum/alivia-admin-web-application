@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ACCESS_TOKEN_KEY, API_BASE_URL, API_PATHS, BUSINESS_ID_KEY, PROFILE_ID_KEY, REFRESH_TOKEN_KEY } from '../../shared/infrastructure/api.config';
-import { AccountActivation, businessIdOf, MOBILE_APP_ROLES, PasswordReset, roleOf, SignInCommand, SignUpCommand } from '../domain/sign-in.command';
+import { AccountActivation, businessIdOf, MOBILE_APP_ROLES, roleOf, SignInCommand, SignUpCommand } from '../domain/sign-in.command';
 
 /** The email already has an account: the page offers to sign in or recover access instead. */
 export class EmailAlreadyRegistered extends Error {}
@@ -9,8 +9,7 @@ interface Session { accessToken: string; refreshToken?: string; user?: { role?: 
 
 const SESSION_KEYS = [ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, BUSINESS_ID_KEY, PROFILE_ID_KEY];
 const PENDING_ACCOUNT = 'Tu cuenta está pendiente de validación. Abre el enlace que enviamos a tu correo o pide a tu administrador que te reenvíe la invitación.';
-const SUSPENDED_ACCOUNT = 'Tu cuenta está suspendida. Comunícate con el administrador de tu negocio para reactivarla.';
-const INACTIVE_ACCOUNT = 'Tu cuenta no está activa. Comunícate con el administrador de tu negocio.';
+const SUSPENDED_ACCOUNT = 'Tu cuenta está suspendida o desactivada. Comunícate con el administrador de tu negocio para reactivarla.';
 const MOBILE_ACCOUNT = 'Esta cuenta es de la app móvil de Alivia. Ingresa desde la app o escribe a soporte@alivia.pe.';
 
 @Injectable({ providedIn: 'root' })
@@ -34,8 +33,13 @@ export class IamApi {
     if (!response.ok) throw new Error(`No se pudo iniciar sesión (${response.status}).`);
     const session = await response.json() as Session;
     const role = session.user?.role ?? roleOf(session.accessToken);
-    if (role && MOBILE_APP_ROLES.includes(role)) throw new Error(MOBILE_ACCOUNT);
-    if (session.user?.status && session.user.status !== 'ACTIVE') throw new Error(accountProblem(session.user.status));
+    const rejection = role && MOBILE_APP_ROLES.includes(role) ? MOBILE_ACCOUNT
+      : session.user?.status && session.user.status !== 'ACTIVE' ? accountProblem(session.user.status) : null;
+    if (rejection) {
+      // IAM lets pending accounts sign in (mobile app offline use); revoke the session it just opened.
+      if (session.refreshToken) this.revoke(session.refreshToken);
+      throw new Error(rejection);
+    }
     this.clear();
     this.save(remember ? window.localStorage : window.sessionStorage, session);
   }
@@ -94,29 +98,23 @@ export class IamApi {
     if (!response.ok) throw new Error(await linkError(response, ACTIVATION_LINK));
   }
 
-  /** Emails a temporary link to choose a new password. */
+  /**
+   * Emails a temporary 6-digit code to choose a new password. IAM answers 202 whether or not the
+   * address has an active account, so nobody learns who is registered.
+   */
   async requestPasswordRecovery(email: string): Promise<void> {
     const response = await this.send(`${API_BASE_URL}${API_PATHS.passwordRecovery}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
     });
-    // The message never confirms or denies who owns the address.
-    if (response.status === 404) throw new Error('No fue posible iniciar la recuperación con ese correo. Verifica que sea el correo institucional de tu cuenta.');
-    if (response.status === 429) throw new Error('Ya enviamos un enlace hace poco. Espera unos minutos antes de pedir otro.');
-    if (!response.ok) throw new Error(`No se pudo enviar el enlace de recuperación (${response.status}).`);
+    if (!response.ok) throw new Error(`No se pudo enviar el código de recuperación (${response.status}).`);
   }
 
-  /** Who a reset link belongs to; fails when the link is unknown, used or expired. */
-  async getPasswordReset(token: string): Promise<PasswordReset> {
-    const response = await this.send(`${API_BASE_URL}${API_PATHS.passwordReset}?${new URLSearchParams({ token })}`, { headers: { Accept: 'application/json' } });
-    if (!response.ok) throw new Error(await linkError(response, RESET_LINK));
-    return await response.json() as PasswordReset;
-  }
-
-  async resetPassword(token: string, password: string): Promise<void> {
+  /** Sets a new password with the emailed code; fails when the code is wrong, used up or expired. */
+  async resetPassword(email: string, code: string, password: string): Promise<void> {
     const response = await this.send(`${API_BASE_URL}${API_PATHS.passwordReset}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, password }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code, password }),
     });
-    if (!response.ok) throw new Error(await linkError(response, RESET_LINK));
+    if (!response.ok) throw new Error(await linkError(response, RESET_CODE));
   }
 
   private async send(url: string, init: RequestInit): Promise<Response> {
@@ -127,10 +125,12 @@ export class IamApi {
   /** Ends the session here and asks the backend to revoke the refresh token. */
   signOut(): void {
     const refreshToken = this.storage().getItem(REFRESH_TOKEN_KEY);
-    if (refreshToken) {
-      void fetch(`${API_BASE_URL}${API_PATHS.logout}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken }) }).catch(() => undefined);
-    }
+    if (refreshToken) this.revoke(refreshToken);
     this.clear();
+  }
+
+  private revoke(refreshToken: string): void {
+    void fetch(`${API_BASE_URL}${API_PATHS.logout}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken }) }).catch(() => undefined);
   }
 
   /** Full name of the signed-in staff member, or null when the account has no staff profile. */
@@ -182,11 +182,12 @@ async function problemDetail(response: Response): Promise<string | null> {
   return isJson(response) ? (await response.json() as { detail?: string }).detail ?? null : null;
 }
 
-/** The backend names the account state in the problem's code or detail, or in user.status. */
+/**
+ * Pending accounts come back as user.status; IAM answers 403 account_not_active for BLOCKED and
+ * INACTIVE without saying which, so both read as suspended.
+ */
 function accountProblem(text: string): string {
-  if (/PENDING|VERIF|pendiente/i.test(text)) return PENDING_ACCOUNT;
-  if (/SUSPEND|BLOCK|LOCK|suspendid|bloquead/i.test(text)) return SUSPENDED_ACCOUNT;
-  return INACTIVE_ACCOUNT;
+  return /PENDING|VERIF|pendiente/i.test(text) ? PENDING_ACCOUNT : SUSPENDED_ACCOUNT;
 }
 
 interface LinkMessages { expired: string; invalid: string; failed: string; }
@@ -195,9 +196,10 @@ const ACTIVATION_LINK: LinkMessages = {
   invalid: 'El enlace de activación no es válido o ya fue usado.',
   failed: 'No se pudo activar la cuenta',
 };
-const RESET_LINK: LinkMessages = {
-  expired: 'El enlace de recuperación venció. Solicita uno nuevo para cambiar tu contraseña.',
-  invalid: 'El enlace de recuperación no es válido o ya fue usado. Solicita uno nuevo.',
+const RESET_CODE: LinkMessages = {
+  expired: 'El código venció. Solicita uno nuevo para cambiar tu contraseña.',
+  // IAM gives the same answer after 5 wrong codes, so the message also points to a new one.
+  invalid: 'El código no es correcto o ya no se puede usar. Revísalo o solicita uno nuevo.',
   failed: 'No se pudo cambiar la contraseña',
 };
 

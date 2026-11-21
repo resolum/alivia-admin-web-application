@@ -56,6 +56,30 @@
           @if (order.technicianName) {
             <div class="employee-card"><span class="avatar">{{ order.technicianName.slice(0, 2).toUpperCase() }}</span><div><strong>{{ order.technicianName }}</strong><span>Técnico de soporte Alivia</span></div></div>
           } @else { <p class="empty">Técnico aún no asignado para la franja {{ window(order) }}.</p> }
+          @if (assignable(order)) {
+            @if (!order.technicianId) {
+              <form class="form-grid assignment" (submit)="assign(order, $event)">
+                <label>Técnico
+                  <select required [value]="technicianId()" (change)="technicianId.set(value($event))">
+                    <option value="">Elige un técnico</option>
+                    @for (technician of store.technicians(); track technician.id) { <option [value]="technician.id">{{ technician.lastName }}, {{ technician.firstName }}</option> }
+                  </select>
+                </label>
+                <label>Nota para el técnico <small>Opcional</small><textarea maxlength="300" [value]="note()" (input)="note.set(value($event))"></textarea></label>
+                <p class="hint">Debe trabajar todo el bloque {{ window(order) }} y no tener otra visita en él.</p>
+                <div class="actions"><button type="submit" class="button primary" [disabled]="saving()">{{ saving() ? 'Asignando…' : 'Asignar técnico' }}</button></div>
+              </form>
+            } @else if (reason() === null) {
+              <div class="actions assignment"><button type="button" class="button secondary" (click)="message.set(''); reason.set('')">Reasignar técnico</button></div>
+            } @else {
+              <form class="form-grid assignment" (submit)="reassign(order, $event)">
+                <label class="full">Motivo de la reasignación <small>Máximo 300 caracteres</small><textarea required maxlength="300" [value]="reason()" (input)="reason.set(value($event))"></textarea></label>
+                <p class="hint">Alivia elige otro técnico disponible en el mismo bloque. Si nadie puede, mueve la visita al bloque más cercano con capacidad.</p>
+                <div class="actions"><button type="submit" class="button primary" [disabled]="saving()">{{ saving() ? 'Reasignando…' : 'Confirmar reasignación' }}</button><button type="button" class="button secondary" (click)="reason.set(null)">Cancelar</button></div>
+              </form>
+            }
+          }
+          @if (message()) { <p class="form-error" role="alert">{{ message() }}</p> }
           @if ((order.assignments?.length ?? 0) > 1) {
             <h3>HISTORIAL DE ASIGNACIONES</h3>
             <ul class="devices">

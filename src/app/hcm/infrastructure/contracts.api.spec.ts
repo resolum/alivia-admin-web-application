@@ -81,6 +81,23 @@ describe('ContractsApi, EmployeesApi and HcmHttpClient', () => {
     expect((await contracts.activateContract(3, 7)).id).toBe(7);
   });
 
+  it('renews, terminates and reads the history of a contract', async () => {
+    const fetchMock = vi.fn((request: RequestInfo | URL) =>
+      Promise.resolve(json(String(request).includes('/history') ? [{ version: 1, action: 'CREATED' }] : contract)));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await contracts.renewContract(3, 7, { startDate: '2026-01-01', endDate: '2027-12-31' });
+    await contracts.terminateContract(3, 7);
+    expect((await contracts.contractHistory(3, 7))[0]?.action).toBe('CREATED');
+
+    const [renewal, termination, history] = fetchMock.mock.calls as unknown as [string, RequestInit?][];
+    expect(String(renewal[0])).toContain('/employees/3/contracts/7/renewals');
+    expect(renewal[1]).toMatchObject({ method: 'POST', body: JSON.stringify({ startDate: '2026-01-01', endDate: '2027-12-31' }) });
+    expect(String(termination[0])).toContain('/employees/3/contracts/7/termination');
+    expect(termination[1]).toMatchObject({ method: 'POST', body: undefined });
+    expect(String(history[0])).toContain('/employees/3/contracts/7/history');
+  });
+
   it('uses the access token and reports HTTP and network errors', async () => {
     sessionStorage.setItem('alivia.iam.access-token', 'token');
     const responses = [

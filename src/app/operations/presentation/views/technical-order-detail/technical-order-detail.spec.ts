@@ -39,4 +39,42 @@ describe('TechnicalOrderDetail', () => {
     expect(view.steps(order({ status: 'CANCELED' }))[2].label).toBe('Orden cancelada');
     expect(view.stage(order({ startedAt: '2026-11-05T13:00:00Z' }))).toBe('in-progress');
   });
+
+  it('lets only the administration assign or reassign before the visit starts', async () => {
+    const manager = {
+      select: vi.fn(), loadTechnicians: vi.fn().mockResolvedValue(undefined),
+      assignTechnician: vi.fn().mockResolvedValue(undefined), reassign: vi.fn().mockRejectedValueOnce(new Error('Sin capacidad')),
+    };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [
+      { provide: TechnicalOrdersStore, useValue: manager },
+      { provide: ActivatedRoute, useValue: { snapshot: { data: { manage: true }, paramMap: convertToParamMap({ orderId: '5' }) } } },
+    ] });
+    const view = TestBed.runInInjectionContext(() => new TechnicalOrderDetail()) as unknown as {
+      ngOnInit(): void; assignable(item: unknown): boolean; technicianId: { set(value: string): void }; reason: { set(value: string | null): void };
+      assign(item: unknown, event: Event): Promise<void>; reassign(item: unknown, event: Event): Promise<void>; message(): string;
+    };
+    const submit = { preventDefault: vi.fn() } as unknown as Event;
+    const unassigned = order({ id: 5, technicianId: null, technicianName: null });
+
+    view.ngOnInit();
+    expect(manager.loadTechnicians).toHaveBeenCalled();
+    expect(view.assignable(unassigned)).toBe(true);
+    expect(view.assignable(order({ startedAt: '2026-11-05T13:00:00Z' }))).toBe(false);
+    expect((component as unknown as { assignable(item: unknown): boolean }).assignable(unassigned)).toBe(false);
+
+    await view.assign(unassigned, submit);
+    expect(manager.assignTechnician).not.toHaveBeenCalled();
+    view.technicianId.set('9');
+    await view.assign(unassigned, submit);
+    expect(manager.assignTechnician).toHaveBeenCalledWith(5, 9, '');
+
+    view.reason.set('  ');
+    await view.reassign(order({ id: 5 }), submit);
+    expect(manager.reassign).not.toHaveBeenCalled();
+    view.reason.set('Descanso médico');
+    await view.reassign(order({ id: 5 }), submit);
+    expect(manager.reassign).toHaveBeenCalledWith(5, 'Descanso médico');
+    expect(view.message()).toBe('Sin capacidad');
+  });
 });

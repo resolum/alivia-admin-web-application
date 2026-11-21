@@ -1,6 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { API_PATHS } from '../../shared/infrastructure/api.config';
-import { Contract, ContractFilters, ContractPage, CreateContract, EmployeeOption, UpdateContract } from '../domain/contract.entity';
+import {
+  Contract, ContractFilters, ContractPage, ContractVersion, CreateContract, EmployeeOption, RenewContract, UpdateContract,
+} from '../domain/contract.entity';
 import { EmployeesApi } from './employees.api';
 import { HcmHttpClient } from './hcm-http.client';
 
@@ -47,9 +49,27 @@ export class ContractsApi {
   }
 
   /** Puts a pending contract into force. */
-  async activateContract(employeeId: number, contractId: number): Promise<Contract> {
-    const contract = await this.http.request<ContractResponse>(this.http.url(`${contractPath(employeeId, contractId)}/activation`, this.http.params()), {
-      method: 'POST',
+  activateContract(employeeId: number, contractId: number): Promise<Contract> {
+    return this.command(employeeId, contractId, 'activation');
+  }
+
+  /** New period; the end date must be later than the current one. */
+  renewContract(employeeId: number, contractId: number, period: RenewContract): Promise<Contract> {
+    return this.command(employeeId, contractId, 'renewals', period);
+  }
+
+  /** Ends the contract without deleting it; a finished contract cannot change again. */
+  terminateContract(employeeId: number, contractId: number): Promise<Contract> {
+    return this.command(employeeId, contractId, 'termination');
+  }
+
+  contractHistory(employeeId: number, contractId: number): Promise<ContractVersion[]> {
+    return this.http.request<ContractVersion[]>(this.http.url(`${contractPath(employeeId, contractId)}/history`, this.http.params()));
+  }
+
+  private async command(employeeId: number, contractId: number, action: string, body?: object): Promise<Contract> {
+    const contract = await this.http.request<ContractResponse>(this.http.url(`${contractPath(employeeId, contractId)}/${action}`, this.http.params()), {
+      method: 'POST', body: body ? JSON.stringify(body) : undefined,
     });
     return withEmployeeName(contract, []);
   }

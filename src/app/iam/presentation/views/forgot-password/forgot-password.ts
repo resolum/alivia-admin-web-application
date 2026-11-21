@@ -3,7 +3,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IamStore } from '../../../application/iam.store';
 
-/** Asks for the account email and sends it a temporary link to choose a new password. */
+/** Asks for the account email and sends it a temporary code to choose a new password. */
 @Component({ selector: 'app-forgot-password', imports: [ReactiveFormsModule, RouterLink], templateUrl: './forgot-password.html', styleUrl: '../activate-account/activate-account.css' })
 export class ForgotPassword {
   private readonly iam = inject(IamStore);
@@ -20,7 +20,7 @@ export class ForgotPassword {
     this.sending.set(true); this.error.set('');
     const email = this.email.value.trim();
     try { await this.iam.requestPasswordRecovery(email); this.sentTo.set(email); }
-    catch (error) { this.error.set(error instanceof Error ? error.message : 'No se pudo enviar el enlace de recuperación.'); }
+    catch (error) { this.error.set(error instanceof Error ? error.message : 'No se pudo enviar el código de recuperación.'); }
     finally { this.sending.set(false); }
   }
 }

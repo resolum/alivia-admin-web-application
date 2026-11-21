@@ -6,7 +6,7 @@ import { ActivateAccount } from './activate-account';
 type Page = { state(): string; error(): string; account(): unknown; valid(): boolean; form: { setValue(value: object): void }; submit(): Promise<void> };
 
 describe('ActivateAccount', () => {
-  const iam = { getActivation: vi.fn(), activate: vi.fn(), getPasswordReset: vi.fn(), resetPassword: vi.fn() };
+  const iam = { getActivation: vi.fn(), activate: vi.fn(), resetPassword: vi.fn() };
   let data: object = {};
   let token: string | null;
 
@@ -39,12 +39,12 @@ describe('ActivateAccount', () => {
     const page = await open();
     expect(page.state()).toBe('ready');
 
-    page.form.setValue({ password: 'debil', confirmation: 'debil' });
+    page.form.setValue({ code: '', password: 'debil', confirmation: 'debil' });
     expect(page.valid()).toBe(false);
     await page.submit();
     expect(iam.activate).not.toHaveBeenCalled();
 
-    page.form.setValue({ password: 'Clave#2026x', confirmation: 'Clave#2026x' });
+    page.form.setValue({ code: '', password: 'Clave#2026x', confirmation: 'Clave#2026x' });
     expect(page.valid()).toBe(true);
     iam.activate.mockRejectedValueOnce(new Error('La contraseña no cumple los requisitos de seguridad.'));
     await page.submit();
@@ -55,27 +55,38 @@ describe('ActivateAccount', () => {
     expect(page.state()).toBe('done');
   });
 
-  it('resets a password from a valid recovery link', async () => {
+  it('resets a password with the emailed 6-digit code', async () => {
     data = { mode: 'reset' };
-    iam.getPasswordReset.mockResolvedValue({ email: 'ana@alivia.pe', expiresAt: '' });
+    token = 'ana@alivia.pe'; // the route mock answers every query param with this value
     const page = await open();
     expect(iam.getActivation).not.toHaveBeenCalled();
-    page.form.setValue({ password: 'Clave#2026x', confirmation: 'Clave#2026x' });
+    expect(page.state()).toBe('ready');
+
+    page.form.setValue({ code: '12a', password: 'Clave#2026x', confirmation: 'Clave#2026x' });
     await page.submit();
-    expect(iam.resetPassword).toHaveBeenCalledWith('abc', 'Clave#2026x');
+    expect(iam.resetPassword).not.toHaveBeenCalled();
+
+    page.form.setValue({ code: ' 482915 ', password: 'Clave#2026x', confirmation: 'Clave#2026x' });
+    await page.submit();
+    expect(iam.resetPassword).toHaveBeenCalledWith('ana@alivia.pe', '482915', 'Clave#2026x');
     expect(page.state()).toBe('done');
   });
 
-  it('offers a new recovery link when the link expired, even while the form was open', async () => {
+  it('asks for a code first, keeps a wrong code inline and rejects an expired one', async () => {
     data = { mode: 'reset' };
-    iam.getPasswordReset.mockRejectedValueOnce(new Error('El enlace de recuperación venció. Solicita uno nuevo.'));
+    token = null;
     expect((await open()).state()).toBe('invalid');
 
     TestBed.resetTestingModule();
-    iam.getPasswordReset.mockResolvedValue({ email: 'ana@alivia.pe', expiresAt: '' });
-    iam.resetPassword.mockRejectedValue(new Error('El enlace de recuperación venció. Solicita uno nuevo.'));
+    token = 'ana@alivia.pe';
+    iam.resetPassword
+      .mockRejectedValueOnce(new Error('El código no es correcto o ya no se puede usar. Revísalo o solicita uno nuevo.'))
+      .mockRejectedValueOnce(new Error('El código venció. Solicita uno nuevo para cambiar tu contraseña.'));
     const page = await open();
-    page.form.setValue({ password: 'Clave#2026x', confirmation: 'Clave#2026x' });
+    page.form.setValue({ code: '000000', password: 'Clave#2026x', confirmation: 'Clave#2026x' });
+    await page.submit();
+    expect(page.state()).toBe('ready');
+    expect(page.error()).toContain('no es correcto');
     await page.submit();
     expect(page.state()).toBe('invalid');
     expect(page.error()).toContain('venció');

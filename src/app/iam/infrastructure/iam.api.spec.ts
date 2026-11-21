@@ -21,12 +21,12 @@ describe('IamApi', () => {
     vi.stubGlobal('fetch', vi.fn()
       .mockResolvedValueOnce(problem({ detail: 'Account is SUSPENDED' }))
       .mockResolvedValueOnce(problem({ code: 'account_pending_verification' }))
-      .mockResolvedValueOnce(problem({}))
+      .mockResolvedValueOnce(problem({ code: 'account_not_active', detail: 'The account is not active.' }))
       .mockResolvedValueOnce(new Response('Invalid CORS request', { status: 403, headers: { 'content-type': 'text/plain' } })));
     const api = new IamApi();
     await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('suspendida');
     await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('pendiente de validación');
-    await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('no está activa');
+    await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('suspendida o desactivada');
     await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('CORS');
   });
 
@@ -37,6 +37,18 @@ describe('IamApi', () => {
     await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('app móvil');
     await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('suspendida');
     expect(api.accessToken()).toBeNull();
+  });
+
+  it('rejects a pending account and revokes the session IAM opened for it', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ accessToken: 'abc', refreshToken: 'r1', user: { role: 'ADMINISTRATOR', status: 'PENDING_VERIFICATION' } }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const api = new IamApi();
+    await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('pendiente de validación');
+    expect(api.accessToken()).toBeNull();
+    expect(fetchMock.mock.calls[1]![0]).toContain('/auth/logout');
+    expect(JSON.parse(fetchMock.mock.calls[1]![1].body)).toEqual({ refreshToken: 'r1' });
   });
 
   it('remembers the session in this browser, renews it and revokes it on sign out', async () => {
@@ -69,35 +81,35 @@ describe('IamApi', () => {
     expect(api.accessToken()).toBeNull();
   });
 
-  it('requests a recovery link without revealing who owns an address', async () => {
+  it('requests a recovery code; IAM answers 202 for known and unknown addresses alike', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(new Response(null, { status: 202 }))
-      .mockResolvedValueOnce(new Response('', { status: 404 })).mockResolvedValueOnce(new Response('', { status: 429 }));
+      .mockResolvedValueOnce(new Response(null, { status: 202 })).mockResolvedValueOnce(new Response('', { status: 500 }));
     vi.stubGlobal('fetch', fetchMock);
     const api = new IamApi();
 
     await api.requestPasswordRecovery('ana@alivia.pe');
+    expect(String(fetchMock.mock.calls[0]![0])).toBe('/api/v1/auth/forgot-password');
     expect(JSON.parse(fetchMock.mock.calls[0]![1].body)).toEqual({ email: 'ana@alivia.pe' });
-    await expect(api.requestPasswordRecovery('nadie@alivia.pe')).rejects.toThrow('No fue posible iniciar la recuperación');
-    await expect(api.requestPasswordRecovery('ana@alivia.pe')).rejects.toThrow('Espera unos minutos');
+    await api.requestPasswordRecovery('nadie@alivia.pe');
+    await expect(api.requestPasswordRecovery('ana@alivia.pe')).rejects.toThrow('No se pudo enviar el código');
   });
 
-  it('validates a reset link, rejects expired ones and sets the new password', async () => {
+  it('resets the password with the emailed code and tells expired, wrong and weak apart', async () => {
+    const problem = (body: object) => new Response(JSON.stringify(body), { status: 400, headers: { 'content-type': 'application/problem+json' } });
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ email: 'ana@alivia.pe', expiresAt: '' }), { status: 200, headers: { 'content-type': 'application/json' } }))
       .mockResolvedValueOnce(new Response(null, { status: 204 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ code: 'reset_token_expired' }), { status: 400, headers: { 'content-type': 'application/problem+json' } }))
-      .mockResolvedValueOnce(new Response('', { status: 410 }))
-      .mockResolvedValueOnce(new Response('', { status: 404 }));
+      .mockResolvedValueOnce(problem({ code: 'verification_token_expired' }))
+      .mockResolvedValueOnce(problem({ code: 'verification_token_invalid' }))
+      .mockResolvedValueOnce(problem({ code: 'validation_failed', errors: [{ field: 'password', code: 'password_weak' }] }));
     vi.stubGlobal('fetch', fetchMock);
     const api = new IamApi();
 
-    expect((await api.getPasswordReset('t 1')).email).toBe('ana@alivia.pe');
-    expect(String(fetchMock.mock.calls[0]![0])).toBe('/api/v1/auth/password-reset?token=t+1');
-    await api.resetPassword('t 1', 'Clave#2026x');
-    expect(JSON.parse(fetchMock.mock.calls[1]![1].body)).toEqual({ token: 't 1', password: 'Clave#2026x' });
-    await expect(api.getPasswordReset('t')).rejects.toThrow('venció');
-    await expect(api.resetPassword('t', 'Clave#2026x')).rejects.toThrow('venció');
-    await expect(api.getPasswordReset('t')).rejects.toThrow('no es válido');
+    await api.resetPassword('ana@alivia.pe', '482915', 'Clave#2026x');
+    expect(String(fetchMock.mock.calls[0]![0])).toBe('/api/v1/auth/reset-password');
+    expect(JSON.parse(fetchMock.mock.calls[0]![1].body)).toEqual({ email: 'ana@alivia.pe', code: '482915', password: 'Clave#2026x' });
+    await expect(api.resetPassword('ana@alivia.pe', '482915', 'Clave#2026x')).rejects.toThrow('venció');
+    await expect(api.resetPassword('ana@alivia.pe', '000000', 'Clave#2026x')).rejects.toThrow('no es correcto');
+    await expect(api.resetPassword('ana@alivia.pe', '482915', 'debil')).rejects.toThrow('requisitos');
   });
 
   it('keeps the business of the session from the response or the token claim', async () => {
