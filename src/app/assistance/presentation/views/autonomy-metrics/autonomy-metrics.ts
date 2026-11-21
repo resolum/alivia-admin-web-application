@@ -4,6 +4,7 @@ import { limaToday } from '../../../../operations/domain/technical-order.entity'
 import {
   AutonomyMetrics as Metrics, DEVICE_TYPES, DeviceType, deviceTypeLabel, RESULTS, resultLabel, summarize,
 } from '../../../domain/autonomy-metrics.entity';
+import { limaInstant } from '../../../domain/care.entity';
 import { AssistanceApi } from '../../../infrastructure/assistance.api';
 
 const addDays = (date: string, days: number) => { const value = new Date(`${date}T00:00:00Z`); value.setUTCDate(value.getUTCDate() + days); return value.toISOString().slice(0, 10); };
@@ -52,5 +53,5 @@ export class AutonomyMetrics implements OnInit {
   }
 
   protected setType(value: 'ALL' | DeviceType): void { this.deviceType.set(value); this.deviceId.set('ALL'); }
-  protected when(value: string | null): string { return value ? timeFormat.format(new Date(/[Z+]|-\d\d:\d\d$/.test(value) ? value : `${value}-05:00`)) : 'nunca'; }
+  protected when(value: string | null): string { return value ? timeFormat.format(limaInstant(value)) : 'nunca'; }
 }

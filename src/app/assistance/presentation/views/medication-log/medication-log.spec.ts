@@ -64,4 +64,48 @@ describe('MedicationLog', () => {
     expect(api.recordOutcome).not.toHaveBeenCalled();
     expect(element.querySelector('dialog .form-error')!.textContent).toContain('motivo');
   });
+
+  it('shows the history with omissions, overdue doses and missing names, and reports a failed load', async () => {
+    const missed = { ...item, assignmentId: 13, assistedPerson: null, responsible: null, status: 'MISSED' } as AgendaItem;
+    const omitted = { ...item, assignmentId: 14, status: 'CANCELLED' } as AgendaItem;
+    const overdueOpen = { ...item, assignmentId: 15, status: 'MISSED' } as AgendaItem;
+    const api = {
+      agenda: vi.fn().mockResolvedValueOnce([missed, omitted, overdueOpen, { ...item, activity: { ...item.activity, type: 'MEAL' } }]).mockRejectedValueOnce(new Error('Sin conexión')),
+      administration: vi.fn(async (id: string) => ({
+        '13-20261121': { ...recorded, administrationId: id, assistedPerson: null, responsible: null, status: 'MISSED', outcome: { result: 'OMITTED', occurredAt: null, reason: null } },
+        '14-20261121': { ...recorded, administrationId: id, status: 'CANCELLED', outcome: { result: 'OMITTED', occurredAt: '2026-11-21T08:20:00', reason: 'Rechazó la dosis' } },
+      } as Record<string, MedicationAdministration>)[id] ?? Promise.reject(new Error('x'))),
+      recordOutcome: vi.fn(),
+    };
+    TestBed.configureTestingModule({ providers: [{ provide: AssistanceApi, useValue: api }] });
+    const fixture = TestBed.createComponent(MedicationLog);
+    const element = fixture.nativeElement as HTMLElement;
+    fixture.detectChanges(); await settle(fixture);
+    const history = element.querySelector('table')!.textContent ?? '';
+    expect(history).toContain('Vencida sin confirmación');
+    expect(history).toContain('Persona asistida');
+    expect(history).toContain('Sin asignar');
+    expect(history).toContain('Motivo: Rechazó la dosis');
+    expect(history).toContain('Sin registro');
+    expect(element.querySelector('.dose.missed .overdue')!.textContent).toContain('pasó la ventana');
+
+    element.querySelector<HTMLButtonElement>('.dose .button.secondary')!.click(); fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('dialog footer .button.secondary')!.click(); fixture.detectChanges();
+    expect(element.querySelector('dialog form')).toBeNull();
+
+    element.querySelector<HTMLFormElement>('form.filters')!.dispatchEvent(new Event('submit'));
+    await settle(fixture);
+    expect(element.querySelector('.error-notice')!.textContent).toContain('Sin conexión');
+  });
+
+  it('records an omission with its reason', async () => {
+    const { api, fixture, element } = setup(vi.fn().mockResolvedValue({ ...recorded, status: 'CANCELLED', outcome: { result: 'OMITTED', occurredAt: '2026-11-21T08:20:00', reason: 'Dormía' } }));
+    fixture.detectChanges(); await settle(fixture);
+    element.querySelector<HTMLButtonElement>('.dose .button.secondary')!.click(); fixture.detectChanges();
+    fixture.componentInstance['reason'].set('  Dormía ');
+    element.querySelector<HTMLFormElement>('dialog form')!.dispatchEvent(new Event('submit'));
+    await settle(fixture);
+    expect(api.recordOutcome).toHaveBeenCalledWith('12-20261121', 'OMITTED', 'Dormía');
+    expect(element.querySelector('table')!.textContent).toContain('Omitida');
+  });
 });

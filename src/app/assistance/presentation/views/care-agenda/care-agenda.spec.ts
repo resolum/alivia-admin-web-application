@@ -58,4 +58,48 @@ describe('CareAgenda', () => {
     expect(element.querySelector('.chip.shift')!.textContent).toContain('Turno 08:00 – 16:00');
     fixture.destroy();
   });
+
+  it('separates reminders from alerts and holds reminders while offline', async () => {
+    const notifications = [
+      { id: 1, type: 'CARE_ACTIVITY_REMINDER', title: 'Medicamento en 15 minutos', body: 'Losartán para Rosa', status: 'UNREAD', createdAt: '' },
+      { id: 2, type: 'ACTUATOR_FAILURE', title: 'Falla de la puerta', body: 'La cerradura no respondió', status: 'UNREAD', createdAt: '' },
+      { id: 3, type: 'LOW_BATTERY', title: 'Leído', body: '', status: 'READ', createdAt: '' },
+    ];
+    const { api, fixture, element } = setup(vi.fn().mockResolvedValue([]));
+    api.notifications.mockResolvedValue(notifications);
+    fixture.detectChanges(); await settle(fixture);
+    expect(element.querySelector('li.reminder')!.textContent).toContain('Medicamento en 15 minutos');
+    expect(element.querySelector('li.alert')!.textContent).toContain('Falla de la puerta');
+    expect(element.textContent).not.toContain('Leído');
+
+    window.dispatchEvent(new Event('offline')); fixture.detectChanges();
+    expect(element.querySelector('.offline')!.textContent).toContain('Sin conexión');
+    await fixture.componentInstance['load']();
+    expect(api.agenda).toHaveBeenCalledTimes(1);
+    window.dispatchEvent(new Event('online')); await settle(fixture);
+    expect(element.querySelector('.offline')).toBeNull();
+    expect(api.agenda).toHaveBeenCalledTimes(2);
+    fixture.destroy();
+  });
+
+  it('moves between weeks, shows fallbacks and reports a failed agenda', async () => {
+    const { api, fixture, element } = setup(vi.fn().mockResolvedValue([]));
+    api.agenda.mockResolvedValueOnce([{ ...dose, assistedPerson: null, responsible: { type: 'RELATIVE', id: null, name: null, email: null } }, { ...dose, assignmentId: 13, responsible: null }])
+      .mockResolvedValueOnce([]).mockRejectedValueOnce(new Error('Sin conexión')).mockRejectedValueOnce('boom');
+    api.notifications.mockRejectedValue(new Error('x'));
+    fixture.detectChanges(); await settle(fixture);
+    const text = element.querySelector('tbody')!.textContent ?? '';
+    expect(text).toContain('Persona asistida');
+    expect(text).toContain('Familiar');
+    expect(text).toContain('Sin asignar');
+
+    element.querySelector<HTMLButtonElement>('[aria-label="Semana siguiente"]')!.click(); await settle(fixture);
+    expect(element.querySelector('.empty')!.textContent).toContain('No tienes turnos');
+    element.querySelector<HTMLButtonElement>('[aria-label="Semana anterior"]')!.click(); await settle(fixture);
+    expect(element.querySelector('.error-notice')!.textContent).toContain('Sin conexión');
+    [...element.querySelectorAll<HTMLButtonElement>('.segmented button')].find(button => button.textContent === 'Hoy')!.click(); await settle(fixture);
+    expect(element.querySelector('.error-notice')!.textContent).toContain('No se pudo consultar tu agenda');
+    expect(api.agenda.mock.calls[3]).toEqual(api.agenda.mock.calls[0]);
+    fixture.destroy();
+  });
 });

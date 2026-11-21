@@ -63,10 +63,15 @@ export function windowEnd(dose: Pick<MedicationAdministration, 'date' | 'startTi
   return end;
 }
 
-/** Recorded after the attention window closed. Lima has no daylight saving, so the -05:00 offset is fixed. */
+/** A backend timestamp as a Date; one without zone is Lima wall-clock time (no daylight saving, so always -05:00). */
+export function limaInstant(value: string): Date {
+  return new Date(/(?:Z|[+-]\d\d:\d\d)$/.test(value) ? value : `${value}-05:00`);
+}
+
+/** Recorded after the attention window closed. */
 export function isLate(dose: MedicationAdministration): boolean {
   const at = dose.outcome?.occurredAt;
-  return !!at && new Date(at.endsWith('Z') || /[+-]\d\d:\d\d$/.test(at) ? at : `${at}-05:00`) > windowEnd(dose);
+  return !!at && limaInstant(at) > windowEnd(dose);
 }
 
 /** Reminders announce what comes next; everything else in the inbox is an alert (a failure, a risk or a missed duty). */

@@ -57,7 +57,7 @@ export function emailOf(token: string | null): string | null {
 
 /** The "sub" claim: the IAM user id. */
 export function userIdOf(token: string | null): number | null {
-  const value = Number(token ? claimsOf(token)?.sub : NaN);
+  const value = Number(token ? claimsOf(token)?.sub : Number.NaN);
   return Number.isInteger(value) && value > 0 ? value : null;
 }
 
