@@ -1,5 +1,5 @@
 {
-  "name": "alivia-admin",
+  "name": "alivia-admin-web-application",
   "compatibility_date": "2026-10-28",
   "main": "./worker/index.js",
   "assets": {
