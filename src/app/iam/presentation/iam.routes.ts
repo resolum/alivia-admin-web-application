@@ -12,7 +12,7 @@ export const SIGN_UP_ROUTES: Routes = [{ path: '', component: SignUp, canActivat
 export const ACCESS_DENIED_ROUTES: Routes = [{ path: '', component: AccessDenied }];
 export const ACTIVATION_ROUTES: Routes = [{ path: '', component: ActivateAccount }];
 export const FORGOT_PASSWORD_ROUTES: Routes = [{ path: '', component: ForgotPassword }];
-/** Same page as the activation, fed by the password recovery link. */
+/** Same page as the activation: the recovery code plus the new password. */
 export const RESET_PASSWORD_ROUTES: Routes = [{ path: '', component: ActivateAccount, data: { mode: 'reset' } }];
 /** Inside the administration shell. */
 export const USER_ROLES_ROUTES: Routes = [{ path: '', component: UserRoles, data: { breadcrumb: [{ label: 'Configuración' }, { label: 'Usuarios y responsabilidades' }] } }];

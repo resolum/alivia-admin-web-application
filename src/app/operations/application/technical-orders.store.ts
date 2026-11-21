@@ -1,12 +1,18 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { groupByDay, matches, stageOf, StageTab, TechnicalOrder, TypeFilter } from '../domain/technical-order.entity';
 import { TechnicalOrdersApi } from '../infrastructure/technical-orders.api';
+// Technicians are HCM employees; reusing its API keeps a single source for the staff list.
+import { EmployeeOption } from '../../hcm/domain/contract.entity';
+import { EmployeesApi } from '../../hcm/infrastructure/employees.api';
 
-/** Every technical order with its stage, for the general administration (read only). */
+/** Every technical order with its stage, and the assignment of its technician, for the general administration. */
 @Injectable({ providedIn: 'root' })
 export class TechnicalOrdersStore {
   private readonly api = inject(TechnicalOrdersApi);
+  private readonly employees = inject(EmployeesApi);
   private readonly ordersState = signal<TechnicalOrder[]>([]);
+  private readonly techniciansState = signal<EmployeeOption[]>([]);
+  readonly technicians = this.techniciansState.asReadonly();
   private readonly selectedState = signal<TechnicalOrder | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -62,6 +68,24 @@ export class TechnicalOrdersStore {
     try { this.ordersState.set(await this.api.listOrders()); }
     catch (error) { this.error.set(error instanceof Error ? error.message : 'No se pudo consultar las órdenes técnicas.'); }
     finally { this.loading.set(false); }
+  }
+
+  /** Active technicians of the business, to pick who attends an unassigned order. */
+  async loadTechnicians(): Promise<void> {
+    this.techniciansState.set((await this.employees.listEmployees()).filter(employee => employee.role === 'TECH'));
+  }
+
+  async assignTechnician(orderId: number, technicianId: number, note: string): Promise<void> {
+    this.replace(await this.api.assignTechnician(orderId, technicianId, note));
+  }
+
+  async reassign(orderId: number, reason: string): Promise<void> {
+    this.replace(await this.api.reassign(orderId, reason));
+  }
+
+  private replace(order: TechnicalOrder): void {
+    this.selectedState.set(order);
+    this.ordersState.update(orders => orders.map(item => item.id === order.id ? order : item));
   }
 
   async select(orderId: number): Promise<void> {

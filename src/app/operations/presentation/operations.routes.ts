@@ -10,7 +10,8 @@ const ORDERS = { label: 'Órdenes técnicas', link: '/operations' };
 const trail = (...items: (string | { label: string; link: string })[]) => ({ breadcrumb: items.map(item => typeof item === 'string' ? { label: item } : item) });
 
 export const OPERATIONS_ROUTES: Routes = [
-  { path: ':orderId', component: TechnicalOrderDetail, data: trail(SECTION, ORDERS, 'Detalle') },
+  // Only the administration assigns technicians; the technician portal reuses the detail read only.
+  { path: ':orderId', component: TechnicalOrderDetail, data: { ...trail(SECTION, ORDERS, 'Detalle'), manage: true } },
   { path: '', component: TechnicalOrdersList, data: trail(SECTION, 'Órdenes técnicas') },
 ];
 

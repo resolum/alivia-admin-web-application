@@ -6,10 +6,10 @@ import { IamStore } from '../../../application/iam.store';
 import { meetsPasswordPolicy, PASSWORD_RULES } from '../../../domain/sign-in.command';
 
 type State = 'loading' | 'invalid' | 'ready' | 'done';
-/** "activation": invitation email of a new employee. "reset": password recovery email (route data `mode`). */
+/** "activation": invitation link of a new employee. "reset": code from the password recovery email (route data `mode`). */
 export type PasswordLinkMode = 'activation' | 'reset';
 
-/** Page opened from an emailed link where the owner chooses a new password. */
+/** Page where the owner of an invitation link or a recovery code chooses a new password. */
 @Component({ selector: 'app-activate-account', imports: [ReactiveFormsModule, RouterLink], templateUrl: './activate-account.html', styleUrl: './activate-account.css' })
 export class ActivateAccount implements OnInit {
   private readonly iam = inject(IamStore); private readonly route = inject(ActivatedRoute);
@@ -21,6 +21,7 @@ export class ActivateAccount implements OnInit {
   protected readonly submitted = signal(false);
   protected readonly showPassword = signal(false); protected readonly showConfirmation = signal(false);
   protected readonly form = new FormGroup({
+    code: new FormControl('', { nonNullable: true }),
     password: new FormControl('', { nonNullable: true, validators: Validators.required }),
     confirmation: new FormControl('', { nonNullable: true, validators: Validators.required }),
   });
@@ -28,19 +29,24 @@ export class ActivateAccount implements OnInit {
   protected readonly password = computed(() => this.value().password ?? '');
   protected readonly matches = computed(() => this.password() !== '' && this.password() === this.value().confirmation);
   protected readonly meetsPolicy = computed(() => meetsPasswordPolicy(this.password()));
-  protected readonly valid = computed(() => this.meetsPolicy() && this.matches());
+  protected readonly codeOk = computed(() => this.mode !== 'reset' || /^\d{6}$/.test((this.value().code ?? '').trim()));
+  protected readonly valid = computed(() => this.codeOk() && this.meetsPolicy() && this.matches());
   private token = '';
 
   ngOnInit(): void { void this.load(); }
 
   private async load(): Promise<void> {
-    this.token = this.route.snapshot.queryParamMap.get('token') ?? '';
-    if (!this.token) {
-      this.fail(this.mode === 'reset' ? 'El enlace de recuperación no es válido o ya fue usado. Solicita uno nuevo.' : 'El enlace de activación no es válido o ya fue usado.');
+    if (this.mode === 'reset') {
+      // IAM checks the code only when the new password is sent; here we just need the address.
+      const email = this.route.snapshot.queryParamMap.get('email')?.trim();
+      if (email) { this.account.set({ email }); this.state.set('ready'); }
+      else this.fail('Primero solicita un código de recuperación con tu correo.');
       return;
     }
+    this.token = this.route.snapshot.queryParamMap.get('token') ?? '';
+    if (!this.token) { this.fail('El enlace de activación no es válido o ya fue usado.'); return; }
     try {
-      this.account.set(this.mode === 'reset' ? await this.iam.getPasswordReset(this.token) : await this.iam.getActivation(this.token));
+      this.account.set(await this.iam.getActivation(this.token));
       this.state.set('ready');
     } catch (error) { this.fail(error instanceof Error ? error.message : 'No se pudo revisar el enlace.'); }
   }
@@ -50,12 +56,12 @@ export class ActivateAccount implements OnInit {
     if (!this.valid()) { this.form.markAllAsTouched(); return; }
     this.saving.set(true); this.error.set('');
     try {
-      if (this.mode === 'reset') await this.iam.resetPassword(this.token, this.password());
+      if (this.mode === 'reset') await this.iam.resetPassword(this.account()!.email, this.value().code!.trim(), this.password());
       else await this.iam.activate(this.token, this.password());
       this.state.set('done');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo guardar la contraseña.';
-      // A link that expired while the form was open cannot be retried: offer a new one instead.
+      // An expired link or code cannot be retried: offer a new one. A mistyped code stays inline.
       if (/venció|no es válido/.test(message)) this.fail(message); else this.error.set(message);
     } finally { this.saving.set(false); }
   }

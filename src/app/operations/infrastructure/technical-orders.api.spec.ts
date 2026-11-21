@@ -37,4 +37,22 @@ describe('TechnicalOrdersApi', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('offline')));
     await expect(api.getOrder(1)).rejects.toBeInstanceOf(OperationsApiError);
   });
+
+  it('assigns and reassigns the technician, explaining each rejection', async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(json(order({ id: 5 }))));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await api.assignTechnician(5, 9, '');
+    await api.reassign(5, 'Descanso médico');
+    const [[assignUrl, assign], [reassignUrl, reassign]] = fetchMock.mock.calls as unknown as [string, RequestInit][];
+    expect(assignUrl).toMatch(/\/technical-orders\/5\/technician$/);
+    expect(assign).toMatchObject({ method: 'PUT', body: JSON.stringify({ technicianId: 9, note: null }) });
+    expect(new Headers(assign.headers).get('Content-Type')).toBe('application/json');
+    expect(reassignUrl).toMatch(/\/technical-orders\/5\/reassignment$/);
+    expect(reassign).toMatchObject({ method: 'POST', body: JSON.stringify({ reason: 'Descanso médico' }) });
+
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(json({}, 409))));
+    await expect(api.assignTechnician(5, 9, '')).rejects.toThrow('debe trabajar todo el bloque');
+    await expect(api.reassign(5, 'x')).rejects.toThrow('Ningún técnico puede tomar la orden');
+  });
 });

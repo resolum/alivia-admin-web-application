@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { ADMINISTRATOR_ROLES, AccountActivation, emailOf, PasswordReset, isTokenAlive, roleOf, SignInCommand, SignUpCommand, SUBSCRIPTION_MANAGER_ROLE, TECHNICIAN_ROLE } from '../domain/sign-in.command';
+import { ADMINISTRATOR_ROLES, AccountActivation, emailOf, isTokenAlive, roleOf, SignInCommand, SignUpCommand, SUBSCRIPTION_MANAGER_ROLE, TECHNICIAN_ROLE } from '../domain/sign-in.command';
 import { IamApi } from '../infrastructure/iam.api';
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +29,5 @@ export class IamStore {
   getActivation(token: string): Promise<AccountActivation> { return this.api.getActivation(token); }
   activate(token: string, password: string): Promise<void> { return this.api.activate(token, password); }
   requestPasswordRecovery(email: string): Promise<void> { return this.api.requestPasswordRecovery(email); }
-  getPasswordReset(token: string): Promise<PasswordReset> { return this.api.getPasswordReset(token); }
-  resetPassword(token: string, password: string): Promise<void> { return this.api.resetPassword(token, password); }
+  resetPassword(email: string, code: string, password: string): Promise<void> { return this.api.resetPassword(email, code, password); }
 }

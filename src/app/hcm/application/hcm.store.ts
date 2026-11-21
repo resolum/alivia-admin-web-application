@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { Contract, ContractFilters, CreateContract, EmployeeOption, UpdateContract } from '../domain/contract.entity';
+import { Contract, ContractFilters, ContractVersion, CreateContract, EmployeeOption, RenewContract, UpdateContract } from '../domain/contract.entity';
 import { ContractsApi } from '../infrastructure/contracts.api';
 import { EmployeesApi } from '../infrastructure/employees.api';
 import { HcmApiError } from '../infrastructure/hcm-http.client';
@@ -74,11 +74,24 @@ export class HcmStore {
   async updateContract(employeeId: number, contractId: number, input: UpdateContract): Promise<Contract> {
     return this.contractsApi.updateContract(employeeId, contractId, input);
   }
-  /** Activates the contract and refreshes it when it is the one on screen. */
-  async activateContract(employeeId: number, contractId: number): Promise<Contract> {
-    const contract = await this.contractsApi.activateContract(employeeId, contractId);
+  activateContract(employeeId: number, contractId: number): Promise<Contract> {
+    return this.refreshSelected(this.contractsApi.activateContract(employeeId, contractId));
+  }
+  renewContract(employeeId: number, contractId: number, period: RenewContract): Promise<Contract> {
+    return this.refreshSelected(this.contractsApi.renewContract(employeeId, contractId, period));
+  }
+  terminateContract(employeeId: number, contractId: number): Promise<Contract> {
+    return this.refreshSelected(this.contractsApi.terminateContract(employeeId, contractId));
+  }
+  contractHistory(employeeId: number, contractId: number): Promise<ContractVersion[]> {
+    return this.contractsApi.contractHistory(employeeId, contractId);
+  }
+
+  /** Shows the backend's answer when the changed contract is the one on screen. */
+  private async refreshSelected(change: Promise<Contract>): Promise<Contract> {
+    const contract = await change;
     const selected = this.selectedState();
-    if (selected?.id === contractId) this.selectedState.set({ ...contract, employeeName: selected.employeeName });
+    if (selected?.id === contract.id) this.selectedState.set({ ...contract, employeeName: selected.employeeName });
     return contract;
   }
 }

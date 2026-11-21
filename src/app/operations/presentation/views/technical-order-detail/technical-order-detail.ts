@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TechnicalOrdersStore } from '../../../application/technical-orders.store';
 import {
@@ -24,7 +24,47 @@ export class TechnicalOrderDetail implements OnInit {
   protected readonly problem = problemOf;
   protected readonly deviceType = deviceTypeOf;
 
-  ngOnInit(): void { void this.store.select(Number(this.route.snapshot.paramMap.get('orderId'))); }
+  protected readonly manage = this.route.snapshot.data['manage'] === true;
+  protected readonly technicianId = signal('');
+  protected readonly note = signal('');
+  /** Reassignment form, open with the reason being typed. */
+  protected readonly reason = signal<string | null>(null);
+  protected readonly saving = signal(false);
+  protected readonly message = signal('');
+
+  ngOnInit(): void {
+    void this.store.select(Number(this.route.snapshot.paramMap.get('orderId')));
+    if (this.manage) this.store.loadTechnicians().catch(() => this.message.set('No se pudo consultar los técnicos del negocio.'));
+  }
+
+  /** The technician can change while the visit has not started. */
+  protected assignable(order: TechnicalOrder): boolean {
+    return this.manage && (stageOf(order) === 'PENDING' || stageOf(order) === 'ASSIGNED');
+  }
+
+  protected value(event: Event): string { return (event.target as HTMLInputElement).value; }
+
+  protected async assign(order: TechnicalOrder, event: Event): Promise<void> {
+    event.preventDefault();
+    if (!this.technicianId()) { this.message.set('Elige el técnico que atenderá la visita.'); return; }
+    await this.run(() => this.store.assignTechnician(order.id, Number(this.technicianId()), this.note().trim()));
+    if (!this.message()) { this.technicianId.set(''); this.note.set(''); }
+  }
+
+  protected async reassign(order: TechnicalOrder, event: Event): Promise<void> {
+    event.preventDefault();
+    const reason = this.reason()?.trim();
+    if (!reason) { this.message.set('Indica por qué el técnico actual ya no puede atender la visita.'); return; }
+    await this.run(() => this.store.reassign(order.id, reason));
+    if (!this.message()) this.reason.set(null);
+  }
+
+  private async run(change: () => Promise<void>): Promise<void> {
+    this.saving.set(true); this.message.set('');
+    try { await change(); }
+    catch (error) { this.message.set(error instanceof Error ? error.message : 'No se pudo actualizar la orden técnica.'); }
+    finally { this.saving.set(false); }
+  }
 
   protected stage(order: TechnicalOrder): string { return stageOf(order).toLowerCase().replace('_', '-'); }
 

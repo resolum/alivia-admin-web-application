@@ -1,0 +1,6 @@
+.renewal, .history { margin-top: 22px; }
+.renewal .actions { margin-top: 18px; }
+.versions { display: flex; flex-direction: column; gap: 10px; margin: 18px 0 0; padding: 0; list-style: none; }
+.versions li { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border-radius: 8px; background: #f5f7fd; }
+.versions strong { color: #0a2c69; font-size: 12px; }
+.versions span { color: #596579; font-size: 11px; }

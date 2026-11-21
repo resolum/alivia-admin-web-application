@@ -33,3 +33,7 @@ h3 { margin: 22px 0 8px; color: #5e687a; font-size: 11px; letter-spacing: .5px; 
 .map { display: block; width: 100%; height: 220px; margin-top: 16px; border: 0; border-radius: 12px; background: #eef1f8; }
 .map-preview { display: flex; align-items: center; justify-content: center; color: #22478d; font-size: 13px; font-weight: 800; text-decoration: none; }
 .map-note { margin: 6px 0 0; color: #6e7889; font-size: 10px; }
+.assignment { margin-top: 18px; }
+.assignment .full, .assignment .hint, .assignment .actions { grid-column: 1 / -1; }
+.assignment .hint { margin: 0; color: #5e687a; font-size: 12px; }
+@media (max-width: 960px) { .assignment.form-grid { grid-template-columns: 1fr; } }
