@@ -1,0 +1,43 @@
+<section class="page homes-page">
+  <div class="page-heading">
+    <div>
+      <h1>{{ scope === 'mine' ? 'Mis hogares' : 'Hogares' }}</h1>
+      <p class="wide">{{ scope === 'mine' ? 'Hogares en servicio que atendiste o tienes asignados' : 'Consulta los hogares registrados y el estado de sus servicios' }}</p>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <article><small>{{ scope === 'mine' ? 'HOGARES ATENDIDOS' : 'TOTAL HOGARES' }}</small><strong>{{ store.counts().total }}</strong><span>Instalación aprobada</span></article>
+    <article><small>SUSCRIPCIÓN ACTIVA</small><div><strong>{{ store.counts().active }}</strong>@if (store.counts().activeShare; as share) { <em class="ok">{{ share }}</em> }</div><span>Cobro al día</span></article>
+    <article class="danger"><small>INCIDENCIAS ACTIVAS</small><strong>{{ store.counts().openIncidents }}</strong><span>Visitas de mantenimiento abiertas</span></article>
+  </div>
+
+  <div class="filters"><label for="home-search">⌕<input id="home-search" placeholder="Buscar por hogar, responsable o dirección..." (input)="onSearch($event)" /></label></div>
+
+  @if (store.error()) { <div class="notice error-notice"><span>⚠ {{ store.error() }}</span><button (click)="store.load(scope)">Reintentar</button></div> }
+  @if (store.loading() && store.homes().length === 0) { <div class="loading card">Cargando hogares…</div> }
+  @else if (!store.error() && store.visible().length === 0) {
+    <div class="loading card">{{ store.homes().length === 0 ? 'Aún no hay hogares en servicio: aparecen cuando su instalación queda aprobada.' : 'No hay hogares con esta búsqueda.' }}</div>
+  } @else if (!store.error()) {
+    <div class="table-card">
+      <table>
+        <thead><tr><th>ALIAS DEL HOGAR</th><th>RESPONSABLE PRINCIPAL</th><th>DIRECCIÓN</th><th>DISTRITO</th><th>TELÉFONO</th><th>PLAN</th><th>SUSCRIPCIÓN</th><th>ACCIÓN</th></tr></thead>
+        <tbody>
+          @for (home of store.visible(); track home.id) {
+            <tr>
+              <td><strong>{{ name(home) }}</strong><small>{{ home.code }}</small></td>
+              <td>{{ home.contactName || 'Sin responsable registrado' }}</td>
+              <td>{{ home.directions || 'Sin dirección registrada' }}</td>
+              <td>{{ district(home) || '—' }}</td>
+              <td class="mono">{{ home.contactPhone || '—' }}</td>
+              <td>{{ home.planName || '—' }}</td>
+              <td><span class="status {{ tone(home) }}">● {{ subscription(home) }}</span></td>
+              <td><a class="view-link" [routerLink]="[home.id]">Ver</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <footer><span>Mostrando <b>{{ store.visible().length }}</b> de <b>{{ store.homes().length }}</b> hogares</span></footer>
+    </div>
+  }
+</section>

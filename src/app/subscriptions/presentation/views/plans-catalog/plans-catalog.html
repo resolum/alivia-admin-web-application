@@ -1,0 +1,37 @@
+<section class="page">
+  <div class="page-heading"><div><h1>Planes</h1><p class="lead">Administra la oferta oficial de Alivia disponible para familias y hogares asistidos.</p></div></div>
+  @if (store.error()) { <div class="notice error-notice"><span>⚠ {{ store.error() }}</span><button (click)="store.load()">Reintentar</button></div> }
+  @else if (store.loading() && store.plans().length === 0) { <div class="loading card">Cargando planes…</div> }
+  @else if (store.plans().length === 0) { <div class="empty card">No hay planes activos en el catálogo.</div> }
+  @else {
+    <div class="plans">
+      @for (plan of store.plans(); track plan.id) {
+        <article class="plan" [class.custom]="plan.code === 'CUSTOM'">
+          <header><span class="badge">● {{ presentation[plan.code].badge }}</span><span class="kind">{{ presentation[plan.code].kind }}</span></header>
+          <h2>{{ plan.name }}</h2>
+          <p class="description">{{ plan.description }}</p>
+          <div class="price">
+            <div><strong>@if (priceLabel(plan).prefix) { <small>{{ priceLabel(plan).prefix }}</small> }{{ priceLabel(plan).amount }}</strong><span>/ mes</span></div>
+            <em>{{ presentation[plan.code].tag }}</em>
+          </div>
+          @if (plan.priceQualifier === 'BASE_COMPONENT') {
+            <h3>Parámetros configurables</h3>
+            <div class="param"><small>Habitaciones incluidas en el precio base:</small><strong>{{ plan.minimumRooms }} habitaciones @if (plan.additionalRoomMonthlyAmount) { · {{ formatAmount(plan.additionalRoomMonthlyAmount, plan.currency) }} por adicional }</strong></div>
+            <div class="param"><small>Actuadores a medida:</small><strong>{{ actuatorRange(plan) }} · {{ devicePrices(plan) }}</strong></div>
+          } @else {
+            <h3>Equipamiento y cobertura</h3>
+          }
+          <ul>
+            @for (device of plan.includedDevices; track device) { <li><b>✓</b><span><strong>{{ device }}</strong> incluido</span></li> }
+            @for (feature of plan.features; track feature) { <li><b>✓</b><span>{{ feature }}</span></li> }
+          </ul>
+          <footer>
+            <div class="meta"><span>{{ actuatorRange(plan) }}</span><span class="active">Catálogo activo</span></div>
+            <button type="button" class="button primary" (click)="store.open(plan)">◉ Ver detalle del plan</button>
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>
+@if (store.selected(); as plan) { <app-plan-detail [plan]="plan" (closed)="store.close()" /> }

@@ -1,0 +1,65 @@
+<section class="page orders-page">
+  <div class="page-heading">
+    <div><h1>Órdenes técnicas</h1><p class="wide">Solicitudes de evaluación, instalación e incidencias</p></div>
+    <label class="search" for="order-search">⌕<input id="order-search" placeholder="Buscar por orden, hogar o técnico..." (input)="onSearch($event)" /></label>
+  </div>
+
+  <div class="counters" aria-label="Resumen de órdenes">
+    <span><i class="dot pending"></i><b>{{ store.counts().PENDING }}</b> Pendientes</span>
+    <span><i class="dot assigned"></i><b>{{ store.counts().ASSIGNED }}</b> Asignadas</span>
+    <span><i class="dot in-progress"></i><b>{{ store.counts().IN_PROGRESS }}</b> En proceso</span>
+  </div>
+
+  <nav class="tabs" aria-label="Estado de las órdenes">
+    @for (tab of tabs; track tab) {
+      <button type="button" [class.active]="store.tab() === tab" [attr.aria-pressed]="store.tab() === tab" (click)="store.setTab(tab)">
+        {{ tabLabel(tab) }} <small>{{ store.counts()[tab] }}</small>
+      </button>
+    }
+  </nav>
+
+  <div class="type-filter">
+    <span>FILTRAR POR TIPO:</span>
+    @for (type of types; track type) {
+      <button type="button" class="chip {{ type.toLowerCase() }}" [class.active]="store.type() === type" [attr.aria-pressed]="store.type() === type" (click)="store.setType(type)">
+        <i class="dot"></i>{{ typeChip[type] }} <small>({{ store.counts()[type] }})</small>
+      </button>
+    }
+  </div>
+
+  @if (store.error()) { <div class="notice error-notice"><span>⚠ {{ store.error() }}</span><button (click)="store.load()">Reintentar</button></div> }
+  @if (store.loading() && store.orders().length === 0) { <div class="loading card">Cargando órdenes técnicas…</div> }
+  @else if (!store.error() && store.visible().length === 0) {
+    <div class="loading card">No hay órdenes técnicas con estos filtros.</div>
+  } @else if (!store.error()) {
+    <div class="table-card">
+      <table>
+        <thead><tr><th>ORDEN</th><th>TIPO</th><th>HOGAR</th><th>HORARIO</th><th>TÉCNICO</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead>
+        <tbody>
+          @for (day of store.days(); track day.key) {
+            <tr class="day"><td colspan="7"><span>▣ {{ day.title }}</span><b>{{ day.total }} {{ day.total === 1 ? 'orden' : 'órdenes' }}</b></td></tr>
+            @for (order of day.orders; track order.id) {
+              <tr>
+                <td><strong>{{ code(order) }}</strong>@if (created(order); as at) { <small>Creada {{ at }}</small> }</td>
+                <td><span class="type {{ order.serviceType.toLowerCase() }}">{{ typeLabel[order.serviceType] }}</span></td>
+                <td><strong>{{ home(order) }}</strong><small>{{ order.directions || 'Sin dirección registrada' }}</small></td>
+                <td>{{ window(order) }}</td>
+                <td>{{ order.technicianName || 'Sin asignar' }}</td>
+                <td><span class="status {{ stage(order) }}">● {{ process(order) }}</span></td>
+                <td><a class="view-link" [routerLink]="[order.id]">Ver</a></td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+      <footer>
+        <span>Mostrando <b>{{ range() }}</b> de <b>{{ store.visible().length }}</b> órdenes</span>
+        <div>
+          <button [disabled]="store.page() === 0" (click)="store.goToPage(store.page() - 1)" aria-label="Página anterior">‹</button>
+          <button class="current">{{ store.page() + 1 }}</button>
+          <button [disabled]="store.page() + 1 >= store.totalPages()" (click)="store.goToPage(store.page() + 1)" aria-label="Página siguiente">›</button>
+        </div>
+      </footer>
+    </div>
+  }
+</section>

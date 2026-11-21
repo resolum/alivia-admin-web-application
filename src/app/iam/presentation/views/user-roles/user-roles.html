@@ -1,0 +1,103 @@
+<section class="page">
+  <div class="page-heading">
+    <div><h1>Usuarios y responsabilidades</h1><p class="intro">Asigna o retira roles. Cada persona accede solo a las funciones que su responsabilidad necesita.</p></div>
+  </div>
+
+  @if (store.error()) { <div class="notice error-notice" role="alert"><span>⚠ {{ store.error() }}</span><button type="button" (click)="store.load()">Reintentar</button></div> }
+
+  @if (store.loading() && store.users().length === 0) {
+    <div class="loading card" role="status">Cargando usuarios…</div>
+  } @else if (!store.error() && store.users().length === 0) {
+    <section class="contracts-empty-state">
+      <div class="empty-state-icon" aria-hidden="true">♙</div>
+      <h2>Todavía no hay usuarios en tu negocio</h2>
+      <p>Cuando registres empleados o un hogar contrate un plan, sus cuentas aparecerán aquí para asignarles responsabilidades.</p>
+    </section>
+  } @else if (store.users().length > 0) {
+    <div class="filters">
+      <label for="user-search"><span aria-hidden="true">⌕</span><input id="user-search" placeholder="Buscar por nombre o correo" [value]="store.search()" (input)="search($event)" /></label>
+      <label class="select-label" for="role-filter"><span>Filtrar por responsabilidad</span>
+        <select id="role-filter" [value]="store.roleFilter()" (change)="filter($event)">
+          <option value="ALL">Todas las responsabilidades</option>
+          @for (role of roles; track role) { <option [value]="role">{{ catalog[role].label }}</option> }
+          <option value="NONE">Sin responsabilidad</option>
+        </select>
+      </label>
+    </div>
+
+    @if (store.filtered().length === 0) {
+      <section class="contracts-empty-state compact"><div class="empty-state-icon" aria-hidden="true">⌕</div><h2>No encontramos usuarios</h2><p>Prueba con otro nombre, correo o responsabilidad.</p></section>
+    } @else {
+      <div class="table-card">
+        <table>
+          <thead><tr><th scope="col">USUARIO</th><th scope="col">CUENTA</th><th scope="col">RESPONSABILIDADES</th><th scope="col">CAPACIDADES</th><th scope="col"><span class="sr-only">Acciones</span></th></tr></thead>
+          <tbody>
+            @for (user of store.filtered(); track user.id) {
+              <tr>
+                <td><div class="user-cell"><span class="avatar" aria-hidden="true">{{ initials(user.fullName) }}</span><div><strong>{{ user.fullName }}</strong><small>{{ user.email }}</small></div></div></td>
+                <td><span [class]="'status account-' + user.status.toLowerCase()">{{ statusLabel[user.status] }}</span></td>
+                <td>
+                  <div class="role-list">
+                    @for (role of user.roles; track role) { <span class="role-pill" [class.household]="catalog[role].scope === 'Hogar'">{{ catalog[role].label }}</span> }
+                    @empty { <em class="muted">Sin responsabilidad</em> }
+                  </div>
+                </td>
+                <td class="count">{{ capabilityCount(user) }}</td>
+                <td class="manage-cell"><button type="button" class="view-link" [attr.aria-label]="'Gestionar responsabilidades de ' + user.fullName" (click)="open(user, $event)">Gestionar</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <footer><span>Mostrando <b>{{ store.filtered().length }}</b> de <b>{{ store.users().length }}</b> usuarios</span></footer>
+      </div>
+    }
+  }
+</section>
+
+@if (selected(); as user) {
+  <div class="backdrop" (click)="close()"></div>
+  <aside #drawer class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" tabindex="-1">
+    <header>
+      <small>RESPONSABILIDADES</small>
+      <h2 id="drawer-title">{{ user.fullName }}</h2>
+      <span class="mail">{{ user.email }} · <b [class]="'account-' + user.status.toLowerCase()">Cuenta {{ statusLabel[user.status].toLowerCase() }}</b></span>
+      <button class="close" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+    </header>
+
+    <div class="body">
+      @for (group of scopes; track group.scope) {
+        <h3>{{ group.scope === 'Negocio' ? 'Personal del negocio' : 'Clientes del hogar' }}</h3>
+        <ul class="role-switches">
+          @for (role of group.roles; track role) {
+            @let on = user.roles.includes(role);
+            @let blocked = conflict(user, role);
+            <li [class.on]="on">
+              <div class="role-text">
+                <strong [id]="'role-' + role">{{ catalog[role].label }}</strong>
+                <small>{{ catalog[role].capabilities.length }} capacidades</small>
+                @if (blocked && !rejectionFor(user, role)) { <small class="warn">No compatible con su rol actual</small> }
+              </div>
+              <button type="button" class="switch" role="switch" [attr.aria-checked]="on" [attr.aria-labelledby]="'role-' + role"
+                [class.busy]="isPending(user, role)" [disabled]="store.pending() !== null" (click)="store.toggle(user, role)">
+                <span class="thumb"></span>
+              </button>
+              @if (rejectionFor(user, role); as message) { <p class="rejection" role="alert">{{ message }}</p> }
+            </li>
+          }
+        </ul>
+      }
+
+      <h3>Capacidades habilitadas <span class="tally">{{ capabilities().length }}</span></h3>
+      @if (capabilities().length === 0) {
+        <p class="empty">Sin responsabilidades no puede usar ninguna función de Alivia.</p>
+      } @else {
+        <ul class="capabilities">
+          @for (capability of capabilities(); track capability.code) {
+            <li><span class="tick" aria-hidden="true">✓</span><div><strong>{{ capability.label }}</strong><small>Por {{ grantedBy(capability.grantedBy) }}</small></div></li>
+          }
+        </ul>
+      }
+    </div>
+    <footer><button class="button secondary" type="button" (click)="close()">Cerrar</button></footer>
+  </aside>
+}

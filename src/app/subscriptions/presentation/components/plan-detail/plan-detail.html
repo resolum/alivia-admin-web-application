@@ -1,0 +1,32 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<aside class="drawer" role="dialog" aria-modal="true" [attr.aria-label]="'Detalle del ' + plan().name">
+  <header>
+    <small>DETALLE DEL PLAN · {{ plan().code }}</small><h2>{{ plan().name }}</h2><span>{{ presentation[plan().code].kind }} · Catálogo activo</span>
+    <button class="close" type="button" aria-label="Cerrar detalle" (click)="closed.emit()">✕</button>
+  </header>
+  <div class="body">
+    <p>{{ plan().description }}</p>
+    <h3>Precio</h3>
+    <dl>
+      <dt>{{ price().prefix ? 'Desde' : 'Mensualidad' }}</dt><dd>{{ price().amount }} / mes</dd>
+      <dt>Precio base</dt><dd>{{ formatAmount(plan().basePriceAmount, plan().currency) }}</dd>
+      @if (plan().additionalRoomMonthlyAmount) { <dt>Habitación adicional</dt><dd>{{ formatAmount(plan().additionalRoomMonthlyAmount!, plan().currency) }} / mes</dd> }
+      <dt>Facturación</dt><dd>{{ plan().billingPeriod === 'MONTHLY' ? 'Mensual' : 'Anual' }}</dd>
+    </dl>
+    <h3>Configuración</h3>
+    <dl>
+      <dt>Habitaciones incluidas</dt><dd>{{ plan().minimumRooms }}</dd>
+      <dt>Actuadores</dt><dd>{{ actuators() }}</dd>
+      <dt>Actuadores sin costo</dt><dd>{{ plan().includedActuators }}</dd>
+    </dl>
+    @if (devicePrices().length) {
+      <h3>Precio por actuador</h3>
+      <dl>@for (device of devicePrices(); track device.label) { <dt>{{ device.label }}</dt><dd>{{ device.amount }} / mes</dd> }</dl>
+    }
+    <h3>Equipos incluidos</h3>
+    <ul>@for (device of plan().includedDevices; track device) { <li>{{ device }}</li> }</ul>
+    <h3>Beneficios</h3>
+    <ul>@for (feature of plan().features; track feature) { <li>{{ feature }}</li> }</ul>
+  </div>
+  <footer><button class="button secondary" type="button" (click)="closed.emit()">Cerrar</button></footer>
+</aside>

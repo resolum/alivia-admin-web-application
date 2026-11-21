@@ -1,0 +1,87 @@
+<section class="calendar-page" [class.page]="!embedded()">
+  <header class="card top">
+    <div>
+      <h1>Calendario <span>/ {{ title() }}</span></h1>
+      <div class="legend" role="group" aria-label="Filtrar por tipo">
+        @for (item of [['EVALUATION', 'Revisión técnica'], ['INSTALLATION', 'Instalación'], ['MAINTENANCE', 'Incidencia']]; track item[0]) {
+          <button type="button" class="{{ item[0].toLowerCase() }}" [class.off]="type() !== 'ALL' && type() !== item[0]" (click)="setType($any(item[0]))"><i></i>{{ item[1] }}</button>
+        }
+      </div>
+    </div>
+    <div class="controls">
+      <div class="segmented" role="group" aria-label="Vista">
+        <button type="button" [class.active]="mode() === 'day'" (click)="mode.set('day')">Día</button>
+        <button type="button" [class.active]="mode() === 'week'" (click)="mode.set('week')">Semana</button>
+        <button type="button" [class.active]="mode() === 'month'" (click)="mode.set('month')">Mes</button>
+      </div>
+      <div class="segmented">
+        <button type="button" (click)="goToday()">Hoy</button>
+        <button type="button" (click)="move(-1)" aria-label="Anterior">‹</button>
+        <button type="button" (click)="move(1)" aria-label="Siguiente">›</button>
+      </div>
+      <span class="range">▣ {{ range() }}</span>
+    </div>
+  </header>
+
+  @if (error()) { <div class="notice error-notice"><span>⚠ {{ error() }}</span><button (click)="load()">Reintentar</button></div> }
+  @if (loading() && orders().length === 0) { <div class="loading card">Cargando tu calendario…</div> }
+  @else if (!error() && mode() !== 'month') {
+    <p class="summary card">
+      <span><b>{{ summary().count }} {{ summary().count === 1 ? 'orden' : 'órdenes' }}</b> · {{ summary().hours }} h reservadas@if (summary().free !== null) { · <em>{{ summary().free }} {{ summary().free === 1 ? 'espacio disponible' : 'espacios disponibles' }}</em> }</span>
+      <span class="regular">{{ summary().regular ? 'Jornada regular: ' + summary().regular : 'Sin horario laboral asignado' }}</span>
+    </p>
+    <div class="card board">
+      <div class="head" [style.grid-template-columns]="'64px repeat(' + columns().length + ', minmax(0, 1fr))'">
+        <span class="zone">GMT-5</span>
+        @for (column of columns(); track column.date) {
+          <button type="button" class="day" [class.today]="column.isToday" (click)="openDay(column.date)"><small>{{ column.weekday }}</small><b>{{ column.day }}</b><em>{{ shiftText(column.schedule) || 'Sin jornada' }}</em></button>
+        }
+      </div>
+      <div class="body" [style.grid-template-columns]="'64px repeat(' + columns().length + ', minmax(0, 1fr))'" [style.height.px]="hours().length * hourHeight">
+        <div class="times">@for (hour of hours(); track hour) { <span [style.height.px]="hourHeight">{{ hour < 10 ? '0' + hour : hour }}:00</span> }</div>
+        @for (column of columns(); track column.date) {
+          <div class="column" [class.today]="column.isToday" [class.off]="!column.schedule" [style.background-size]="'100% ' + hourHeight + 'px'">
+            @for (shift of column.schedule?.shifts ?? []; track shift.start) {
+              <div class="shift" [style.top.px]="placeShift(shift).top" [style.height.px]="placeShift(shift).height" [title]="'Jornada ' + shift.start + ' – ' + shift.end"></div>
+            }
+            @for (order of column.orders; track order.id) {
+              <button type="button" class="event {{ order.serviceType.toLowerCase() }} {{ stage(order) }}" [class.outside]="outside(order)" [style.top.px]="place(order).top" [style.height.px]="place(order).height" (click)="selected.set(order)">
+                <span class="code">{{ code(order) }} <em>{{ typeLabel[order.serviceType] }}</em></span>
+                <strong>{{ home(order) }}</strong>
+                <span class="time">◷ {{ window(order) }}@if (outside(order)) { <b class="flag">Fuera de jornada</b> }</span>
+              </button>
+            } @empty { <p class="free">{{ column.schedule ? (mode() === 'day' ? 'Sin visitas programadas' : '') : 'Sin jornada' }}</p> }
+          </div>
+        }
+        @if (nowLine(); as line) { <div class="now" [style.top.px]="line.top"><span>{{ line.label }}</span></div> }
+      </div>
+    </div>
+  } @else if (!error()) {
+    <div class="card month">
+      <div class="grid">
+        @for (name of ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM']; track name) { <b class="weekday">{{ name }}</b> }
+        @for (cell of monthCells(); track cell.date) {
+          <div class="cell" [class.out]="!cell.inMonth" [class.today]="cell.isToday">
+            <button type="button" class="number" (click)="openDay(cell.date)">{{ cell.day }}</button>
+            @if (cell.schedule && cell.inMonth) { <small class="shift-label">{{ shiftText(cell.schedule) }}</small> }
+            @for (order of cell.orders; track order.id) {
+              <button type="button" class="chip {{ order.serviceType.toLowerCase() }}" (click)="selected.set(order)">{{ order.startTime.slice(0, 5) }} {{ home(order) }}</button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (selected(); as order) {
+    <div class="backdrop" (click)="selected.set(null)" aria-hidden="true"></div>
+    <aside class="popover card" role="dialog" aria-modal="true" [attr.aria-label]="'Orden ' + code(order)">
+      <header><span class="code">{{ code(order) }} <em class="{{ order.serviceType.toLowerCase() }}">{{ typeLabel[order.serviceType] }}</em></span><button type="button" class="close" (click)="selected.set(null)" aria-label="Cerrar">✕</button></header>
+      <strong>{{ home(order) }}</strong>
+      <span>⌖ {{ order.directions || 'Sin dirección registrada' }}</span>
+      <span>◷ {{ window(order) }} · {{ process(order) }}</span>
+      @if (order.contactName) { <span>Contacto: {{ order.contactName }}@if (order.contactPhone) { · {{ order.contactPhone }} }</span> }
+      <a class="see" [routerLink]="['/technician/orders', order.id]">Ver orden</a>
+    </aside>
+  }
+</section>

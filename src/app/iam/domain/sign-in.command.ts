@@ -1,5 +1,15 @@
 export interface SignInCommand { email: string; password: string; }
 
+/** A business administrator registering from the portal; the backend sends a verification link. */
+export interface SignUpCommand { firstName: string; lastName: string; email: string; phoneNumber: string; password: string; acceptedTerms: boolean; }
+
+/** Peruvian mobile numbers: 9 digits starting with 9; the backend stores them with the 51 country code. */
+export const MOBILE_PATTERN = /^9\d{8}$/;
+export function toPhoneNumber(mobile: string): string { return `51${mobile.replace(/\D/g, '')}`; }
+
+/** Families and assisted people use the Alivia mobile app; the business portal rejects their accounts. */
+export const MOBILE_APP_ROLES: readonly string[] = ['CAREGIVER', 'FAMILIAR', 'RELATIVE', 'ASSISTED_PERSON'];
+
 /** Who an invitation link belongs to, before its owner chooses a password. */
 export interface AccountActivation { email: string; fullName: string; expiresAt: string; }
 
@@ -14,7 +24,7 @@ export const PASSWORD_RULES = [
 
 export function meetsPasswordPolicy(value: string): boolean { return PASSWORD_RULES.every(rule => rule.test(value)); }
 
-interface TokenClaims { exp?: number; businessId?: number | string; role?: string; }
+interface TokenClaims { exp?: number; businessId?: number | string; role?: string; email?: string; }
 
 function claimsOf(token: string): TokenClaims | null {
   try { return JSON.parse(atob(token.split('.')[1]!.replace(/-/g, '+').replace(/_/g, '/'))) as TokenClaims; }
@@ -27,12 +37,20 @@ export function isTokenAlive(token: string | null, now = Date.now()): boolean {
   return claims !== null && (!claims.exp || claims.exp * 1000 > now);
 }
 
-/** Field technicians use their own portal; every other staff role uses the administration one. */
+/** Field technicians and subscription managers have their own portals; administrators use the general one. */
 export const TECHNICIAN_ROLE = 'TECHNICIAN';
+export const SUBSCRIPTION_MANAGER_ROLE = 'SUBSCRIPTION_MANAGER';
+/** Only business administrators use the administration portal (US-17). */
+export const ADMINISTRATOR_ROLES: readonly string[] = ['ADMINISTRATOR', 'ADMIN'];
 
 /** The "role" claim of the JWT (ADMINISTRATOR, TECHNICIAN, ...). */
 export function roleOf(token: string | null): string | null {
   return (token ? claimsOf(token)?.role : null) ?? null;
+}
+
+/** The "email" claim of the JWT. */
+export function emailOf(token: string | null): string | null {
+  return (token ? claimsOf(token)?.email : null) ?? null;
 }
 
 /** The "businessId" claim of the JWT, when the backend includes it. */

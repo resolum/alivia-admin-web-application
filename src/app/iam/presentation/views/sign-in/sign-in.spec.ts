@@ -22,14 +22,16 @@ describe('SignIn', () => {
 
   it('does not call the backend with an invalid form', async () => {
     await component.submit();
+    component.form.setValue({ email: 'carlos.mendoza@alivia', password: 'pass123', remember: true });
+    await component.submit();
     expect(iam.signIn).not.toHaveBeenCalled();
   });
 
   it('signs in and returns to the requested page', async () => {
     returnUrl = '/hcm/work-schedules';
-    component.form.setValue({ email: 'admin@alivia.test', password: 'secret' });
+    component.form.setValue({ email: ' admin@alivia.test ', password: 'secret12', remember: false });
     await component.submit();
-    expect(iam.signIn).toHaveBeenCalledWith({ email: 'admin@alivia.test', password: 'secret' });
+    expect(iam.signIn).toHaveBeenCalledWith({ email: 'admin@alivia.test', password: 'secret12' }, false);
     expect(router.navigateByUrl).toHaveBeenCalledWith('/hcm/work-schedules');
 
     returnUrl = null;
@@ -39,7 +41,7 @@ describe('SignIn', () => {
 
   it('shows the sign-in error', async () => {
     iam.signIn.mockRejectedValue(new Error('Correo o contraseña incorrectos.'));
-    component.form.setValue({ email: 'admin@alivia.test', password: 'bad' });
+    component.form.setValue({ email: 'admin@alivia.test', password: 'wrongpass', remember: true });
     await component.submit();
     expect(component.error()).toBe('Correo o contraseña incorrectos.');
     expect(component.loading()).toBe(false);

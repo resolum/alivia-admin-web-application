@@ -1,0 +1,26 @@
+/* Layout, fields and illustration come from sign-in.css; these are the parts only the sign-up has. */
+.form { margin-top: clamp(24px, 5vh, 44px); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; margin: 0; padding: 0; border: 0; }
+.pair legend { margin-bottom: 14px; color: var(--navy-ink); font-size: 15px; font-weight: 600; }
+.field input:first-child { padding-left: 16px; }
+.prefix { margin: 0 10px 0 16px; padding-right: 10px; border-right: 1px solid var(--line); color: var(--muted); font-size: 16px; font-variant-numeric: tabular-nums; }
+.hint { margin: 0; color: var(--muted); font-size: 13px; }
+.rules { display: grid; gap: 6px; margin: 4px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--surface); color: var(--muted); font-size: 14px; list-style: none; }
+.rules li { display: flex; align-items: center; gap: 8px; transition: color 150ms ease; }
+.rules svg { flex: 0 0 auto; width: 18px; height: 18px; color: #c3c9d8; transition: color 150ms ease, fill 150ms ease; }
+.rules li.ok { color: var(--teal); }
+.rules li.ok svg { color: #fff; fill: var(--teal); }
+.terms .check { align-items: flex-start; font-size: 15px; line-height: 1.45; }
+.terms .box { flex: 0 0 auto; margin-top: 1px; }
+.taken div { display: flex; flex-direction: column; gap: 4px; }
+.taken-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.taken-links a { display: inline-flex; align-items: center; min-height: 44px; color: #7d1b1b; font-weight: 600; }
+.sent { align-items: flex-start; }
+.sent-icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 18px; border-radius: 16px; background: #d9faf2; color: var(--teal); }
+.sent-icon svg { width: 28px; height: 28px; }
+.sent .lead strong { color: var(--navy-ink); overflow-wrap: anywhere; }
+.sent .submit { align-self: stretch; text-decoration: none; }
+.notice-ok { margin: -10px 0 18px; padding: 10px 14px; border-radius: 10px; background: #effbf8; color: #1d5d53; font-size: 14px; }
+.ghost { align-self: center; min-height: 44px; margin-top: 8px; border: 0; background: none; color: var(--teal); font-size: 15px; font-weight: 600; }
+.ghost:disabled { color: #8a93a5; cursor: default; }
+@media (max-width: 520px) { .pair { grid-template-columns: 1fr; } }

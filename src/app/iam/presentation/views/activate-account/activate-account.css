@@ -1,14 +1,13 @@
 .activation { display: flex; min-height: 100vh; flex-direction: column; align-items: center; padding: 40px 16px 24px; background: #f6f7ff; }
 .portal { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 26px; }
-.logo { display: flex; align-items: center; gap: 6px; }
-.logo strong { color: #0a2c69; font-size: 26px; letter-spacing: -.5px; }
-.mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #0c307a; color: #5fe0cc; font-weight: 800; }
-.mark.small { width: 34px; height: 34px; background: #fff; color: #20aa91; }
+:host { display: block; font-family: Outfit, Inter, ui-sans-serif, system-ui, sans-serif; --ease-out: cubic-bezier(.23, 1, .32, 1); }
+.logo { width: 64px; height: 64px; border-radius: 16px; background: #fff; box-shadow: 0 1px 2px rgba(9, 22, 49, .06), 0 8px 20px -10px rgba(9, 22, 49, .25); object-fit: contain; }
 .portal small { padding: 4px 12px; border-radius: 12px; background: #eceffd; color: #33415a; font-size: 11px; font-weight: 700; letter-spacing: .4px; }
 .panel { display: flex; flex-direction: column; align-items: center; width: min(460px, 100%); padding: 32px 28px; border-radius: 18px; background: #fff; box-shadow: 0 10px 30px rgba(9, 22, 49, .06); text-align: center; }
 .badge { display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: 14px; border-radius: 50%; background: #eef1ff; }
 .badge svg, .field-error svg, .rules svg, .eye svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .badge svg { width: 30px; height: 30px; }
+.badge img { width: 44px; height: 44px; object-fit: contain; }
 .done-badge { background: #d9faf2; color: #168978; box-shadow: 0 0 0 8px #eef1ff; }
 .error-badge { background: #ffe5e5; color: #c52828; }
 h1 { margin: 0 0 8px; color: #0a2c69; font-size: 22px; }
@@ -26,11 +25,41 @@ label small { color: #5d687a; font-size: 11px; }
 .rules b { color: #33415a; font-size: 11px; letter-spacing: .4px; }
 .rules ul { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; color: #4f5b70; font-size: 13px; }
 .rules li { display: flex; align-items: center; gap: 8px; }
-.rules li svg { width: 18px; height: 18px; color: #c3c9d8; }
+.rules li svg { width: 18px; height: 18px; color: #c3c9d8; transition: color 150ms ease, fill 150ms ease; }
+.rules li { transition: color 150ms ease; }
 .rules li.ok { color: #168978; }
 .rules li.ok svg { color: #fff; fill: #168978; stroke: #fff; }
 .field-error { display: flex; align-items: center; gap: 6px; margin: 0; color: #c52828; font-size: 12px; }
 .field-error svg { flex: 0 0 auto; width: 16px; height: 16px; }
 .wide { width: 100%; margin-top: 14px; min-height: 46px; }
 .button:disabled { cursor: not-allowed; opacity: .55; }
+.button { gap: 8px; font-size: 15px; transition: transform 160ms var(--ease-out), background-color 150ms ease; }
+.button:active:not(:disabled) { transform: scale(.97); }
+.btn-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+a:focus-visible, button:focus-visible { outline: 2px solid #0c307a; outline-offset: 3px; }
+.spinner { display: inline-block; width: 14px; height: 14px; margin-right: 8px; border: 2px solid #c9d1e6; border-top-color: #0c307a; border-radius: 50%; vertical-align: -2px; animation: spin 600ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.back-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 10px; color: #4f5b70; font-size: 14px; font-weight: 700; text-decoration: none; }
+.back-link svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .back-link:hover { color: #0a2c69; } .back-link:hover svg { transform: translateX(-3px); } .button.primary:hover:not(:disabled) { background: #123a88; } }
+
+/* Forgot password: email field with the domain hint, and the "link sent" state. */
+.required { color: #c52828; }
+.hint { color: #6a7487; font-size: 11px; font-weight: 800; }
+.email-field { padding-left: 14px; background: #fff; border-color: #e3e7f1; }
+.email-field > svg { flex: 0 0 auto; width: 20px; height: 20px; color: #4f5b70; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.email-field.invalid { border-color: #f08a8a; }
+.sent-to { margin: 10px 0 0; padding: 10px 14px; border-radius: 10px; background: #f1f3fd; color: #173b77; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.resend { min-height: 44px; margin-top: 6px; border: 0; background: none; color: #168978; font-size: 13px; font-weight: 800; }
+.resend:disabled { color: #8a93a5; cursor: default; }
+
+/* The card arrives once per visit; state changes inside it swap without motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .panel { animation: rise 360ms var(--ease-out) both; }
+  .done-badge { animation: pop 420ms var(--ease-out) both 80ms; }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes pop { from { opacity: 0; transform: scale(.9); } }
+@starting-style { .field-error { opacity: 0; } }
+.field-error { transition: opacity 180ms ease; }
 footer { margin-top: 24px; color: #6a7487; font-size: 11px; font-weight: 700; }
