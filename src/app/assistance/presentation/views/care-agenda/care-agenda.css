@@ -1,0 +1,55 @@
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.segmented { display: flex; gap: 2px; padding: 4px; border-radius: 10px; background: #eef1fa; }
+.segmented button { min-height: 36px; padding: 7px 13px; border: 0; border-radius: 7px; background: none; color: #334057; font-size: 13px; font-weight: 700; }
+.segmented button.active { background: #fff; color: #0c307a; box-shadow: 0 1px 3px rgba(15, 42, 107, .12); }
+.range { padding: 9px 13px; border-radius: 10px; background: #eef1fa; color: #0c307a; font-size: 13px; font-weight: 800; }
+
+.offline { background: #fff6e0; color: #6b4a00; }
+.inbox { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+.box { padding: 18px 20px; }
+.box h2 { display: flex; align-items: center; gap: 10px; margin: 0; color: #092765; font-size: 17px; }
+.hint { margin: 4px 0 12px; color: #5d687a; font-size: 12px; }
+.box ul { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.box li { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+.box li strong { color: #172540; }
+.box li span { color: #485368; font-size: 12px; }
+/* Reminders and alerts must never be confused (US-36 #7): different symbol, tint and wording. */
+.kind { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: 900; }
+.kind.reminder { background: #e6eaff; color: #264a94; }
+.kind.alert { background: #ffe0e0; color: #b02020; }
+li.reminder { background: #f2f4fd; }
+li.alert { background: #fff0f0; }
+li.alert strong { color: #a32929; }
+li.none { padding: 6px 0; color: #5d687a; }
+
+.days { display: flex; flex-direction: column; gap: 14px; }
+.day { padding: 16px; }
+.day h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: #092765; font-size: 15px; text-transform: capitalize; }
+.day h2 small { padding: 2px 8px; border-radius: 10px; background: #0c307a; color: #fff; font-size: 10px; text-transform: none; }
+.day.today { border-color: #b7c4e6; }
+.day .table-card { border: 0; }
+.day td { font-size: 12px; }
+
+.priority, .status { display: inline-flex; padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 800; }
+.priority.high { background: #ffe0e0; color: #a32929; } .priority.medium { background: #fff1d6; color: #7a5200; }
+.priority.low, .priority.routine { background: #e8ebf2; color: #4f5868; }
+.status.scheduled { background: #e6eaff; color: #264a94; } .status.in-progress { background: #d9faf2; color: #126f61; }
+.status.completed { background: #dcf7f0; color: #126f61; } .status.missed { background: #ffe0e0; color: #a32929; }
+.status.cancelled, .status.omitted { background: #e8ebf2; color: #4f5868; }
+
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; padding: 12px; }
+.column { display: flex; flex-direction: column; gap: 6px; min-height: 160px; padding: 8px; border-radius: 8px; background: #f6f7fd; }
+.column.today { outline: 2px solid #0c307a; }
+.column h3 { margin: 0 0 4px; color: #334057; font-size: 11px; text-transform: capitalize; }
+.chip { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; border-radius: 6px; background: #fff; border: 1px solid #e3e7f1; color: #172540; font-size: 11px; }
+.chip small { color: #5d687a; font-size: 10px; }
+.chip.shift { border-color: #c4ede2; background: #effbf7; }
+.chip.shift b { color: #126f61; }
+tr.shift td:first-child strong { color: #126f61; }
+.chip.medication { border-color: #c9d4f3; background: #f2f5ff; }
+.chip.completed, .chip.cancelled, .chip.omitted { opacity: .7; }
+.chip.missed { border-color: #f0c4c4; background: #fff5f5; }
+.free { margin: 8px 0; color: #5d687a; font-size: 11px; text-align: center; }
+
+@media (max-width: 950px) { .week { grid-template-columns: 1fr; } .column { min-height: 0; } }
+@media (max-width: 760px) { .inbox { grid-template-columns: 1fr; } }

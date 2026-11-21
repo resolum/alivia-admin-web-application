@@ -30,9 +30,9 @@ describe('IamApi', () => {
     await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('CORS');
   });
 
-  it('rejects family accounts and inactive users without keeping their session', async () => {
+  it('rejects assisted-person accounts and inactive users without keeping their session', async () => {
     const ok = (user: object) => new Response(JSON.stringify({ accessToken: 'abc', user }), { status: 200 });
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(ok({ role: 'CAREGIVER', status: 'ACTIVE' })).mockResolvedValueOnce(ok({ role: 'ADMINISTRATOR', status: 'SUSPENDED' })));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(ok({ role: 'ASSISTED_PERSON', status: 'ACTIVE' })).mockResolvedValueOnce(ok({ role: 'ADMINISTRATOR', status: 'SUSPENDED' })));
     const api = new IamApi();
     await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('app móvil');
     await expect(api.signIn({ email: 'a@b.c', password: 'x' })).rejects.toThrow('suspendida');

@@ -32,3 +32,9 @@ export const requireSubscriptionManager: CanActivateFn = () => {
   const iam = inject(IamStore);
   return iam.isSubscriptionManager() ? true : inject(Router).parseUrl(iam.homeUrl());
 };
+
+/** The care portal is only for caregivers and relatives. */
+export const requireCare: CanActivateFn = () => {
+  const iam = inject(IamStore);
+  return iam.isCareMember() ? true : inject(Router).parseUrl(iam.homeUrl());
+};

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
-import { requireAdministration, requireSession, requireSubscriptionManager, requireTechnician } from './iam/presentation/guards/require-session.guard';
+import { requireAdministration, requireCare, requireSession, requireSubscriptionManager, requireTechnician } from './iam/presentation/guards/require-session.guard';
 import { CommercialShell } from './shared/presentation/layout/commercial-shell/commercial-shell';
+import { CareShell } from './shared/presentation/layout/care-shell/care-shell';
 import { AdminShell } from './shared/presentation/layout/admin-shell/admin-shell';
 import { TechnicianShell } from './shared/presentation/layout/technician-shell/technician-shell';
 import { ComingSoon } from './shared/presentation/views/coming-soon/coming-soon';
@@ -32,6 +33,10 @@ export const routes: Routes = [
     { path: 'subscriptions', loadChildren: () => import('./subscriptions/presentation/subscriptions.routes').then(module => module.COMMERCIAL_SUBSCRIPTIONS_ROUTES) },
     comingSoon('metrics', 'Métricas'),
     { path: '**', redirectTo: 'home' },
+  ] },
+  { path: 'care', component: CareShell, canActivate: [requireSession, requireCare], children: [
+    { path: '', pathMatch: 'full', redirectTo: 'agenda' },
+    { path: '', loadChildren: () => import('./assistance/presentation/assistance.routes').then(module => module.CARE_ROUTES) },
   ] },
   { path: '', component: AdminShell, canActivate: [requireSession, requireAdministration], children: [
     { path: '', pathMatch: 'full', redirectTo: 'hcm/contracts' },

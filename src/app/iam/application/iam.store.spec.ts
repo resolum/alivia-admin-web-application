@@ -66,6 +66,10 @@ describe('IamStore', () => {
       expect(store.isAdministrator()).toBe(false);
       expect(store.homeUrl()).toBe('/access-denied');
     }
+    for (const role of ['CAREGIVER', 'RELATIVE']) {
+      current = token({ role });
+      expect(store.homeUrl()).toBe('/care/agenda');
+    }
     current = token({});
     expect(store.homeUrl()).toBe('/access-denied');
   });
