@@ -21,6 +21,12 @@ export const API_PATHS = {
   hiringRequests: environment.API_HIRING_REQUESTS_PATH,
   technicalOrders: environment.API_TECHNICAL_ORDERS_PATH,
   servicedHomes: environment.API_SERVICED_HOMES_PATH,
+  careAgenda: environment.API_CARE_AGENDA_PATH,
+  careShifts: environment.API_CARE_SHIFTS_PATH,
+  caregivers: environment.API_CAREGIVERS_PATH,
+  medicationAdministrations: environment.API_MEDICATION_ADMINISTRATIONS_PATH,
+  notifications: environment.API_NOTIFICATIONS_PATH,
+  autonomyMetrics: environment.API_AUTONOMY_METRICS_PATH,
 } as const;
 export const ACCESS_TOKEN_KEY = 'alivia.iam.access-token';
 /** Kept next to the access token; in localStorage when the user chose "Recordarme en este equipo". */

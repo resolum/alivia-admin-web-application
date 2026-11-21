@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { ADMINISTRATOR_ROLES, AccountActivation, emailOf, isTokenAlive, roleOf, SignInCommand, SignUpCommand, SUBSCRIPTION_MANAGER_ROLE, TECHNICIAN_ROLE } from '../domain/sign-in.command';
+import { ADMINISTRATOR_ROLES, AccountActivation, CARE_ROLES, emailOf, isTokenAlive, roleOf, SignInCommand, SignUpCommand, SUBSCRIPTION_MANAGER_ROLE, TECHNICIAN_ROLE } from '../domain/sign-in.command';
 import { IamApi } from '../infrastructure/iam.api';
 
 @Injectable({ providedIn: 'root' })
@@ -10,6 +10,7 @@ export class IamStore {
   async ensureSession(): Promise<boolean> { return this.isAuthenticated() || (await this.api.refresh() && this.isAuthenticated()); }
   isTechnician(): boolean { return roleOf(this.api.accessToken()) === TECHNICIAN_ROLE; }
   isSubscriptionManager(): boolean { return roleOf(this.api.accessToken()) === SUBSCRIPTION_MANAGER_ROLE; }
+  isCareMember(): boolean { return CARE_ROLES.includes(roleOf(this.api.accessToken()) ?? ''); }
   isAdministrator(): boolean { return ADMINISTRATOR_ROLES.includes(roleOf(this.api.accessToken()) ?? ''); }
   /** Email of the signed-in user, shown in the portal sidebar. */
   currentEmail(): string | null { return emailOf(this.api.accessToken()); }
@@ -18,6 +19,7 @@ export class IamStore {
     if (this.isTechnician()) return '/technician/home';
     if (this.isSubscriptionManager()) return '/commercial/home';
     if (this.isAdministrator()) return '/hcm/contracts';
+    if (this.isCareMember()) return '/care/agenda';
     return '/access-denied';
   }
   /** Name shown in the sidebar; null when the account has no staff profile (the administrator). */

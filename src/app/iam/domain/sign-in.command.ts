@@ -7,8 +7,10 @@ export interface SignUpCommand { firstName: string; lastName: string; email: str
 export const MOBILE_PATTERN = /^9\d{8}$/;
 export function toPhoneNumber(mobile: string): string { return `51${mobile.replace(/\D/g, '')}`; }
 
-/** Families and assisted people use the Alivia mobile app; the business portal rejects their accounts. */
-export const MOBILE_APP_ROLES: readonly string[] = ['CAREGIVER', 'FAMILIAR', 'RELATIVE', 'ASSISTED_PERSON'];
+/** Assisted people use the Alivia mobile app; the web portal rejects their accounts. */
+export const MOBILE_APP_ROLES: readonly string[] = ['FAMILIAR', 'ASSISTED_PERSON'];
+/** Caregivers and relatives use the care portal (US-36, US-37, US-41). */
+export const CARE_ROLES: readonly string[] = ['CAREGIVER', 'RELATIVE'];
 
 /** Who an invitation link belongs to, before its owner chooses a password. */
 export interface AccountActivation { email: string; fullName: string; expiresAt: string; }
@@ -24,7 +26,7 @@ export const PASSWORD_RULES = [
 
 export function meetsPasswordPolicy(value: string): boolean { return PASSWORD_RULES.every(rule => rule.test(value)); }
 
-interface TokenClaims { exp?: number; businessId?: number | string; role?: string; email?: string; }
+interface TokenClaims { sub?: string; exp?: number; businessId?: number | string; role?: string; email?: string; }
 
 function claimsOf(token: string): TokenClaims | null {
   try { return JSON.parse(atob(token.split('.')[1]!.replace(/-/g, '+').replace(/_/g, '/'))) as TokenClaims; }
@@ -51,6 +53,12 @@ export function roleOf(token: string | null): string | null {
 /** The "email" claim of the JWT. */
 export function emailOf(token: string | null): string | null {
   return (token ? claimsOf(token)?.email : null) ?? null;
+}
+
+/** The "sub" claim: the IAM user id. */
+export function userIdOf(token: string | null): number | null {
+  const value = Number(token ? claimsOf(token)?.sub : Number.NaN);
+  return Number.isInteger(value) && value > 0 ? value : null;
 }
 
 /** The "businessId" claim of the JWT, when the backend includes it. */

@@ -1,4 +1,4 @@
-import { isTokenAlive, meetsPasswordPolicy, roleOf } from './sign-in.command';
+import { isTokenAlive, meetsPasswordPolicy, roleOf, userIdOf } from './sign-in.command';
 
 function token(exp: number): string {
   return `header.${btoa(JSON.stringify({ sub: '1', exp }))}.signature`;
@@ -30,5 +30,11 @@ describe('roleOf', () => {
     expect(roleOf(`h.${btoa(JSON.stringify({ role: 'TECHNICIAN' }))}.s`)).toBe('TECHNICIAN');
     expect(roleOf(`h.${btoa(JSON.stringify({}))}.s`)).toBeNull();
     expect(roleOf(null)).toBeNull();
+  });
+
+  it('reads the IAM user id from the subject', () => {
+    expect(userIdOf(`h.${btoa(JSON.stringify({ sub: '42' }))}.s`)).toBe(42);
+    expect(userIdOf(`h.${btoa(JSON.stringify({ sub: 'abc' }))}.s`)).toBeNull();
+    expect(userIdOf(null)).toBeNull();
   });
 });

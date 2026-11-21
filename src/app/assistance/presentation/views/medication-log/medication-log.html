@@ -1,0 +1,83 @@
+<section class="page">
+  <header class="page-heading">
+    <div><h1>Medicación</h1><p>Confirma u omite cada dosis programada. Cada registro queda en el historial.</p></div>
+  </header>
+
+  <form class="filters" (ngSubmit)="load()">
+    <label class="date">Desde <input type="date" name="from" [ngModel]="from()" (ngModelChange)="from.set($event)" [max]="to()" required></label>
+    <label class="date">Hasta <input type="date" name="to" [ngModel]="to()" (ngModelChange)="to.set($event)" [min]="from()" required></label>
+    <button type="submit" class="button primary">Consultar periodo</button>
+  </form>
+
+  @if (error()) { <div class="notice error-notice" role="alert"><span>{{ error() }}</span><button type="button" (click)="load()">Reintentar</button></div> }
+
+  @if (loading()) {
+    <div class="loading card">Cargando administraciones…</div>
+  } @else if (!error()) {
+    <section class="card block" aria-labelledby="pending-title">
+      <h2 id="pending-title">Por registrar <small>{{ pending().length }}</small></h2>
+      @for (dose of pending(); track dose.administrationId) {
+        <article class="dose" [class.missed]="dose.status === 'MISSED'">
+          <div>
+            <strong>{{ dose.medication }}</strong>
+            <span>{{ person(dose) }} · {{ scheduled(dose) }}</span>
+            @if (dose.status === 'MISSED') {
+              <span class="overdue" role="status">Alerta: pasó la ventana sin confirmación. Si la diste, regístrala: quedará como tardía con la hora real.</span>
+            } @else {
+              <span class="state">{{ statusLabel[dose.status] }}</span>
+            }
+          </div>
+          <div class="actions">
+            <button type="button" class="button primary" (click)="open(dose, 'ADMINISTERED')">Confirmar administración</button>
+            <button type="button" class="button secondary" (click)="open(dose, 'OMITTED')">Registrar omisión</button>
+          </div>
+        </article>
+      } @empty { <p class="none">No hay dosis pendientes en este periodo.</p> }
+    </section>
+
+    <section class="card block" aria-labelledby="history-title">
+      <h2 id="history-title">Historial</h2>
+      @if (history().length) {
+        <div class="table-card"><table>
+          <thead><tr><th>Medicamento</th><th>Persona asistida</th><th>Horario programado</th><th>Horario real</th><th>Responsable</th><th>Resultado</th></tr></thead>
+          <tbody>
+            @for (dose of history(); track dose.administrationId) {
+              <tr>
+                <td><strong>{{ dose.medication }}</strong>@if (dose.outcome?.reason) { <small>Motivo: {{ dose.outcome?.reason }}</small> }</td>
+                <td>{{ person(dose) }}</td>
+                <td>{{ scheduled(dose) }}</td>
+                <td>{{ actual(dose) }}@if (late(dose)) { <small class="late">Atención tardía</small> }</td>
+                <td>{{ dose.responsible?.name ?? 'Sin asignar' }}</td>
+                <td><span class="status {{ css(dose) }}">{{ result(dose) }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+      } @else { <p class="none">Todavía no hay administraciones registradas en este periodo.</p> }
+    </section>
+  }
+
+  <dialog #dialog class="card" aria-labelledby="dialog-title" (close)="editing.set(null)">
+    @if (editing(); as current) {
+      <form (ngSubmit)="save()">
+        <h2 id="dialog-title">{{ current.result === 'ADMINISTERED' ? 'Confirmar administración' : 'Registrar omisión' }}</h2>
+        <p><strong>{{ current.dose.medication }}</strong> para {{ person(current.dose) }}<br>Programada: {{ scheduled(current.dose) }}</p>
+        @if (existing(); as dose) {
+          <p class="existing" role="status">Resultado ya registrado: <b>{{ result(dose) }}</b>@if (dose.outcome?.occurredAt) { a las {{ actual(dose) }} }. No se registró otra vez.</p>
+        } @else {
+          <label>{{ current.result === 'OMITTED' ? 'Motivo de la omisión' : 'Nota (opcional)' }}
+            <textarea name="reason" rows="3" maxlength="300" [ngModel]="reason()" (ngModelChange)="reason.set($event)" [required]="current.result === 'OMITTED'"></textarea>
+          </label>
+          <p class="hint">Se guarda tu usuario y la hora real de este registro.</p>
+        }
+        @if (saveError() && !existing()) { <p class="form-error" role="alert">{{ saveError() }}</p> }
+        <footer>
+          <button type="button" class="button secondary" (click)="close()">{{ existing() ? 'Cerrar' : 'Cancelar' }}</button>
+          @if (!existing()) {
+            <button type="submit" class="button primary" [disabled]="saving()">{{ saving() ? 'Guardando…' : current.result === 'ADMINISTERED' ? 'Confirmar' : 'Registrar omisión' }}</button>
+          }
+        </footer>
+      </form>
+    }
+  </dialog>
+</section>

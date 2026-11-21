@@ -1,0 +1,31 @@
+.filters { flex-wrap: wrap; align-items: flex-end; }
+.filters .field { flex: 0 1 190px; flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px 13px; color: #334057; font-size: 11px; font-weight: 800; }
+.filters .field input, .filters .field select { width: 100%; min-width: 0; min-height: 0; padding: 4px 0; background: none; color: #172540; font-weight: 700; }
+/* The global .filters input drops the outline; the label carries the focus ring instead. */
+.filters .field:focus-within { box-shadow: 0 0 0 2px #6b8ac4; }
+
+.sync { margin: 0 0 16px; padding: 12px 16px; border-radius: 8px; background: #eef2ff; color: #22396b; font-size: 13px; }
+.sync.offline { background: #fff6e0; color: #6b4a00; }
+
+.overview { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+.overview h2, .block h2 { margin: 0 0 12px; color: #092765; font-size: 17px; }
+.counts { width: 100%; border-collapse: collapse; font-size: 13px; }
+.counts th { padding: 8px 0; color: #566176; font-size: 11px; text-align: left; }
+.counts td { padding: 10px 0; border-top: 1px solid #eef0f6; color: #344056; }
+.counts td + td, .counts th + th { text-align: right; font-variant-numeric: tabular-nums; }
+.results { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.results li { display: flex; justify-content: space-between; padding: 9px 12px; border-radius: 8px; background: #f2f4fd; font-size: 13px; color: #344056; }
+.results b { font-variant-numeric: tabular-nums; color: #092765; }
+.results .failed b { color: #a32929; }
+.local { margin: 12px 0 0; color: #485368; font-size: 12px; }
+
+.block { padding: 20px; }
+.block .table-card { border: 0; }
+.block td { font-size: 12px; }
+.privacy { margin: -4px 0 12px; color: #5d687a; font-size: 12px; }
+.status.succeeded { background: #dcf7f0; color: #126f61; }
+.status.failed { background: #ffe0e0; color: #a32929; }
+.status.low_confidence { background: #fff1d6; color: #7a5200; }
+.status.unconfirmed { background: #e8ebf2; color: #4f5868; }
+
+@media (max-width: 760px) { .overview { grid-template-columns: 1fr; } .filters .field { flex: 1 1 100%; } }
