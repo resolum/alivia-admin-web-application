@@ -1,5 +1,5 @@
 {
-  "name": "alivia-admin",
+  "name": "alivia-admin-web-application",
   "compatibility_date": "2026-10-28",
   "main": "./worker/index.js",
   "assets": {
@@ -10,5 +10,11 @@
   },
   "vars": {
     "API_ORIGIN": "https://app-alivia-production-a6gws.azurewebsites.net"
+  },
+  // Previews use the deployed backend on purpose: it is the only one; actions in a preview change real data.
+  "previews": {
+    "vars": {
+      "API_ORIGIN": "https://app-alivia-production-a6gws.azurewebsites.net"
+    }
   }
 }

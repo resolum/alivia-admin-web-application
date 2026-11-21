@@ -1,0 +1,80 @@
+<section class="page">
+  <header class="page-heading">
+    <div><h1>Autonomía</h1><p>Acciones que pidió la persona asistida sobre luces, puertas y ventanas, y cómo terminaron.</p></div>
+  </header>
+
+  <form class="filters" (ngSubmit)="load()">
+    <label class="field">Desde <input type="date" name="from" [ngModel]="from()" (ngModelChange)="from.set($event)" [max]="to()" required></label>
+    <label class="field">Hasta <input type="date" name="to" [ngModel]="to()" (ngModelChange)="to.set($event)" [min]="from()" required></label>
+    <button type="submit" class="button primary">Consultar periodo</button>
+    <label class="field">Tipo
+      <select name="type" [ngModel]="deviceType()" (ngModelChange)="setType($event)">
+        <option value="ALL">Todos</option>
+        @for (type of deviceTypes; track type) { <option [value]="type">{{ typeLabel[type] }}</option> }
+      </select>
+    </label>
+    <label class="field">Dispositivo
+      <select name="device" [ngModel]="deviceId()" (ngModelChange)="deviceId.set($event)">
+        <option value="ALL">Todos</option>
+        @for (device of devices(); track device.id) { <option [ngValue]="device.id">{{ device.name }}</option> }
+      </select>
+    </label>
+  </form>
+
+  @if (error()) { <div class="notice error-notice" role="alert"><span>{{ error() }}</span><button type="button" (click)="load()">Reintentar</button></div> }
+
+  @if (loading()) {
+    <div class="loading card">Cargando métricas…</div>
+  } @else if (metrics(); as data) {
+    <p class="sync" [class.offline]="!data.edgeOnline" role="status">
+      Última actualización: <b>{{ when(data.lastSyncedAt) }}</b>.
+      @if (!data.edgeOnline) { El Edge de la vivienda está sin conexión: pueden existir eventos pendientes que aparecerán cuando se sincronice. }
+    </p>
+
+    @if (actions().length === 0) {
+      <div class="empty card">No hay acciones registradas para estos criterios.</div>
+    } @else {
+      <div class="overview">
+        <section class="card" aria-labelledby="devices-title">
+          <h2 id="devices-title">Solicitadas y ejecutadas</h2>
+          <table class="counts">
+            <thead><tr><th>Dispositivo</th><th>Solicitadas</th><th>Ejecutadas</th></tr></thead>
+            <tbody>
+              @for (row of summary().byDevice; track row.type) {
+                <tr><td>{{ typeLabel[row.type] }}</td><td>{{ row.requested }}</td><td>{{ row.executed }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </section>
+        <section class="card" aria-labelledby="results-title">
+          <h2 id="results-title">Por resultado</h2>
+          <ul class="results">
+            @for (result of results; track result) {
+              <li class="{{ result.toLowerCase() }}"><span>{{ resultLabel[result] }}</span><b>{{ summary().byResult[result] }}</b></li>
+            }
+          </ul>
+          @if (summary().local) { <p class="local">{{ summary().local }} {{ summary().local === 1 ? 'acción se ejecutó' : 'acciones se ejecutaron' }} localmente sin Internet y se contaron una sola vez al sincronizar.</p> }
+        </section>
+      </div>
+
+      <section class="card block" aria-labelledby="actions-title">
+        <h2 id="actions-title">Acciones</h2>
+        <p class="privacy">Los comandos de voz muestran solo la intención reconocida. El audio no se guarda en el portal ni se puede reproducir.</p>
+        <div class="table-card"><table>
+          <thead><tr><th>Momento</th><th>Dispositivo</th><th>Origen</th><th>Intención</th><th>Resultado</th></tr></thead>
+          <tbody>
+            @for (action of actions(); track action.eventId) {
+              <tr>
+                <td>{{ when(action.occurredAt) }}</td>
+                <td><strong>{{ action.deviceName }}</strong><small>{{ typeLabel[action.deviceType] }}</small></td>
+                <td>{{ sourceLabel[action.source] }}@if (action.executedLocally) { <small>Ejecutada localmente</small> }</td>
+                <td>{{ action.intent }}</td>
+                <td><span class="status {{ action.result.toLowerCase() }}">{{ resultLabel[action.result] }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+      </section>
+    }
+  }
+</section>

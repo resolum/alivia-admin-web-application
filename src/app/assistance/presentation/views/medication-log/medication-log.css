@@ -1,0 +1,42 @@
+.filters { flex-wrap: wrap; align-items: flex-end; }
+.filters .date { flex: 0 1 200px; flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px 13px; color: #334057; font-size: 11px; font-weight: 800; }
+.filters .date input { padding: 4px 0; color: #172540; font-weight: 700; }
+/* The global .filters input drops the outline; the label carries the focus ring instead. */
+.filters .date:focus-within { box-shadow: 0 0 0 2px #6b8ac4; }
+.button:disabled { cursor: not-allowed; opacity: .6; }
+
+.block { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; padding: 20px; }
+.block h2 { display: flex; align-items: center; gap: 8px; margin: 0; color: #092765; font-size: 17px; }
+.block h2 small { padding: 2px 9px; border-radius: 10px; background: #e6eaff; color: #264a94; font-size: 11px; }
+.block .table-card { border: 0; }
+.block td { font-size: 12px; }
+.none { margin: 0; color: #5d687a; font-size: 13px; }
+
+.dose { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 16px; border: 1px solid #e3e7f1; border-radius: 10px; }
+.dose > div:first-child { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: 13px; color: #485368; }
+.dose strong { color: #092765; font-size: 15px; }
+.dose.missed { border-color: #f0c4c4; background: #fff8f8; }
+.state { color: #264a94; font-size: 12px; font-weight: 800; }
+.overdue { color: #a32929; font-size: 12px; font-weight: 700; }
+.actions { flex-wrap: wrap; justify-content: flex-end; }
+
+.status.completed { background: #dcf7f0; color: #126f61; }
+.status.missed { background: #ffe0e0; color: #a32929; }
+.status.omitted { background: #e8ebf2; color: #4f5868; }
+.late { color: #8a5a00 !important; font-weight: 800; }
+
+dialog { width: min(460px, calc(100% - 32px)); padding: 24px; color: #344056; }
+dialog::backdrop { background: rgba(15, 30, 60, .35); }
+dialog h2 { margin: 0 0 8px; color: #092765; font-size: 20px; }
+dialog p { margin: 0 0 12px; font-size: 13px; line-height: 1.5; }
+dialog label { display: flex; flex-direction: column; gap: 6px; color: #193763; font-size: 12px; font-weight: 800; }
+dialog textarea { padding: 10px 12px; border: 1px solid #d6dcea; border-radius: 8px; background: #f7f8ff; resize: vertical; }
+dialog .hint { margin: 8px 0 0; color: #5d687a; font-size: 11px; }
+.existing { padding: 10px 12px; border-radius: 8px; background: #eef2ff; color: #22396b; }
+dialog footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+@media (max-width: 760px) {
+  .dose { flex-direction: column; align-items: stretch; }
+  .actions .button { flex: 1; min-height: 44px; }
+  .filters .date { flex: 1 1 100%; }
+}
