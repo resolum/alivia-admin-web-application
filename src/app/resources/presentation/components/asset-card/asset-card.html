@@ -1,0 +1,29 @@
+@let card = view();
+<article class="asset-card" [class.edge]="card.isEdge">
+  <header>
+    <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path [attr.d]="card.icon" /></svg></span>
+    @if (card.isEdge) {
+      <div class="heading"><h3>{{ card.title }}</h3><p>{{ card.subtitle }}</p></div>
+    }
+    <span class="badge {{ card.tone }}">● {{ card.status }}</span>
+  </header>
+
+  @if (card.isEdge) {
+    <dl class="facts">
+      <div><dt>Alias:</dt><dd>{{ card.alias }}</dd></div>
+      <div><dt>Código:</dt><dd class="mono">{{ card.code }}</dd></div>
+      <div><dt>MAC address:</dt><dd class="mono">{{ card.mac }}</dd></div>
+    </dl>
+  } @else {
+    <h3>{{ card.title }}</h3>
+    <p class="subtitle">{{ card.subtitle }}</p>
+    <div class="mac"><small>MAC ADDRESS</small><span class="mono">{{ card.mac }}</span></div>
+  }
+
+  <footer>
+    <span class="location">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="card.stored ? 'M3 21V8l9-5 9 5v13M7 21v-8h10v8' : 'M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5'" /></svg>
+      {{ card.location }}
+    </span>
+  </footer>
+</article>

@@ -1,0 +1,26 @@
+:host { display: block; }
+.asset-card { display: flex; height: 100%; flex-direction: column; gap: 6px; padding: 18px; background: #fff; border: 1px solid #e5e9f2; border-radius: 14px; box-sizing: border-box; }
+header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.icon { display: grid; width: 36px; height: 36px; flex: none; place-items: center; background: #e3f7f1; border-radius: 10px; color: #138575; }
+.edge .icon { background: #e8eefb; color: #0c307a; }
+svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.heading { flex: 1; min-width: 0; }
+.badge { margin-left: auto; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.badge.available { background: #e3f4fd; color: #1676a8; }
+.badge.in-use { background: #dff8f2; color: #138575; }
+.badge.maintenance { background: #fff2dc; color: #b26a00; }
+.badge.broken { background: #ffe0e0; color: #c52828; }
+.badge.retired { background: #e8ebf2; color: #626b7b; }
+h3 { margin: 0; color: #0c1f4a; font-size: 15px; font-weight: 800; }
+p { margin: 2px 0 0; color: #5d687a; font-size: 12px; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .02em; }
+.mac { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; padding: 10px 12px; background: #f1f4fb; border-radius: 10px; }
+.mac small { color: #5d687a; font-size: 10px; font-weight: 800; }
+.mac span { color: #0c1f4a; font-size: 13px; }
+.facts { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 0; padding: 14px 16px; background: #f1f4fb; border-radius: 10px; }
+.facts div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.facts dt { color: #5d687a; }
+.facts dd { margin: 0; color: #0c1f4a; font-weight: 800; }
+footer { display: flex; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid #edf0f7; }
+.location { display: inline-flex; align-items: center; gap: 6px; color: #5d687a; font-size: 12px; }
+.location svg { width: 14px; height: 14px; }

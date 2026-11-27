@@ -1,0 +1,55 @@
+<section class="page devices-page">
+  <div class="page-heading">
+    <div><h1>Dispositivos</h1><p>Inventario general de Alivia</p></div>
+    <button class="button primary" (click)="registering.set(true)">+ Registrar dispositivo</button>
+  </div>
+
+  <div class="kpis">
+    <article><strong>{{ store.counts().total }}</strong><small>Total</small></article>
+    <article><strong class="ok">{{ store.counts().available }}</strong><small>Disponibles</small></article>
+    <article><strong>{{ store.counts().inUse }}</strong><small>Asignados</small></article>
+    <article><strong class="warn">{{ store.counts().attention }}</strong><small>En revisión</small></article>
+  </div>
+
+  <div class="toolbar">
+    <label class="search" for="device-search">⌕<input id="device-search" placeholder="Buscar por código, alias o MAC..." (input)="onSearch($event)" /></label>
+    <div class="tabs" role="tablist">
+      <button role="tab" [class.current]="scope() === 'ALL'" (click)="scope.set('ALL')">Todos ({{ store.counts().total }})</button>
+      <button role="tab" [class.current]="scope() === 'EDGES'" (click)="scope.set('EDGES')"><i class="dot"></i>Nodos Edge ({{ store.counts().edges }})</button>
+      <button role="tab" [class.current]="scope() === 'DEVICES'" (click)="scope.set('DEVICES')">Dispositivos ({{ store.counts().devices }})</button>
+    </div>
+    <label class="select" for="device-status">Estado:
+      <select id="device-status" (change)="onStatus($event)">
+        <option value="ALL">Todos</option>
+        @for (option of statusOptions; track option[0]) { <option [value]="option[0]">{{ option[1] }}</option> }
+      </select>
+    </label>
+  </div>
+
+  @if (store.error()) { <div class="notice error-notice"><span>⚠ {{ store.error() }}</span><button (click)="store.load()">Reintentar</button></div> }
+  @if (store.loading() && store.counts().total === 0) { <div class="loading card">Cargando inventario…</div> }
+  @else if (!store.error() && sections().length === 0) {
+    <div class="loading card empty">
+      @if (store.counts().total === 0) {
+        <strong>Aún no hay dispositivos registrados.</strong>
+        <span>Registra los edges y los dispositivos que el negocio tiene en almacén para poder instalarlos en los hogares.</span>
+        <button class="button primary" (click)="registering.set(true)">+ Registrar dispositivo</button>
+      } @else { No hay dispositivos con estos filtros. }
+    </div>
+  } @else if (!store.error()) {
+    @for (section of sections(); track section.category) {
+      <section class="category">
+        <header>
+          <span class="icon" [class.edge]="section.category === 'EDGES'" aria-hidden="true"><svg viewBox="0 0 24 24"><path [attr.d]="section.icon" /></svg></span>
+          <div><h2>{{ section.info.title }}</h2><p>{{ section.total }} {{ section.total === 1 ? 'dispositivo' : 'dispositivos' }} · {{ section.info.description }}</p></div>
+          <a class="see-all" [routerLink]="[section.info.slug]">Ver todos ({{ section.total }}) →</a>
+        </header>
+        <div class="grid" [class.wide]="section.category === 'EDGES'">
+          @for (item of section.items; track item.id) { <app-asset-card [asset]="item" /> }
+        </div>
+      </section>
+    }
+  }
+</section>
+
+@if (registering()) { <app-register-device-dialog (closed)="registering.set(false)" (registered)="onRegistered()" /> }

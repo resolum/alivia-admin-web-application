@@ -21,6 +21,8 @@ export const API_PATHS = {
   hiringRequests: environment.API_HIRING_REQUESTS_PATH,
   technicalOrders: environment.API_TECHNICAL_ORDERS_PATH,
   servicedHomes: environment.API_SERVICED_HOMES_PATH,
+  devices: environment.API_DEVICES_PATH,
+  edges: environment.API_EDGES_PATH,
   careAgenda: environment.API_CARE_AGENDA_PATH,
   careShifts: environment.API_CARE_SHIFTS_PATH,
   caregivers: environment.API_CAREGIVERS_PATH,
