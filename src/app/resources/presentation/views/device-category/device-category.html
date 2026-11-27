@@ -2,7 +2,7 @@
   <div class="page-heading">
     <div class="title">
       <span class="icon" [class.edge]="category() === 'EDGES'" aria-hidden="true"><svg viewBox="0 0 24 24"><path [attr.d]="icon()" /></svg></span>
-      <div><h1>{{ info().title }}</h1><p>{{ counts().total }} {{ info().unit[counts().total === 1 ? 0 : 1] }} {{ counts().total === 1 ? 'registrado' : 'registrados' }}</p></div>
+      <div><h1>{{ info().title }}</h1><p>{{ counts().total }} {{ counts().total === 1 ? 'dispositivo registrado' : 'dispositivos registrados' }}</p></div>
     </div>
     <div class="actions">
       <a class="button secondary" routerLink="/devices">← Volver al inventario</a>
@@ -33,7 +33,7 @@
     <div class="loading card">{{ counts().total === 0 ? 'Aún no hay ' + info().title.toLowerCase() + ' registrados.' : 'No hay resultados con estos filtros.' }}</div>
   } @else if (!store.error()) {
     <div class="grid" [class.wide]="category() === 'EDGES'">
-      @for (item of visible(); track track(item)) { <app-asset-card [asset]="item" /> }
+      @for (item of visible(); track item.id) { <app-asset-card [asset]="item" /> }
     </div>
     <footer class="pager">
       <span>Mostrando <b>{{ range().from }}–{{ range().to }}</b> de <b>{{ range().total }}</b></span>

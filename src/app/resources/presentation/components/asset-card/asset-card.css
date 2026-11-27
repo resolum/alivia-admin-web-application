@@ -24,9 +24,3 @@ p { margin: 2px 0 0; color: #5d687a; font-size: 12px; }
 footer { display: flex; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid #edf0f7; }
 .location { display: inline-flex; align-items: center; gap: 6px; color: #5d687a; font-size: 12px; }
 .location svg { width: 14px; height: 14px; }
-.channels { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 0; padding: 10px 12px; background: #f1f4fb; border-radius: 10px; list-style: none; }
-.channels li { display: flex; align-items: center; gap: 10px; font-size: 12px; }
-.channels .channel { width: 58px; color: #5d687a; font-weight: 700; }
-.channels .mono { flex: 1; color: #0c1f4a; }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: #1676a8; }
-.dot.in-use { background: #138575; } .dot.maintenance { background: #b26a00; } .dot.broken { background: #c52828; } .dot.retired { background: #8a93a3; }

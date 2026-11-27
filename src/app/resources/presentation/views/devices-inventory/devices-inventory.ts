@@ -1,8 +1,8 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ResourcesStore, StatusFilter } from '../../../application/resources.store';
-import { AssetStatus, CATEGORIES, Category, CATEGORY_ORDER, STATUS_LABELS } from '../../../domain/device.entity';
-import { AssetCard, CATEGORY_KINDS, KIND_ICONS, trackItem } from '../../components/asset-card/asset-card';
+import { AssetKind, AssetStatus, CATEGORIES, Category, CATEGORY_ORDER, STATUS_LABELS } from '../../../domain/device.entity';
+import { AssetCard, KIND_ICONS } from '../../components/asset-card/asset-card';
 import { RegisterDeviceDialog } from '../../components/register-device-dialog/register-device-dialog';
 
 type Scope = 'ALL' | 'EDGES' | 'DEVICES';
@@ -15,7 +15,6 @@ export class DevicesInventory implements OnInit {
   protected readonly store = inject(ResourcesStore);
   protected readonly scope = signal<Scope>('ALL');
   protected readonly registering = signal(false);
-  protected readonly track = trackItem;
   protected readonly statusOptions = Object.entries(STATUS_LABELS) as [AssetStatus, string][];
   protected readonly categories = CATEGORIES;
 
@@ -38,5 +37,5 @@ export class DevicesInventory implements OnInit {
   protected onSearch(event: Event): void { this.store.search.set((event.target as HTMLInputElement).value); }
   protected onStatus(event: Event): void { this.store.status.set((event.target as HTMLSelectElement).value as StatusFilter); }
   protected onRegistered(): void { this.registering.set(false); }
-  protected iconOf(category: Category): string { return KIND_ICONS[CATEGORY_KINDS[category]]; }
+  protected iconOf(category: Category): string { return KIND_ICONS[(category === 'EDGES' ? 'ACTUATOR_EDGE' : category) as AssetKind]; }
 }

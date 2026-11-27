@@ -17,21 +17,15 @@
 
   @if (!isEdge()) {
     <label for="device-alias">Alias del dispositivo <b>*</b></label>
-    <input id="device-alias" maxlength="70" [placeholder]="isModule() ? 'Ej. Actuadores hogar demo' : 'Ej. Micrófono de asistencia'" [value]="alias()" (input)="alias.set(value($event))" />
+    <input id="device-alias" maxlength="80" placeholder="Ej. Micrófono de asistencia" [value]="alias()" (input)="alias.set(value($event))" />
   } @else {
     <p class="hint">Los edges se identifican por su tipo y su código; no llevan alias.</p>
   }
 
-  <div class="label-row"><label for="device-mac">{{ isModule() ? 'MAC base del ESP32' : 'MAC address' }} <b>*</b></label><span>Hexadecimal</span></div>
+  <div class="label-row"><label for="device-mac">MAC address <b>*</b></label><span>Hexadecimal</span></div>
   <input id="device-mac" class="mono" placeholder="AA:BB:CC:DD:EE:FF" autocomplete="off" spellcheck="false" [class.invalid]="macInvalid()"
          [value]="mac()" (input)="mac.set(value($event))" />
   @if (macInvalid()) { <small class="field-error">Usa el formato AA:BB:CC:DD:EE:FF.</small> }
-  @if (isModule()) {
-    <p class="hint">Se registran los 4 servos del ESP32, cada uno con la MAC que su firmware deriva de la MAC base.</p>
-    @if (channels().length) {
-      <ul class="channels">@for (channel of channels(); track channel.type) { <li><span>{{ channelLabels[channel.type] }}</span><code>{{ channel.mac }}</code></li> }</ul>
-    }
-  }
 
   @if (error()) { <div class="notice error-notice"><span>⚠ {{ error() }}</span></div> }
 

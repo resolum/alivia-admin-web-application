@@ -1,35 +1,23 @@
 @let card = view();
-<article class="asset-card" [class.edge]="card.layout === 'edge'">
+<article class="asset-card" [class.edge]="card.isEdge">
   <header>
     <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path [attr.d]="card.icon" /></svg></span>
-    @if (card.layout === 'edge') {
+    @if (card.isEdge) {
       <div class="heading"><h3>{{ card.title }}</h3><p>{{ card.subtitle }}</p></div>
     }
     <span class="badge {{ card.tone }}">● {{ card.status }}</span>
   </header>
 
-  @switch (card.layout) {
-    @case ('edge') {
-      <dl class="facts">
-        <div><dt>Alias:</dt><dd>{{ card.alias }}</dd></div>
-        <div><dt>Código:</dt><dd class="mono">{{ card.code }}</dd></div>
-        <div><dt>MAC address:</dt><dd class="mono">{{ card.mac }}</dd></div>
-      </dl>
-    }
-    @case ('module') {
-      <h3>{{ card.title }}</h3>
-      <p class="subtitle">{{ card.subtitle }}</p>
-      <ul class="channels">
-        @for (channel of card.channels; track channel.id) {
-          <li><span class="channel">{{ channel.label }}</span><span class="mono">{{ channel.mac }}</span><i class="dot {{ channel.tone }}" [title]="channel.status"></i></li>
-        }
-      </ul>
-    }
-    @default {
-      <h3>{{ card.title }}</h3>
-      <p class="subtitle">{{ card.subtitle }}</p>
-      <div class="mac"><small>MAC ADDRESS</small><span class="mono">{{ card.mac }}</span></div>
-    }
+  @if (card.isEdge) {
+    <dl class="facts">
+      <div><dt>Alias:</dt><dd>{{ card.alias }}</dd></div>
+      <div><dt>Código:</dt><dd class="mono">{{ card.code }}</dd></div>
+      <div><dt>MAC address:</dt><dd class="mono">{{ card.mac }}</dd></div>
+    </dl>
+  } @else {
+    <h3>{{ card.title }}</h3>
+    <p class="subtitle">{{ card.subtitle }}</p>
+    <div class="mac"><small>MAC ADDRESS</small><span class="mono">{{ card.mac }}</span></div>
   }
 
   <footer>

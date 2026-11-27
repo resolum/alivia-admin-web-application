@@ -41,11 +41,11 @@
       <section class="category">
         <header>
           <span class="icon" [class.edge]="section.category === 'EDGES'" aria-hidden="true"><svg viewBox="0 0 24 24"><path [attr.d]="section.icon" /></svg></span>
-          <div><h2>{{ section.info.title }}</h2><p>{{ section.total }} {{ section.info.unit[section.total === 1 ? 0 : 1] }} · {{ section.info.description }}</p></div>
+          <div><h2>{{ section.info.title }}</h2><p>{{ section.total }} {{ section.total === 1 ? 'dispositivo' : 'dispositivos' }} · {{ section.info.description }}</p></div>
           <a class="see-all" [routerLink]="[section.info.slug]">Ver todos ({{ section.total }}) →</a>
         </header>
         <div class="grid" [class.wide]="section.category === 'EDGES'">
-          @for (item of section.items; track track(item)) { <app-asset-card [asset]="item" /> }
+          @for (item of section.items; track item.id) { <app-asset-card [asset]="item" /> }
         </div>
       </section>
     }
