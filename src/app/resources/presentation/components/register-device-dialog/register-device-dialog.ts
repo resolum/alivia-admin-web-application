@@ -1,8 +1,9 @@
 import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { ResourcesStore } from '../../../application/resources.store';
-import { AssetKind, DEVICE_TYPES, EDGE_TYPES, isEdgeKind, isValidMac, KIND_LABELS } from '../../../domain/device.entity';
+import { AssetKind, CHANNEL_LABELS, channelMacs, EDGE_TYPES, isEdgeKind, isValidMac, KIND_LABELS } from '../../../domain/device.entity';
 
-/** "Registrar dispositivo": adds a device (alias and MAC) or an edge (MAC) to the inventory of the business. */
+/** "Registrar dispositivo": adds an edge (MAC), a microphone (alias and MAC) or an actuator module (alias and the
+ * ESP32's MAC base, from which its four servo devices are registered) to the inventory of the business. */
 @Component({ selector: 'app-register-device-dialog', templateUrl: './register-device-dialog.html', styleUrl: './register-device-dialog.css' })
 export class RegisterDeviceDialog implements OnInit {
   private readonly store = inject(ResourcesStore);
@@ -11,7 +12,8 @@ export class RegisterDeviceDialog implements OnInit {
   readonly registered = output<AssetKind>();
 
   protected readonly edgeKinds = EDGE_TYPES;
-  protected readonly deviceKinds = DEVICE_TYPES;
+  protected readonly deviceKinds: AssetKind[] = ['MICROPHONE', 'ACTUATOR_MODULE'];
+  protected readonly channelLabels = CHANNEL_LABELS;
   protected readonly labels = KIND_LABELS;
   protected readonly kind = signal<AssetKind>('MICROPHONE');
   protected readonly alias = signal('');
@@ -19,6 +21,9 @@ export class RegisterDeviceDialog implements OnInit {
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly isEdge = computed(() => isEdgeKind(this.kind()));
+  protected readonly isModule = computed(() => this.kind() === 'ACTUATOR_MODULE');
+  /** MACs of the four servo channels, shown so the administrator can compare them with the ESP32's serial output. */
+  protected readonly channels = computed(() => this.isModule() && isValidMac(this.mac()) ? channelMacs(this.mac()) : []);
   protected readonly macInvalid = computed(() => this.mac().trim() !== '' && !isValidMac(this.mac()));
   protected readonly canSubmit = computed(() =>
     !this.saving() && isValidMac(this.mac()) && (this.isEdge() || this.alias().trim().length > 0));

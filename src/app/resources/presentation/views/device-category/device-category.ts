@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ResourcesStore, StatusFilter } from '../../../application/resources.store';
 import { AssetKind, AssetStatus, CATEGORIES, Category, categoryBySlug, STATUS_LABELS } from '../../../domain/device.entity';
-import { AssetCard, KIND_ICONS } from '../../components/asset-card/asset-card';
+import { AssetCard, CATEGORY_KINDS, KIND_ICONS, trackItem } from '../../components/asset-card/asset-card';
 import { RegisterDeviceDialog } from '../../components/register-device-dialog/register-device-dialog';
 
 const PAGE_SIZES = [9, 18, 36];
@@ -17,8 +17,9 @@ export class DeviceCategory implements OnInit {
   private readonly slug = toSignal(inject(ActivatedRoute).paramMap.pipe(map(params => params.get('category'))));
   protected readonly category = computed<Category>(() => categoryBySlug(this.slug() ?? null) ?? 'MICROPHONE');
   protected readonly info = computed(() => CATEGORIES[this.category()]);
-  protected readonly icon = computed(() => KIND_ICONS[(this.category() === 'EDGES' ? 'ACTUATOR_EDGE' : this.category()) as AssetKind]);
-  protected readonly initialKind = computed<AssetKind>(() => this.category() === 'EDGES' ? 'MICROPHONE_EDGE' : this.category() as AssetKind);
+  protected readonly icon = computed(() => KIND_ICONS[CATEGORY_KINDS[this.category()]]);
+  protected readonly initialKind = computed<AssetKind>(() => ({ EDGES: 'MICROPHONE_EDGE', MICROPHONE: 'MICROPHONE', ACTUATORS: 'ACTUATOR_MODULE' } as const)[this.category()]);
+  protected readonly track = trackItem;
   protected readonly statusOptions = Object.entries(STATUS_LABELS) as [AssetStatus, string][];
   protected readonly pageSizes = PAGE_SIZES;
   protected readonly registering = signal(false);
