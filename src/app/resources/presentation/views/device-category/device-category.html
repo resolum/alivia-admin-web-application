@@ -1,0 +1,54 @@
+<section class="page category-page">
+  <div class="page-heading">
+    <div class="title">
+      <span class="icon" [class.edge]="category() === 'EDGES'" aria-hidden="true"><svg viewBox="0 0 24 24"><path [attr.d]="icon()" /></svg></span>
+      <div><h1>{{ info().title }}</h1><p>{{ counts().total }} {{ counts().total === 1 ? 'dispositivo registrado' : 'dispositivos registrados' }}</p></div>
+    </div>
+    <div class="actions">
+      <a class="button secondary" routerLink="/devices">← Volver al inventario</a>
+      <button class="button primary" (click)="registering.set(true)">+ Registrar dispositivo</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <article><strong>{{ counts().total }}</strong><small>TOTAL</small></article>
+    <article><div><strong>{{ counts().available }}</strong><em class="available">Disponibles</em></div><small>EN ALMACÉN</small></article>
+    <article><div><strong>{{ counts().inUse }}</strong><em class="in-use">Asignados</em></div><small>EN HOGARES</small></article>
+    <article><div><strong>{{ counts().attention }}</strong><em class="maintenance">Mantenimiento</em></div><small>EN REVISIÓN</small></article>
+  </div>
+
+  <div class="toolbar">
+    <label class="search" for="category-search">⌕<input id="category-search" placeholder="Buscar por código, alias o MAC..." (input)="onSearch($event)" /></label>
+    <label class="select" for="category-status">Estado:
+      <select id="category-status" (change)="onStatus($event)">
+        <option value="ALL">Todos</option>
+        @for (option of statusOptions; track option[0]) { <option [value]="option[0]">{{ option[1] }}</option> }
+      </select>
+    </label>
+  </div>
+
+  @if (store.error()) { <div class="notice error-notice"><span>⚠ {{ store.error() }}</span><button (click)="store.load()">Reintentar</button></div> }
+  @if (store.loading() && counts().total === 0) { <div class="loading card">Cargando {{ info().title.toLowerCase() }}…</div> }
+  @else if (!store.error() && visible().length === 0) {
+    <div class="loading card">{{ counts().total === 0 ? 'Aún no hay ' + info().title.toLowerCase() + ' registrados.' : 'No hay resultados con estos filtros.' }}</div>
+  } @else if (!store.error()) {
+    <div class="grid" [class.wide]="category() === 'EDGES'">
+      @for (item of visible(); track item.id) { <app-asset-card [asset]="item" /> }
+    </div>
+    <footer class="pager">
+      <span>Mostrando <b>{{ range().from }}–{{ range().to }}</b> de <b>{{ range().total }}</b></span>
+      <label>Mostrar:
+        <select (change)="onPageSize($event)">@for (size of pageSizes; track size) { <option [value]="size">{{ size }} por página</option> }</select>
+      </label>
+      <div class="pages">
+        <button [disabled]="page() === 0" (click)="page.set(page() - 1)">Anterior</button>
+        @for (number of pageNumbers(); track number) { <button [class.current]="number === page()" (click)="page.set(number)">{{ number + 1 }}</button> }
+        <button [disabled]="page() >= pages() - 1" (click)="page.set(page() + 1)">Siguiente</button>
+      </div>
+    </footer>
+  }
+</section>
+
+@if (registering()) {
+  <app-register-device-dialog [initialKind]="initialKind()" (closed)="registering.set(false)" (registered)="registering.set(false)" />
+}

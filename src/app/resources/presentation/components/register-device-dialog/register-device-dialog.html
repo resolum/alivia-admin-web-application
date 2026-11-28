@@ -1,0 +1,36 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+<form class="dialog" role="dialog" aria-modal="true" aria-labelledby="register-title" (submit)="submit($event)">
+  <header>
+    <div><h2 id="register-title">Registrar dispositivo</h2><p>Agrega el dispositivo al inventario de Alivia.</p></div>
+    <button type="button" class="close" aria-label="Cerrar" (click)="closed.emit()">×</button>
+  </header>
+
+  <label for="device-kind">Tipo de dispositivo <b>*</b></label>
+  <select id="device-kind" [value]="kind()" (change)="kind.set($any(value($event)))">
+    <optgroup label="Nodos Edge">
+      @for (option of edgeKinds; track option) { <option [value]="option" [selected]="option === kind()">{{ labels[option] }}</option> }
+    </optgroup>
+    <optgroup label="Dispositivos">
+      @for (option of deviceKinds; track option) { <option [value]="option" [selected]="option === kind()">{{ labels[option] }}</option> }
+    </optgroup>
+  </select>
+
+  @if (!isEdge()) {
+    <label for="device-alias">Alias del dispositivo <b>*</b></label>
+    <input id="device-alias" maxlength="80" placeholder="Ej. Micrófono de asistencia" [value]="alias()" (input)="alias.set(value($event))" />
+  } @else {
+    <p class="hint">Los edges se identifican por su tipo y su código; no llevan alias.</p>
+  }
+
+  <div class="label-row"><label for="device-mac">MAC address <b>*</b></label><span>Hexadecimal</span></div>
+  <input id="device-mac" class="mono" placeholder="AA:BB:CC:DD:EE:FF" autocomplete="off" spellcheck="false" [class.invalid]="macInvalid()"
+         [value]="mac()" (input)="mac.set(value($event))" />
+  @if (macInvalid()) { <small class="field-error">Usa el formato AA:BB:CC:DD:EE:FF.</small> }
+
+  @if (error()) { <div class="notice error-notice"><span>⚠ {{ error() }}</span></div> }
+
+  <footer>
+    <button type="button" class="link" (click)="closed.emit()">Cancelar</button>
+    <button type="submit" class="button primary" [disabled]="!canSubmit()">{{ saving() ? 'Registrando…' : 'Registrar dispositivo' }}</button>
+  </footer>
+</form>

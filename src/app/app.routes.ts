@@ -47,6 +47,7 @@ export const routes: Routes = [
     { path: 'hiring', loadChildren: () => import('./subscriptions/presentation/subscriptions.routes').then(module => module.HIRING_ROUTES) },
     { path: 'subscriptions', loadChildren: () => import('./subscriptions/presentation/subscriptions.routes').then(module => module.SUBSCRIPTIONS_ROUTES) },
     { path: 'households', loadChildren: () => import('./subscriptions/presentation/subscriptions.routes').then(module => module.HOMES_ROUTES) },
+    { path: 'devices', loadChildren: () => import('./resources/presentation/resources.routes').then(module => module.DEVICES_ROUTES) },
     { path: '**', redirectTo: 'hcm/contracts' },
   ] },
 ];

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ACCESS_TOKEN_KEY, API_BASE_URL, API_PATHS } from '../../shared/infrastructure/api.config';
-import { TechnicalOrder, WorkingDay } from '../domain/technical-order.entity';
+import { InstallationDeviceType, TechnicalOrder, WorkingDay } from '../domain/technical-order.entity';
 
 export class OperationsApiError extends Error {
   constructor(message: string, readonly status: number) { super(message); this.name = 'OperationsApiError'; }
@@ -39,6 +39,15 @@ export class TechnicalOrdersApi {
       { method: 'POST', body: JSON.stringify({ reason }) });
   }
 
+  async registerInstallationDevice(orderId: number, alias: string, macAddress: string, type: InstallationDeviceType, room: string | null): Promise<{ order: TechnicalOrder; provisioningToken: string | null }> {
+    const order = await this.request<TechnicalOrder>(`${API_BASE_URL}${API_PATHS.technicalOrders}/${orderId}/devices`,
+      { method: 'POST', body: JSON.stringify({ alias, macAddress, type, room }) });
+    if (type !== 'MICROPHONE_EDGE' && type !== 'ACTUATOR_EDGE') return { order, provisioningToken: null };
+    const issued = await this.request<{ provisioningToken: string }>(`${API_BASE_URL}/api/v1/edge-provisioning-tokens`,
+      { method: 'POST', body: JSON.stringify({ macAddress }) });
+    return { order, provisioningToken: issued.provisioningToken };
+  }
+
   private async request<T>(url: string, init: RequestInit = {}): Promise<T> {
     const headers = new Headers({ Accept: 'application/json' });
     if (init.body) headers.set('Content-Type', 'application/json');
@@ -48,7 +57,10 @@ export class TechnicalOrdersApi {
     let response: Response;
     try { response = await fetch(url, { ...init, headers }); }
     catch { throw new OperationsApiError('No se pudo conectar con el servicio de operaciones técnicas.', 0); }
-    if (!response.ok) throw new OperationsApiError(init.method ? changeMessageOf(response.status, init.method) : messageOf(response.status), response.status);
+    if (!response.ok) {
+      const problem = await response.clone().json().catch(() => null) as { detail?: string } | null;
+      throw new OperationsApiError(problem?.detail || (init.method ? changeMessageOf(response.status, init.method) : messageOf(response.status)), response.status);
+    }
     return await response.json() as T;
   }
 }

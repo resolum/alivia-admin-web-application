@@ -10,6 +10,14 @@ export type OrderStage = 'PENDING' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 
 export type IncidentStatus = 'OPEN' | 'IN_EVALUATION' | 'SCHEDULED' | 'IN_PROGRESS' | 'RESOLVED' | 'CANCELED';
 
 export interface InstalledDevice { alias: string; macAddress: string; type: string; }
+export type InstallationDeviceType = 'MICROPHONE_EDGE' | 'ACTUATOR_EDGE' | 'MICROPHONE' | 'DOOR' | 'WINDOW' | 'CURTAIN' | 'LIGHT';
+/** Rooms (habitaciones) of the home, numbered like the ones the plan counts; devices (not edges) go in one of them. */
+export const INSTALLATION_ROOMS: readonly { key: string; label: string }[] =
+  [1, 2, 3, 4, 5, 6].map(number => ({ key: `habitacion-${number}`, label: `Habitación ${number}` }));
+export const isEdgeType = (type: InstallationDeviceType) => type === 'MICROPHONE_EDGE' || type === 'ACTUATOR_EDGE';
+export const INSTALLATION_DEVICE_TYPES: readonly InstallationDeviceType[] = [
+  'MICROPHONE_EDGE', 'ACTUATOR_EDGE', 'MICROPHONE', 'DOOR', 'WINDOW', 'CURTAIN', 'LIGHT',
+];
 
 export interface AssignmentRecord { technicianId: number; technicianName: string; assignedAt: string; reason?: string | null; }
 
@@ -107,7 +115,11 @@ const problemLabel: Record<string, string> = {
   CONNECTIVITY: 'Problema de conexión', PHYSICAL_DAMAGE: 'Daño físico', OTHER: 'Otro problema',
 };
 
-const deviceTypeLabel: Record<string, string> = { MICROPHONE: 'Micrófono', ACTUATOR: 'Actuador', SENSOR: 'Sensor', HUB: 'Hub central' };
+export const deviceTypeLabel: Record<string, string> = {
+  MICROPHONE_EDGE: 'Edge de control por voz', ACTUATOR_EDGE: 'Edge de actuadores', MICROPHONE: 'Micrófono',
+  DOOR: 'Puerta', WINDOW: 'Ventana', CURTAIN: 'Cortina', LIGHT: 'Luz',
+  ACTUATOR: 'Actuador', SENSOR: 'Sensor', HUB: 'Hub central',
+};
 
 /** A scheduled order is in process once the technician started it at the home. */
 export function stageOf(order: TechnicalOrder): OrderStage {
