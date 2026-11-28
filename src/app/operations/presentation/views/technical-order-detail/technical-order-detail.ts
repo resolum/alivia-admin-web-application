@@ -3,7 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TechnicalOrdersStore } from '../../../application/technical-orders.store';
 import {
   createdAt, deviceTypeOf, formatDay, formatMoment, homeName, mapSearchUrl, orderCode, problemOf, processLabel, serviceTypeLabel, stageOf,
-  TechnicalOrder, window,
+  INSTALLATION_DEVICE_TYPES, INSTALLATION_ROOMS, InstallationDeviceType, isEdgeType, TechnicalOrder, window,
 } from '../../../domain/technical-order.entity';
 
 interface Step { label: string; at: string | null; done: boolean; }
@@ -31,6 +31,13 @@ export class TechnicalOrderDetail implements OnInit {
   protected readonly reason = signal<string | null>(null);
   protected readonly saving = signal(false);
   protected readonly message = signal('');
+  protected readonly installationTypes = INSTALLATION_DEVICE_TYPES;
+  protected readonly deviceAlias = signal('');
+  protected readonly deviceMac = signal('');
+  protected readonly selectedDeviceType = signal<InstallationDeviceType>('MICROPHONE_EDGE');
+  protected readonly rooms = INSTALLATION_ROOMS;
+  protected readonly deviceRoom = signal('');
+  protected readonly isEdgeType = isEdgeType;
 
   ngOnInit(): void {
     void this.store.select(Number(this.route.snapshot.paramMap.get('orderId')));
@@ -43,6 +50,15 @@ export class TechnicalOrderDetail implements OnInit {
   }
 
   protected value(event: Event): string { return (event.target as HTMLInputElement).value; }
+  protected deviceTypeValue(event: Event): InstallationDeviceType { return (event.target as HTMLSelectElement).value as InstallationDeviceType; }
+
+  protected async registerDevice(order: TechnicalOrder, event: Event): Promise<void> {
+    event.preventDefault();
+    await this.run(() => this.store.registerInstallationDevice(
+      order.id, this.deviceAlias().trim(), this.deviceMac().trim(), this.selectedDeviceType(),
+      isEdgeType(this.selectedDeviceType()) ? null : this.deviceRoom() || null));
+    if (!this.message()) { this.deviceAlias.set(''); this.deviceMac.set(''); this.deviceRoom.set(''); }
+  }
 
   protected async assign(order: TechnicalOrder, event: Event): Promise<void> {
     event.preventDefault();

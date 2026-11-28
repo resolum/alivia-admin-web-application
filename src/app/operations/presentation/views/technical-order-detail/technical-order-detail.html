@@ -34,6 +34,30 @@
               @for (device of order.installedDevices; track device.macAddress) { <li><strong>{{ device.alias }}</strong><span>{{ deviceType(device.type) }} · {{ device.macAddress }}</span></li> }
             </ul>
           }
+          @if (order.serviceType === 'INSTALLATION' && stage(order) !== 'completed' && stage(order) !== 'canceled') {
+            <h3>REGISTRAR EQUIPO DE LA INSTALACIÓN</h3>
+            <form class="form-grid installation-device" (submit)="registerDevice(order, $event)">
+              <label>Alias<input required maxlength="60" [value]="deviceAlias()" (input)="deviceAlias.set(value($event))"></label>
+              <label>Dirección MAC<input required placeholder="00:1A:2B:3C:4D:5E" [value]="deviceMac()" (input)="deviceMac.set(value($event))"></label>
+              <label>Tipo
+                <select [value]="selectedDeviceType()" (change)="selectedDeviceType.set(deviceTypeValue($event))">
+                  @for (type of installationTypes; track type) { <option [value]="type">{{ deviceType(type) }}</option> }
+                </select>
+              </label>
+              @if (!isEdgeType(selectedDeviceType())) {
+                <label>Habitación
+                  <select required [value]="deviceRoom()" (change)="deviceRoom.set(value($event))">
+                    <option value="" disabled>Elige la habitación</option>
+                    @for (room of rooms; track room.key) { <option [value]="room.key">{{ room.label }}</option> }
+                  </select>
+                </label>
+              }
+              <div class="actions"><button type="submit" class="button primary" [disabled]="saving() || (!isEdgeType(selectedDeviceType()) && !deviceRoom())">{{ saving() ? 'Registrando…' : 'Registrar equipo' }}</button></div>
+            </form>
+            @if (store.provisioningToken(); as token) {
+              <div class="provisioning-token"><strong>Token temporal del edge</strong><code>{{ token }}</code><span>Caduca en 10 minutos y solo puede usarse una vez.</span></div>
+            }
+          }
           @if (order.completionNotes) { <h3>NOTAS DEL CIERRE</h3><p class="description">{{ order.completionNotes }}</p> }
         </article>
 

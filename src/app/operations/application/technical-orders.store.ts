@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { groupByDay, matches, stageOf, StageTab, TechnicalOrder, TypeFilter } from '../domain/technical-order.entity';
+import { groupByDay, InstallationDeviceType, matches, stageOf, StageTab, TechnicalOrder, TypeFilter } from '../domain/technical-order.entity';
 import { TechnicalOrdersApi } from '../infrastructure/technical-orders.api';
 // Technicians are HCM employees; reusing its API keeps a single source for the staff list.
 import { EmployeeOption } from '../../hcm/domain/contract.entity';
@@ -21,6 +21,7 @@ export class TechnicalOrdersStore {
   readonly search = signal('');
   readonly orders = this.ordersState.asReadonly();
   readonly selected = this.selectedState.asReadonly();
+  readonly provisioningToken = signal<string | null>(null);
 
   /** How many orders each stage tab and each type filter holds. */
   readonly counts = computed(() => {
@@ -81,6 +82,12 @@ export class TechnicalOrdersStore {
 
   async reassign(orderId: number, reason: string): Promise<void> {
     this.replace(await this.api.reassign(orderId, reason));
+  }
+
+  async registerInstallationDevice(orderId: number, alias: string, macAddress: string, type: InstallationDeviceType, room: string | null): Promise<void> {
+    const result = await this.api.registerInstallationDevice(orderId, alias, macAddress, type, room);
+    this.replace(result.order);
+    this.provisioningToken.set(result.provisioningToken);
   }
 
   private replace(order: TechnicalOrder): void {
